@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Laboratório de Builds — Crie, teste e salve suas builds de estratégias.">
-  <title>Laboratório | BuildCraft OB</title>
+  <meta name="description" content="Laboratórios de BuildCraft — Estratégias, Gerenciamentos e Builds.">
+  <title>Laboratórios | BuildCraft OB</title>
 
   <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/cards.css">
@@ -41,629 +41,144 @@
   <main class="main-content">
     <div class="container">
       <!-- Header -->
-      <div class="lab-header" style="margin-top: 40px; margin-bottom: 40px;">
-        <h1 class="page-title">⚗️ Laboratório de Builds</h1>
-        <p class="page-subtitle">Combine estratégia + gerenciamento + par + filtros. Teste contra histórico real e descubra cartas raras.</p>
+      <div class="lab-header" style="margin-top: 40px; margin-bottom: 60px;">
+        <h1 class="page-title">⚗️ Laboratórios</h1>
+        <p class="page-subtitle">Escolha o tipo de teste. Comece isolado e combine para criar builds raras.</p>
       </div>
 
-      <!-- Main Grid -->
-      <div class="lab-grid">
-        <!-- LEFT: FORM -->
-        <div class="lab-form-container">
-          <div class="card-box">
-            <h2 class="card-box-title">Monte sua build</h2>
+      <!-- Labs Grid -->
+      <div class="labs-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-bottom: 60px;">
 
-            <!-- Strategy -->
-            <div class="form-group">
-              <label for="select-strategy" class="form-label">🎯 Estratégia</label>
-              <select id="select-strategy" class="form-select">
-                <option value="">Escolha uma estratégia...</option>
-              </select>
-              <div class="form-hint" id="strategy-hint"></div>
+        <!-- LAB 1: ESTRATÉGIAS -->
+        <a href="laboratorio_estrategias.html" class="lab-card-link">
+          <div class="lab-card">
+            <div class="lab-card-icon" style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+            <h2 class="lab-card-title">Laboratório de Estratégias</h2>
+            <p class="lab-card-desc">Teste estratégias isoladas contra a histórico real. Descubra qual funciona melhor em cada cenário.</p>
+            <div class="lab-card-features">
+              <span class="lab-feature">✓ Teste isolado</span>
+              <span class="lab-feature">✓ Múltiplos pares</span>
+              <span class="lab-feature">✓ Raridade automática</span>
             </div>
-
-            <!-- Management -->
-            <div class="form-group">
-              <label for="select-management" class="form-label">⚙️ Gerenciamento</label>
-              <select id="select-management" class="form-select">
-                <option value="">Escolha um gerenciamento...</option>
-              </select>
-              <div class="form-hint" id="management-hint"></div>
-            </div>
-
-            <!-- Pair -->
-            <div class="form-group">
-              <label for="select-pair" class="form-label">💱 Par</label>
-              <select id="select-pair" class="form-select">
-                <option value="">Escolha um par...</option>
-                <option value="EURUSD">EUR/USD</option>
-                <option value="GBPUSD">GBP/USD</option>
-                <option value="USDJPY">USD/JPY</option>
-                <option value="AUDUSD">AUD/USD</option>
-                <option value="USDCAD">USD/CAD</option>
-              </select>
-            </div>
-
-            <!-- Timeframe -->
-            <div class="form-group">
-              <label for="select-timeframe" class="form-label">⏱️ Timeframe</label>
-              <select id="select-timeframe" class="form-select">
-                <option value="M1">M1 (1 minuto)</option>
-                <option value="M5">M5 (5 minutos)</option>
-                <option value="M15">M15 (15 minutos)</option>
-                <option value="M30">M30 (30 minutos)</option>
-              </select>
-            </div>
-
-            <!-- Schedule -->
-            <div class="form-group">
-              <label for="select-schedule" class="form-label">🕐 Horário</label>
-              <select id="select-schedule" class="form-select">
-                <option value="">Escolha um horário...</option>
-                <option value="00h-06h">00h-06h (Madrugada)</option>
-                <option value="06h-12h">06h-12h (Manhã)</option>
-                <option value="12h-18h">12h-18h (Tarde)</option>
-                <option value="18h-00h">18h-00h (Noite)</option>
-              </select>
-            </div>
-
-            <!-- Filters -->
-            <div class="form-group">
-              <label class="form-label">🔍 Filtros (opcional)</label>
-              <div class="filters-grid">
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="Sem Doji" class="filter-input">
-                  <span class="checkbox-label">Sem Doji</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="RSI > 70" class="filter-input">
-                  <span class="checkbox-label">RSI > 70</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="RSI < 30" class="filter-input">
-                  <span class="checkbox-label">RSI < 30</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="Tendência Alta" class="filter-input">
-                  <span class="checkbox-label">Tendência Alta</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="Tendência Baixa" class="filter-input">
-                  <span class="checkbox-label">Tendência Baixa</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="Volatilidade Alta" class="filter-input">
-                  <span class="checkbox-label">Volatilidade Alta</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Test Button -->
-            <button id="btn-test-build" class="btn btn-lg btn-legendary btn-block" style="margin-top: 30px;">
-              ⚡ Testar Build
-            </button>
-
-            <!-- Loading State -->
-            <div id="lab-loading" class="lab-loading" style="display: none;">
-              <div class="spinner"></div>
-              <p>Testando sua build contra histórico...</p>
-              <p class="text-small text-muted">Analisando 5.000+ velas...</p>
-            </div>
-
-            <!-- Empty State -->
-            <div id="lab-empty" class="lab-empty" style="margin-top: 30px;">
-              <p class="text-muted">Preencha todos os campos acima e clique em "Testar Build"</p>
-            </div>
+            <div class="lab-card-cta">Explorar Estratégias →</div>
           </div>
-        </div>
+        </a>
 
-        <!-- RIGHT: RESULT -->
-        <div class="lab-result-container">
-          <div id="lab-result-area" style="display: none;">
-            <!-- Build Card -->
-            <div id="result-build-card" class="result-section">
-              <div class="result-card-header">
-                <div>
-                  <h3 id="result-name" class="result-card-title">Build Teste</h3>
-                  <p id="result-creator" class="result-card-creator">Criado por você</p>
-                </div>
-                <div id="result-rarity-badge" class="card-rarity-badge common">Comum</div>
-              </div>
-
-              <div class="result-card-body">
-                <div class="result-build-components">
-                  <div class="build-component">
-                    <div class="component-label">Estratégia</div>
-                    <div id="result-strategy" class="component-value">—</div>
-                  </div>
-                  <div class="build-component">
-                    <div class="component-label">Gerenciamento</div>
-                    <div id="result-management" class="component-value">—</div>
-                  </div>
-                  <div class="build-component">
-                    <div class="component-label">Par</div>
-                    <div id="result-pair" class="component-value">—</div>
-                  </div>
-                  <div class="build-component">
-                    <div class="component-label">Horário</div>
-                    <div id="result-schedule" class="component-value">—</div>
-                  </div>
-                </div>
-              </div>
+        <!-- LAB 2: GERENCIAMENTOS -->
+        <a href="laboratorio_gerenciamentos.html" class="lab-card-link">
+          <div class="lab-card">
+            <div class="lab-card-icon" style="font-size: 48px; margin-bottom: 16px;">⚙️</div>
+            <h2 class="lab-card-title">Laboratório de Gerenciamentos</h2>
+            <p class="lab-card-desc">Teste gerenciamentos isolados. Veja qual melhor controla risco e recupera de perdas.</p>
+            <div class="lab-card-features">
+              <span class="lab-feature">✓ Teste isolado</span>
+              <span class="lab-feature">✓ Análise de drawdown</span>
+              <span class="lab-feature">✓ Comparação direta</span>
             </div>
+            <div class="lab-card-cta">Explorar Gerenciamentos →</div>
+          </div>
+        </a>
 
-            <!-- Stats -->
-            <div class="result-section">
-              <h4 class="section-title">📊 Performance</h4>
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <div class="stat-label">Winrate</div>
-                  <div id="result-winrate" class="stat-value positive">53,2%</div>
-                  <div class="stat-bar">
-                    <div class="stat-bar-fill" data-width="53.2%" style="width: 0%;"></div>
-                  </div>
-                </div>
-
-                <div class="stat-item">
-                  <div class="stat-label">Entradas</div>
-                  <div id="result-entries" class="stat-value neutral">2.340</div>
-                  <div class="stat-bar">
-                    <div class="stat-bar-fill" data-width="65%"></div>
-                  </div>
-                </div>
-
-                <div class="stat-item">
-                  <div class="stat-label">Drawdown</div>
-                  <div id="result-drawdown" class="stat-value negative">-R$ 320</div>
-                  <div class="stat-bar">
-                    <div class="stat-bar-fill" data-width="45%"></div>
-                  </div>
-                </div>
-
-                <div class="stat-item">
-                  <div class="stat-label">Payout Mín</div>
-                  <div id="result-payout" class="stat-value neutral">1.80x</div>
-                  <div class="stat-bar">
-                    <div class="stat-bar-fill" data-width="70%"></div>
-                  </div>
-                </div>
-              </div>
+        <!-- LAB 3: BUILDS (COMPLETO) -->
+        <a href="laboratorio_builds.html" class="lab-card-link">
+          <div class="lab-card">
+            <div class="lab-card-icon" style="font-size: 48px; margin-bottom: 16px;">🏆</div>
+            <h2 class="lab-card-title">Laboratório de Builds</h2>
+            <p class="lab-card-desc">Monte a build completa: estratégia + gerenciamento + par + horário + filtros. A junção perfeita.</p>
+            <div class="lab-card-features">
+              <span class="lab-feature">✓ Teste completo</span>
+              <span class="lab-feature">✓ Todos os filtros</span>
+              <span class="lab-feature">✓ Salvar & comparar</span>
             </div>
+            <div class="lab-card-cta">Criar Build Rara →</div>
+          </div>
+        </a>
 
-            <!-- Insights -->
-            <div class="result-section">
-              <h4 class="section-title">💡 Insights</h4>
-              <div id="result-insights" class="insights-list">
-                <div class="insight-item">
-                  <span class="insight-icon">✓</span>
-                  <span>Esta build funciona melhor em EUR/USD</span>
-                </div>
-              </div>
-            </div>
+      </div>
 
-            <!-- Actions -->
-            <div class="result-section">
-              <button class="btn btn-block btn-primary">💾 Salvar Build</button>
-              <button class="btn btn-block btn-outline" style="margin-top: 10px;">🔄 Mutar Build</button>
-            </div>
+      <!-- Info Section -->
+      <div class="card-box" style="max-width: 800px; margin: 0 auto;">
+        <h3 style="margin-bottom: 16px;">💡 Como usar os laboratórios</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+          <div>
+            <p><strong>Passo 1:</strong> Teste estratégias isoladas. Qual tem melhor winrate?</p>
+            <p style="margin-top: 12px;"><strong>Passo 2:</strong> Teste gerenciamentos isolados. Qual controla melhor o risco?</p>
+          </div>
+          <div>
+            <p><strong>Passo 3:</strong> Combine no Laboratório de Builds. Monte a melhor sinergia.</p>
+            <p style="margin-top: 12px;"><strong>Passo 4:</strong> Salve, compartilhe e suba no ranking.</p>
           </div>
         </div>
       </div>
+
     </div>
   </main>
 
-  <!-- CSS para Laboratório -->
+  <!-- ==================== STYLES (inline for this menu) ==================== -->
   <style>
-    .main-content {
-      padding-top: 80px;
+    .lab-card-link {
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .lab-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      margin-bottom: 60px;
+    .lab-card-link:hover .lab-card {
+      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+      transform: translateY(-8px);
     }
 
-    @media (max-width: 1024px) {
-      .lab-grid {
-        grid-template-columns: 1fr;
-        gap: 30px;
-      }
-    }
-
-    .lab-form-container {
-      /* Form on left */
-    }
-
-    .lab-result-container {
-      /* Result on right */
-    }
-
-    .card-box {
-      background: var(--bg-card);
+    .lab-card {
+      background: linear-gradient(135deg, var(--card-bg), rgba(99, 102, 241, 0.05));
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    }
-
-    .card-box-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 24px;
-      color: var(--text-primary);
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      color: var(--text-secondary);
-    }
-
-    .form-select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background: var(--bg-input);
-      color: var(--text-primary);
-      font-size: 14px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-
-    .form-select:hover {
-      border-color: var(--accent);
-    }
-
-    .form-select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 8px rgba(100, 200, 255, 0.2);
-    }
-
-    .form-hint {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 6px;
-      min-height: 16px;
-    }
-
-    .filters-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .filter-checkbox {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
-
-    .filter-checkbox:hover {
-      background: rgba(100, 200, 255, 0.1);
-    }
-
-    .filter-checkbox input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      cursor: pointer;
-      accent-color: var(--accent);
-    }
-
-    .checkbox-label {
-      font-size: 13px;
-      color: var(--text-primary);
-      user-select: none;
-    }
-
-    .btn-block {
-      width: 100%;
-    }
-
-    .lab-loading {
+      padding: 32px 24px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      padding: 60px 30px;
-      text-align: center;
+      height: 100%;
+      transition: all 0.3s ease;
     }
 
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 3px solid rgba(100, 200, 255, 0.2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .lab-empty {
-      padding: 40px;
-      text-align: center;
-      color: var(--text-secondary);
-    }
-
-    .result-section {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      animation: slideUp 0.5s ease-out;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .result-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-    }
-
-    .result-card-title {
+    .lab-card-title {
       font-size: 18px;
       font-weight: 600;
+      margin-bottom: 12px;
       color: var(--text-primary);
-      margin: 0;
     }
 
-    .result-card-creator {
-      font-size: 12px;
+    .lab-card-desc {
+      font-size: 14px;
       color: var(--text-secondary);
-      margin: 4px 0 0 0;
+      margin-bottom: 20px;
+      flex-grow: 1;
+      line-height: 1.5;
     }
 
-    .result-card-body {
-      padding-top: 16px;
-      border-top: 1px solid var(--border-color);
+    .lab-card-features {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
     }
 
-    .result-build-components {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .build-component {
-      padding: 10px;
-      background: rgba(100, 200, 255, 0.05);
-      border-radius: 6px;
-      border: 1px solid rgba(100, 200, 255, 0.1);
-    }
-
-    .component-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-
-    .component-value {
+    .lab-feature {
       font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .lab-card-cta {
+      font-size: 14px;
       font-weight: 600;
       color: var(--accent);
+      margin-top: auto;
     }
 
-    .section-title {
-      font-size: 14px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 0 0 16px 0;
-      color: var(--text-primary);
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-
-    .stat-item {
-      padding: 12px;
-      background: rgba(100, 200, 255, 0.05);
-      border-radius: 8px;
-      border: 1px solid rgba(100, 200, 255, 0.1);
-    }
-
-    .stat-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .stat-value {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .stat-value.positive { color: var(--profit-color); }
-    .stat-value.negative { color: var(--loss-color); }
-    .stat-value.neutral { color: var(--text-primary); }
-
-    .stat-bar {
-      width: 100%;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .stat-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--rarity-epic));
-      transition: width 0.8s ease-out;
-      border-radius: 2px;
-    }
-
-    .insights-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .insight-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      background: rgba(100, 200, 255, 0.05);
-      border-left: 3px solid var(--accent);
-      border-radius: 4px;
-      font-size: 13px;
-      color: var(--text-primary);
-    }
-
-    .insight-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      background: var(--accent);
-      color: var(--bg-dark);
-      border-radius: 50%;
-      font-size: 11px;
-      font-weight: bold;
-    }
-
-    .page-title {
-      font-size: 32px;
-      font-weight: 700;
-      margin: 0 0 8px 0;
-      color: var(--text-primary);
-    }
-
-    .page-subtitle {
-      font-size: 15px;
-      color: var(--text-secondary);
-      margin: 0;
-    }
-
-    .text-muted {
-      color: var(--text-secondary);
-    }
-
-    .text-small {
-      font-size: 12px;
+    @media (max-width: 768px) {
+      .labs-grid {
+        grid-template-columns: 1fr !important;
+      }
     }
   </style>
 
-  <script src="js/data.js"></script>
   <script src="js/app.js"></script>
-
-  <!-- Lab-specific script -->
-  <script>
-    const API_URL = 'http://localhost:5000'; // Mudar para seu IP/porta se necessário
-
-    document.addEventListener('DOMContentLoaded', () => {
-      populateSelects();
-      initSelectHints();
-      initLabSimulation();
-      checkApiHealth();
-    });
-
-    function checkApiHealth() {
-      fetch(`${API_URL}/health`)
-        .then(r => r.json())
-        .then(data => {
-          console.log('✓ API conectada', data);
-          document.body.classList.add('api-connected');
-        })
-        .catch(e => {
-          console.warn('⚠ API indisponível. Usando dados mockados.', e);
-          document.body.classList.add('api-offline');
-        });
-    }
-
-    function populateSelects() {
-      const strategySelect = document.getElementById('select-strategy');
-      const managementSelect = document.getElementById('select-management');
-
-      // Populate strategies
-      MOCK.strategies.forEach(strat => {
-        const option = document.createElement('option');
-        option.value = strat.id;
-        option.textContent = `${strat.name} (${strat.rarity})`;
-        strategySelect.appendChild(option);
-      });
-
-      // Populate managements
-      MOCK.managements.forEach(mgmt => {
-        const option = document.createElement('option');
-        option.value = mgmt.id;
-        option.textContent = `${mgmt.name} (${mgmt.rarity})`;
-        managementSelect.appendChild(option);
-      });
-    }
-
-    function initSelectHints() {
-      const strategySelect = document.getElementById('select-strategy');
-      const managementSelect = document.getElementById('select-management');
-      const strategyHint = document.getElementById('strategy-hint');
-      const managementHint = document.getElementById('management-hint');
-
-      strategySelect.addEventListener('change', () => {
-        const selectedId = strategySelect.value;
-        if (!selectedId) {
-          strategyHint.textContent = '';
-          return;
-        }
-        const strat = MOCK.strategies.find(s => s.id === selectedId);
-        if (strat) {
-          strategyHint.textContent = strat.description;
-        }
-      });
-
-      managementSelect.addEventListener('change', () => {
-        const selectedId = managementSelect.value;
-        if (!selectedId) {
-          managementHint.textContent = '';
-          return;
-        }
-        const mgmt = MOCK.managements.find(m => m.id === selectedId);
-        if (mgmt) {
-          managementHint.textContent = mgmt.description;
-        }
-      });
-    }
-  </script>
-
 </body>
 </html>

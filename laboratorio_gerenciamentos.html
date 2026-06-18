@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Laboratório de Gerenciamentos — Teste gerenciamentos isolados e descubra qual controla melhor o risco.">
+  <title>Laboratório de Gerenciamentos | BuildCraft OB</title>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span class="brand-icon">⚗️</span>
+      <span class="brand-text-craft">BuildCraft OB</span>
+    </a>
+
+    <div class="navbar-links">
+      <a href="index.html" class="navbar-link">Início</a>
+      <a href="laboratorio.html" class="navbar-link active">Laboratório</a>
+      <a href="rankings.html" class="navbar-link">Ranking</a>
+      <a href="batalhas.html" class="navbar-link">Batalhas</a>
+      <a href="loja.html" class="navbar-link">Loja</a>
+      <a href="cartas.html" class="navbar-link">Cartas</a>
+    </div>
+
+    <div class="navbar-actions">
+      <a href="planos.html" class="btn btn-sm btn-primary">Começar Grátis</a>
+      <a href="painel.html" class="navbar-avatar">D</a>
+    </div>
+
+    <button class="navbar-toggle" aria-label="Menu">☰</button>
+  </nav>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Header -->
+      <div class="lab-header" style="margin-top: 40px; margin-bottom: 40px;">
+        <h1 class="page-title">⚙️ Laboratório de Gerenciamentos</h1>
+        <p class="page-subtitle">Teste gerenciamentos isolados. Veja qual controla melhor o risco e recupera de perdas com mais eficiência.</p>
+        <div style="margin-top: 16px;">
+          <a href="laboratorio.html" class="btn btn-sm btn-outline" style="font-size: 12px;">← Voltar para Laboratórios</a>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="lab-grid">
+        <!-- LEFT: FORM -->
+        <div class="lab-form-container">
+          <div class="card-box">
+            <h2 class="card-box-title">Teste um gerenciamento</h2>
+
+            <!-- Management (MAIN) -->
+            <div class="form-group">
+              <label for="select-management" class="form-label" style="font-size: 16px; font-weight: 600;">⚙️ Gerenciamento</label>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">Escolha qual gerenciamento testar isoladamente com uma estratégia base.</p>
+              <select id="select-management" class="form-select" style="border: 2px solid var(--accent); font-weight: 500;">
+                <option value="">Escolha um gerenciamento...</option>
+              </select>
+              <div class="form-hint" id="management-hint"></div>
+            </div>
+
+            <!-- Base Strategy -->
+            <div class="form-group" style="margin-top: 24px;">
+              <label for="select-strategy" class="form-label">🎯 Estratégia Base</label>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Contra qual estratégia testar este gerenciamento?</p>
+              <select id="select-strategy" class="form-select">
+                <option value="">Escolha uma estratégia...</option>
+              </select>
+            </div>
+
+            <!-- Pair -->
+            <div class="form-group">
+              <label for="select-pair" class="form-label">💱 Par</label>
+              <select id="select-pair" class="form-select">
+                <option value="EURUSD">EUR/USD</option>
+                <option value="GBPUSD">GBP/USD</option>
+                <option value="USDJPY">USD/JPY</option>
+                <option value="AUDUSD">AUD/USD</option>
+                <option value="USDCAD">USD/CAD</option>
+              </select>
+            </div>
+
+            <!-- Timeframe -->
+            <div class="form-group">
+              <label for="select-timeframe" class="form-label">⏱️ Timeframe</label>
+              <select id="select-timeframe" class="form-select">
+                <option value="M1">M1 (1 minuto)</option>
+                <option value="M5">M5 (5 minutos)</option>
+                <option value="M15">M15 (15 minutos)</option>
+                <option value="M30">M30 (30 minutos)</option>
+              </select>
+            </div>
+
+            <!-- Button -->
+            <button id="btn-test-management" class="btn btn-lg btn-accent" style="width: 100%; margin-top: 32px;">⚡ Testar Gerenciamento</button>
+
+            <!-- Info -->
+            <div style="margin-top: 24px; padding: 16px; background: rgba(99, 102, 241, 0.05); border-radius: 8px; font-size: 12px; color: var(--text-secondary);">
+              <p><strong>💡 Dica:</strong> Teste o mesmo gerenciamento com diferentes estratégias para entender sua adaptabilidade.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: RESULT -->
+        <div class="lab-result-container">
+          <!-- Empty State -->
+          <div id="lab-empty" class="card-box" style="text-align: center; padding: 60px 24px;">
+            <div style="font-size: 64px; margin-bottom: 16px;">🔐</div>
+            <h3 style="margin-bottom: 8px;">Nenhum gerenciamento testado ainda</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">Escolha um gerenciamento e uma estratégia base, depois clique em "Testar Gerenciamento" para analisar seu desempenho.</p>
+          </div>
+
+          <!-- Loading State -->
+          <div id="lab-loading" class="card-box" style="display: none; align-items: center; justify-content: center; min-height: 400px;">
+            <div style="text-align: center;">
+              <div class="spinner" style="width: 40px; height: 40px; border-width: 3px; margin: 0 auto 16px;"></div>
+              <p>Analisando o gerenciamento contra o histórico real...</p>
+            </div>
+          </div>
+
+          <!-- Result Area -->
+          <div id="lab-result-area" style="display: none;">
+            <div class="card-collectible" id="result-card">
+              <div class="card-holo-overlay"></div>
+
+              <!-- Card Header -->
+              <div class="result-header">
+                <div>
+                  <h2 class="result-name" id="result-name">Gerenciamento Name</h2>
+                  <p class="result-creator" id="result-creator">Análise de risco e controle</p>
+                </div>
+                <div class="result-rarity" id="result-rarity" style="text-align: right;">
+                  <div class="rarity-badge" id="rarity-badge">Comum</div>
+                  <div class="result-grade" id="result-grade" style="font-size: 24px; font-weight: bold; color: var(--accent);">D</div>
+                </div>
+              </div>
+
+              <!-- Card Info -->
+              <div class="result-info" style="margin: 24px 0; padding: 16px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+                  <div>
+                    <span class="result-label">Estratégia Base</span>
+                    <div id="result-strategy" class="result-value">—</div>
+                  </div>
+                  <div>
+                    <span class="result-label">Par</span>
+                    <div id="result-pair" class="result-value">—</div>
+                  </div>
+                  <div>
+                    <span class="result-label">Timeframe</span>
+                    <div id="result-timeframe" class="result-value">—</div>
+                  </div>
+                  <div>
+                    <span class="result-label">Tipo</span>
+                    <div id="result-type" class="result-value">Gerenciamento isolado</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Risk Analysis -->
+              <div style="margin: 24px 0; padding: 16px; background: rgba(236, 72, 153, 0.05); border-radius: 8px; border-left: 3px solid var(--rarity-rare);">
+                <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">⚠️ Análise de Risco</h3>
+                <div style="font-size: 12px; display: grid; gap: 8px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>Nível de Risco</span>
+                    <span id="risk-level" style="color: var(--accent);">Médio</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>Tipo de Proteção</span>
+                    <span id="protection-type" style="color: var(--accent);">Stop Loss</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stats -->
+              <div class="result-stats" style="margin: 24px 0;">
+                <div class="stat-item">
+                  <span class="stat-label">📊 Winrate</span>
+                  <div class="stat-bar">
+                    <div class="stat-bar-fill" id="stat-winrate" data-width="52%" style="background: linear-gradient(90deg, var(--accent), var(--rarity-epic));"></div>
+                  </div>
+                  <span class="stat-value" id="stat-winrate-text">52.0%</span>
+                </div>
+
+                <div class="stat-item">
+                  <span class="stat-label">📉 Drawdown Máx.</span>
+                  <div class="stat-bar">
+                    <div class="stat-bar-fill" id="stat-drawdown" data-width="35%" style="background: linear-gradient(90deg, var(--accent), var(--rarity-rare));"></div>
+                  </div>
+                  <span class="stat-value" id="stat-drawdown-text">-R$ 450</span>
+                </div>
+
+                <div class="stat-item">
+                  <span class="stat-label">🔄 Taxa de Recuperação</span>
+                  <span class="stat-value" id="stat-recovery-text">78%</span>
+                </div>
+
+                <div class="stat-item">
+                  <span class="stat-label">📈 Entradas Totais</span>
+                  <span class="stat-value" id="stat-entries-text">2,140</span>
+                </div>
+
+                <div class="stat-item">
+                  <span class="stat-label">✅ Ganhos Totais</span>
+                  <span class="stat-value" id="stat-wins-text">1,113</span>
+                </div>
+
+                <div class="stat-item">
+                  <span class="stat-label">❌ Perdas Totais</span>
+                  <span class="stat-value" id="stat-losses-text">1,027</span>
+                </div>
+
+                <div class="stat-item">
+                  <span class="stat-label">💰 Payout Médio</span>
+                  <span class="stat-value" id="stat-payout-text">1.76</span>
+                </div>
+
+                <div class="stat-item">
+                  <span class="stat-label">📊 Sharpe Ratio</span>
+                  <span class="stat-value" id="stat-sharpe-text">1.24</span>
+                </div>
+              </div>
+
+              <!-- Comparison Table -->
+              <div style="margin: 24px 0; padding: 16px; background: rgba(99, 102, 241, 0.03); border-radius: 8px;">
+                <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">📊 Comparação com Outros Gerenciamentos</h3>
+                <div style="font-size: 12px; display: grid; gap: 8px;">
+                  <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Este Gerenciamento</span>
+                    <span style="color: var(--accent); font-weight: 600;">52.0% ⭐</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                    <span>Gerenciamento Médio</span>
+                    <span style="color: var(--text-secondary);">50.5%</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                    <span>Melhor Gerenciamento</span>
+                    <span style="color: var(--success);">54.2%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Insights -->
+              <div class="result-insights" id="result-insights" style="margin: 24px 0; padding: 16px; background: rgba(99, 102, 241, 0.05); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <!-- Insights aqui -->
+              </div>
+
+              <!-- Actions -->
+              <div class="result-actions" style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn btn-sm btn-accent" style="flex: 1;">📌 Salvar Análise</button>
+                <button class="btn btn-sm btn-outline" style="flex: 1;">🔗 Combinar em uma Build</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==================== TOAST NOTIFICATION ==================== -->
+  <div id="toast" class="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
