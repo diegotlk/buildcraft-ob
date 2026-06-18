@@ -236,9 +236,27 @@ function setPair(pair) {
 
 // ── FASE 6: HORÁRIO ──
 function setSchedule() {
-  strategyState.scheduleStart = document.getElementById('schedule-start').value;
-  strategyState.scheduleEnd = document.getElementById('schedule-end').value;
+  const start = document.getElementById('schedule-start').value;
+  const end = document.getElementById('schedule-end').value;
+
+  if (!start || !end) {
+    showToast('⚠️ Horários inválidos', 'Digite um horário de início e fim válidos.', 'default');
+    return false;
+  }
+
+  strategyState.scheduleStart = start;
+  strategyState.scheduleEnd = end;
+  return true;
 }
+
+// Tornar inputs de horário clicáveis
+document.addEventListener('DOMContentLoaded', () => {
+  const startInput = document.getElementById('schedule-start');
+  const endInput = document.getElementById('schedule-end');
+
+  if (startInput) startInput.addEventListener('focus', (e) => e.target.click());
+  if (endInput) endInput.addEventListener('focus', (e) => e.target.click());
+});
 
 // ── NAVEGAÇÃO ──
 function goToPhase(phase) {
@@ -269,9 +287,7 @@ function goToPhase(phase) {
   }
 
   if (phase === 'review') {
-    setSchedule();
-    if (!strategyState.scheduleStart || !strategyState.scheduleEnd) {
-      showToast('⚠️ Defina o horário', 'Escolha a hora de início e fim.', 'default');
+    if (!setSchedule()) {
       return;
     }
     updateReviewContent();
