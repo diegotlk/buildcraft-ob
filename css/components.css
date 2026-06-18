@@ -43,11 +43,12 @@
 }
 
 .navbar-brand .brand-text-craft {
-  background: linear-gradient(90deg, #8B5CF6 0%, #D946EF 100%);
+  background: linear-gradient(90deg, #6366f1, #ec4899);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 800;
+  letter-spacing: -1px;
 }
 
 .navbar-links {
