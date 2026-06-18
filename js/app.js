@@ -1,0 +1,391 @@
+/* ============================================================
+   BuildCraft OB — App Logic
+   Card rendering, animations, interactions, navigation
+   ============================================================ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  initParticles();
+  initCardTilt();
+  initTabs();
+  initScrollAnimations();
+  initMobileMenu();
+  initLabSimulation();
+  initBattleAnimation();
+  initStatBars();
+  initCountUp();
+});
+
+/* ==================== PARTICLES (Hero) ==================== */
+function initParticles() {
+  const container = document.querySelector('.hero-particles');
+  if (!container) return;
+
+  for (let i = 0; i < 30; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDuration = (6 + Math.random() * 8) + 's';
+    particle.style.animationDelay = Math.random() * 6 + 's';
+    particle.style.width = (2 + Math.random() * 3) + 'px';
+    particle.style.height = particle.style.width;
+    particle.style.opacity = (0.15 + Math.random() * 0.25);
+
+    const colors = ['var(--accent)', 'var(--rarity-epic)', 'var(--rarity-legendary)', 'var(--rarity-rare)'];
+    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+    container.appendChild(particle);
+  }
+}
+
+/* ==================== CARD TILT (3D hover effect) ==================== */
+function initCardTilt() {
+  document.querySelectorAll('.card-collectible').forEach(card => {
+    const overlay = card.querySelector('.card-holo-overlay');
+
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+
+      const rotateX = (0.5 - y) * 12;
+      const rotateY = (x - 0.5) * 12;
+
+      card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px) scale(1.02)`;
+
+      if (overlay) {
+        overlay.style.setProperty('--mouse-x', (x * 100) + '%');
+        overlay.style.setProperty('--mouse-y', (y * 100) + '%');
+      }
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+}
+
+/* ==================== TABS ==================== */
+function initTabs() {
+  document.querySelectorAll('.tabs').forEach(tabContainer => {
+    const tabs = tabContainer.querySelectorAll('.tab-item');
+    const parentSection = tabContainer.closest('.tab-section') || tabContainer.parentElement;
+    const panels = parentSection.querySelectorAll('.tab-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        panels.forEach(p => {
+          p.classList.remove('active');
+          if (p.dataset.tab === target) {
+            p.classList.add('active');
+          }
+        });
+      });
+    });
+  });
+}
+
+/* ==================== SCROLL ANIMATIONS ==================== */
+function initScrollAnimations() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-slide-up');
+        entry.target.style.opacity = '1';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.scroll-animate').forEach(el => {
+    el.style.opacity = '0';
+    observer.observe(el);
+  });
+}
+
+/* ==================== MOBILE MENU ==================== */
+function initMobileMenu() {
+  const toggle = document.querySelector('.navbar-toggle');
+  const sidebar = document.querySelector('.sidebar');
+
+  if (!toggle || !sidebar) return;
+
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
+      sidebar.classList.remove('open');
+    }
+  });
+}
+
+/* ==================== LAB SIMULATION ==================== */
+function initLabSimulation() {
+  const testBtn = document.getElementById('btn-test-build');
+  if (!testBtn) return;
+
+  testBtn.addEventListener('click', () => {
+    const resultArea = document.getElementById('lab-result-area');
+    const loadingArea = document.getElementById('lab-loading');
+    const emptyArea = document.getElementById('lab-empty');
+
+    if (emptyArea) emptyArea.style.display = 'none';
+    if (resultArea) resultArea.style.display = 'none';
+    if (loadingArea) loadingArea.style.display = 'flex';
+
+    // Simulate processing
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px"></div> Processando...';
+
+    setTimeout(() => {
+      if (loadingArea) loadingArea.style.display = 'none';
+      if (resultArea) {
+        resultArea.style.display = 'block';
+        resultArea.classList.add('animate-slide-up');
+      }
+
+      testBtn.disabled = false;
+      testBtn.innerHTML = '⚡ Testar Build';
+
+      // Animate stat bars
+      resultArea?.querySelectorAll('.stat-bar-fill').forEach(bar => {
+        const target = bar.dataset.width;
+        setTimeout(() => {
+          bar.style.width = target;
+        }, 100);
+      });
+
+      // Show discovery toast
+      showToast('🏆 Build Épica descoberta!', 'Sua combinação gerou uma carta Épica com nota A!', 'discovery');
+    }, 2500);
+  });
+}
+
+/* ==================== BATTLE ANIMATION ==================== */
+function initBattleAnimation() {
+  const battleBtn = document.getElementById('btn-start-battle');
+  if (!battleBtn) return;
+
+  battleBtn.addEventListener('click', () => {
+    const bars = document.querySelectorAll('.comparison-bar-left, .comparison-bar-right');
+    bars.forEach(bar => {
+      bar.style.width = '0%';
+      setTimeout(() => {
+        bar.style.width = bar.dataset.width;
+      }, 300);
+    });
+  });
+}
+
+/* ==================== STAT BARS ==================== */
+function initStatBars() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const bar = entry.target.querySelector('.stat-bar-fill');
+        if (bar && bar.dataset.width) {
+          setTimeout(() => {
+            bar.style.width = bar.dataset.width;
+          }, 200);
+        }
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.stat-bar').forEach(bar => observer.observe(bar));
+}
+
+/* ==================== COUNT UP ANIMATION ==================== */
+function initCountUp() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseFloat(el.dataset.count);
+        const suffix = el.dataset.suffix || '';
+        const prefix = el.dataset.prefix || '';
+        const decimals = el.dataset.decimals ? parseInt(el.dataset.decimals) : 0;
+        const duration = 1500;
+        const startTime = performance.now();
+
+        function update(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // Ease out
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = target * eased;
+
+          el.textContent = prefix + current.toFixed(decimals).replace('.', ',') + suffix;
+
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          }
+        }
+        requestAnimationFrame(update);
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-count]').forEach(el => observer.observe(el));
+}
+
+/* ==================== TOAST NOTIFICATIONS ==================== */
+function showToast(title, message, type = 'default') {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const icons = {
+    discovery: '🏆',
+    ranking: '📊',
+    sale: '💰',
+    battle: '⚔️',
+    anomaly: '✨',
+    default: 'ℹ️',
+  };
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || icons.default}</span>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      <div class="toast-message">${message}</div>
+    </div>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100px)';
+    toast.style.transition = 'all .3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+
+/* ==================== CARD RENDERER ==================== */
+function renderCard(data, size = 'normal') {
+  const rarityClass = getRarityClass(data.rarity);
+  const rarityLabel = getRarityLabel(data.rarity);
+  const gradeClass = getGradeClass(data.grade);
+
+  if (size === 'mini') {
+    return `
+      <div class="card-mini" data-id="${data.id}">
+        <div class="card-mini-info">
+          <div class="card-mini-name">${data.name}</div>
+          <div class="card-mini-meta">
+            <span class="badge badge-${rarityClass}" style="font-size:.6rem;padding:2px 6px">${rarityLabel}</span>
+            ${data.creator ? `<span style="margin-left:4px;color:var(--text-muted);font-size:.72rem">por ${data.creator}</span>` : ''}
+          </div>
+        </div>
+        ${data.winrate ? `
+          <div class="card-mini-stats">
+            <div><div class="card-mini-stat-val" style="color:var(--success)">${formatPercent(data.winrate)}</div></div>
+          </div>
+        ` : ''}
+        <div class="grade ${gradeClass}">${data.grade}</div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card-collectible card-${rarityClass}" data-id="${data.id}">
+      <div class="card-holo-overlay"></div>
+      <div class="card-header">
+        <span class="card-type-tag">${data.type || 'Estratégia'}</span>
+        <span class="card-rarity-badge ${rarityClass}">${rarityLabel}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${data.name}</div>
+        <div class="card-creator">por <span>${data.creator || 'Sistema'}</span></div>
+        ${data.winrate !== undefined ? `
+          <div class="card-stats">
+            <div class="card-stat">
+              <div class="card-stat-label">Winrate</div>
+              <div class="card-stat-value positive">${formatPercent(data.winrate)}</div>
+            </div>
+            <div class="card-stat">
+              <div class="card-stat-label">Entradas</div>
+              <div class="card-stat-value neutral">${(data.entries || 0).toLocaleString('pt-BR')}</div>
+            </div>
+            ${data.profit !== undefined ? `
+              <div class="card-stat">
+                <div class="card-stat-label">Lucro Sim.</div>
+                <div class="card-stat-value ${data.profit >= 0 ? 'positive' : 'negative'}">${formatCurrency(data.profit)}</div>
+              </div>
+            ` : ''}
+            ${data.stability !== undefined ? `
+              <div class="card-stat">
+                <div class="card-stat-label">Estabilidade</div>
+                <div class="card-stat-value neutral">${data.stability}%</div>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+        ${data.className ? `
+          <div class="card-class-icon">
+            <span class="icon">${getClassIcon(data.className)}</span>
+            ${data.className}
+          </div>
+        ` : ''}
+      </div>
+      <div class="card-footer">
+        <div class="card-footer-stat">
+          ${data.users ? `<strong>${data.users}</strong> usuários` : ''}
+          ${data.sales ? ` · <strong>${data.sales}</strong> vendas` : ''}
+        </div>
+        <div class="grade ${gradeClass}">${data.grade}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* ==================== RENDER RANKING ROW ==================== */
+function renderRankingRow(item, position) {
+  const posClass = position === 1 ? 'gold' : position === 2 ? 'silver' : position === 3 ? 'bronze' : '';
+  const rarityClass = getRarityClass(item.rarity);
+
+  return `
+    <tr>
+      <td><span class="ranking-pos ${posClass}">#${position}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div>
+            <div style="font-weight:700">${item.name}</div>
+            <div style="font-size:.75rem;color:var(--text-muted)">por ${item.creator}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge badge-${rarityClass}">${getRarityLabel(item.rarity)}</span></td>
+      <td style="color:var(--success);font-weight:700;font-family:var(--font-display)">${formatPercent(item.winrate)}</td>
+      <td style="font-family:var(--font-display)">${(item.entries || 0).toLocaleString('pt-BR')}</td>
+      <td><span class="grade ${getGradeClass(item.grade)}">${item.grade}</span></td>
+    </tr>
+  `;
+}
+
+/* ==================== POPULATE SELECTS ==================== */
+function populateSelect(selectId, items, labelKey) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  items.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = typeof item === 'string' ? item : item.id;
+    opt.textContent = typeof item === 'string' ? item : item[labelKey || 'name'];
+    select.appendChild(opt);
+  });
+}

@@ -1,0 +1,365 @@
+/* ============================================================
+   BuildCraft OB — Card System
+   Collectible card game aesthetics with rarity-based styling
+   ============================================================ */
+
+/* ---------- Base card ---------- */
+.card-collectible {
+  position: relative;
+  width: 280px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  transition: transform .4s var(--ease-spring), box-shadow .4s var(--ease-out), border-color .3s;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  perspective: 800px;
+}
+
+.card-collectible:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+/* ---------- Rarity borders & glows ---------- */
+.card-common {
+  border-color: var(--rarity-common);
+}
+.card-common:hover {
+  box-shadow: 0 8px 30px var(--rarity-common-glow);
+}
+
+.card-rare {
+  border-color: var(--rarity-rare);
+}
+.card-rare:hover {
+  box-shadow: 0 8px 30px var(--rarity-rare-glow), 0 0 40px var(--rarity-rare-glow);
+}
+
+.card-epic {
+  border-color: var(--rarity-epic);
+}
+.card-epic:hover {
+  box-shadow: 0 8px 30px var(--rarity-epic-glow), 0 0 60px var(--rarity-epic-glow);
+}
+
+.card-legendary {
+  border-color: var(--rarity-legendary);
+  background: linear-gradient(145deg, var(--bg-card), rgba(245,158,11,.04));
+}
+.card-legendary:hover {
+  box-shadow: 0 8px 40px var(--rarity-legendary-glow), 0 0 80px var(--rarity-legendary-glow);
+}
+
+/* ---------- Legendary shimmer overlay ---------- */
+.card-legendary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(245,158,11,.06) 30%,
+    rgba(234,179,8,.12) 50%,
+    rgba(245,158,11,.06) 70%,
+    transparent 80%
+  );
+  background-size: 250% 100%;
+  animation: holo-sweep 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+@keyframes holo-sweep {
+  0%, 100% { background-position: 250% center; }
+  50% { background-position: -50% center; }
+}
+
+/* ---------- Epic pulse ring ---------- */
+.card-epic::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--rarity-epic), #ec4899, var(--rarity-epic));
+  background-size: 200% 200%;
+  animation: shimmer-bg 3s ease-in-out infinite;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.card-epic:hover::before {
+  opacity: 1;
+}
+
+/* ---------- Card header (top bar) ---------- */
+.card-header {
+  padding: 16px 16px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  z-index: 3;
+}
+
+.card-type-tag {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(255,255,255,.06);
+  color: var(--text-secondary);
+}
+
+.card-rarity-badge {
+  font-size: .65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+.card-rarity-badge.common    { background: rgba(107,114,128,.2); color: var(--rarity-common); }
+.card-rarity-badge.rare      { background: rgba(59,130,246,.15); color: var(--rarity-rare); }
+.card-rarity-badge.epic      { background: rgba(139,92,246,.15); color: var(--rarity-epic); }
+.card-rarity-badge.legendary {
+  background: linear-gradient(135deg, rgba(245,158,11,.2), rgba(234,179,8,.2));
+  color: var(--rarity-legendary);
+  text-shadow: 0 0 6px rgba(245,158,11,.4);
+}
+
+/* ---------- Card body ---------- */
+.card-body {
+  padding: 0 16px 16px;
+  position: relative;
+  z-index: 3;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.card-creator {
+  font-size: .78rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.card-creator span {
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
+/* ---------- Card stats ---------- */
+.card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.card-stat {
+  background: rgba(0,0,0,.2);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+.card-stat-label {
+  font-size: .65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 2px;
+}
+
+.card-stat-value {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+}
+.card-stat-value.positive { color: var(--success); }
+.card-stat-value.negative { color: var(--danger); }
+.card-stat-value.neutral  { color: var(--text-primary); }
+
+/* ---------- Card grade (bottom right) ---------- */
+.card-grade {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 3;
+}
+
+/* ---------- Card class icon ---------- */
+.card-class-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .75rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.card-class-icon .icon {
+  font-size: 1rem;
+}
+
+/* ---------- Card footer ---------- */
+.card-footer {
+  padding: 10px 16px;
+  background: rgba(0,0,0,.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 3;
+}
+
+.card-footer-stat {
+  font-size: .72rem;
+  color: var(--text-muted);
+}
+.card-footer-stat strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* ---------- Interactive card tilt (via JS) ---------- */
+.card-collectible.tilt-active {
+  transition: none;
+}
+
+/* ---------- Mini card (for lists / compact views) ---------- */
+.card-mini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all .25s var(--ease-out);
+  cursor: pointer;
+}
+.card-mini:hover {
+  border-color: var(--border-light);
+  background: var(--bg-elevated);
+  transform: translateX(4px);
+}
+
+.card-mini-rank {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  min-width: 36px;
+  text-align: center;
+}
+.card-mini-rank.top1 { color: #fbbf24; }
+.card-mini-rank.top2 { color: #94a3b8; }
+.card-mini-rank.top3 { color: #cd7f32; }
+
+.card-mini-info {
+  flex: 1;
+  min-width: 0;
+}
+.card-mini-name {
+  font-weight: 700;
+  font-size: .9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-mini-meta {
+  font-size: .75rem;
+  color: var(--text-muted);
+}
+
+.card-mini-stats {
+  display: flex;
+  gap: 16px;
+  font-size: .8rem;
+}
+.card-mini-stat-val {
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+/* ---------- Card grid ---------- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 24px;
+}
+.card-grid .card-collectible {
+  width: 100%;
+}
+
+/* ---------- Card holographic effect (mouse-tracked, via JS) ---------- */
+.card-holo-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255,255,255,.08) 0%,
+    transparent 60%
+  );
+}
+.card-collectible:hover .card-holo-overlay {
+  opacity: 1;
+}
+
+/* ---------- Discovery flash ---------- */
+@keyframes discovery-flash {
+  0% { opacity: 0; transform: scale(.8); }
+  50% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.card-discovered {
+  animation: discovery-flash .6s var(--ease-spring) forwards;
+}
+
+/* ---------- Silhouette (undiscovered) ---------- */
+.card-silhouette {
+  filter: brightness(0) saturate(0);
+  opacity: .15;
+  pointer-events: none;
+}
+.card-silhouette .card-body,
+.card-silhouette .card-header,
+.card-silhouette .card-footer {
+  visibility: hidden;
+}
+.card-silhouette::after {
+  content: '?';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--text-muted);
+  visibility: visible;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .card-collectible { width: 100%; }
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+}
