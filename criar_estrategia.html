@@ -290,7 +290,7 @@
 
         <!-- ── FASE 1: MONTAR PADRÃO ── -->
         <div class="phase-section active" id="phase-pattern">
-          <div class="step-counter">Passo 1 de 5: Monte seu padrão</div>
+          <div class="step-counter">Passo 1 de 6: Monte seu padrão</div>
           <h2 class="card-box-title">🎯 Quantas velas você quer?</h2>
 
           <div style="display: flex; gap: 12px; justify-content: center; margin: 20px 0; flex-wrap: wrap;">
@@ -298,15 +298,22 @@
             <button class="btn btn-outline" onclick="setPatternLength(5)">5 velas</button>
             <button class="btn btn-outline" onclick="setPatternLength(10)">10 velas</button>
             <button class="btn btn-outline" onclick="setPatternLength(20)">20 velas</button>
+            <button class="btn btn-outline" onclick="showCustomInput()">Outro...</button>
+          </div>
+
+          <div id="custom-input-container" style="display: none; margin: 20px 0; text-align: center;">
+            <input type="number" id="custom-length" min="1" max="20" placeholder="Digite entre 1 e 20"
+                   style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary); width: 150px;">
+            <button class="btn btn-sm btn-accent" onclick="setCustomPatternLength()" style="margin-left: 8px;">Confirmar</button>
           </div>
 
           <div id="pattern-container-wrapper" style="display: none;">
-            <h3 style="text-align: center; margin: 24px 0 12px;">Clique para colorir</h3>
+            <h3 style="text-align: center; margin: 24px 0 12px;">Clique para mudar as cores</h3>
             <div class="pattern-container" id="pattern-container"></div>
 
             <div class="pattern-info">
               ⬜ = Qualquer cor | 🟩 = Verde | 🟥 = Vermelho<br/>
-              Clique em uma vela para ciclar as cores
+              Clique em uma vela para mudar a cor
             </div>
 
             <div class="pattern-controls">
@@ -318,7 +325,7 @@
 
         <!-- ── FASE 2: DIREÇÃO ── -->
         <div class="phase-section" id="phase-direction">
-          <div class="step-counter">Passo 2 de 5: Escolha a direção</div>
+          <div class="step-counter">Passo 2 de 6: Escolha a direção</div>
           <h2 class="card-box-title">📈 Você quer apostar em CALL ou PUT?</h2>
           <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
             <strong>CALL</strong> = aposta em vela verde (subida)<br/>
@@ -327,13 +334,19 @@
 
           <div class="direction-grid">
             <button class="direction-btn" onclick="setDirection('call')">
-              📈 CALL<br/><span style="font-size: 12px;">Vela Verde</span>
+              <span style="font-size: 32px; color: var(--success);">📈</span><br/>
+              <strong>CALL</strong><br/>
+              <span style="font-size: 12px; color: var(--success);">Vela Verde ⬆️</span>
             </button>
             <button class="direction-btn" onclick="setDirection('put')">
-              📉 PUT<br/><span style="font-size: 12px;">Vela Vermelha</span>
+              <span style="font-size: 32px; color: var(--danger);">📉</span><br/>
+              <strong>PUT</strong><br/>
+              <span style="font-size: 12px; color: var(--danger);">Vela Vermelha ⬇️</span>
             </button>
             <button class="direction-btn" onclick="setDirection('both')">
-              ⚖️ OS DOIS<br/><span style="font-size: 12px;">Testar ambas</span>
+              <span style="font-size: 32px;">⚖️</span><br/>
+              <strong>OS DOIS</strong><br/>
+              <span style="font-size: 12px;">Testar ambas direções</span>
             </button>
           </div>
 
@@ -345,20 +358,31 @@
 
         <!-- ── FASE 3: ANCORAGEM ── -->
         <div class="phase-section" id="phase-anchoring">
-          <div class="step-counter">Passo 3 de 5: Escolha a ancoragem</div>
+          <div class="step-counter">Passo 3 de 6: Escolha a ancoragem</div>
           <h2 class="card-box-title">⚓ Exato ou No Mínimo?</h2>
 
           <div class="anchoring-grid">
             <div class="anchoring-card" onclick="setAnchoring('exato')">
               <div class="anchoring-title">📌 Exato</div>
               <div class="anchoring-desc">
-                A vela anterior tem que ser de cor DIFERENTE. Padrão fixo e rigoroso.
+                A vela anterior <strong>TEM QUE</strong> ser de cor DIFERENTE. Padrão fixo e rigoroso.
+              </div>
+              <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 6px; font-size: 13px;">
+                <strong>Exemplo:</strong><br/>
+                Se seu padrão é: 🟩🟩🟥<br/>
+                Antes deve vir: <span style="color: var(--danger); font-weight: 600;">🟥</span> 🟩🟩🟥
               </div>
             </div>
             <div class="anchoring-card" onclick="setAnchoring('minimo')">
               <div class="anchoring-title">➡️ No Mínimo</div>
               <div class="anchoring-desc">
                 A vela anterior pode ser qualquer cor. Aceita variações do padrão.
+              </div>
+              <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 6px; font-size: 13px;">
+                <strong>Exemplos válidos:</strong><br/>
+                🟥 🟩🟩🟥 ✓<br/>
+                🟥 🟩🟩🟩...🟩 🟥 ✓<br/>
+                🟩 🟩🟩🟥 ✓
               </div>
             </div>
           </div>
@@ -371,7 +395,7 @@
 
         <!-- ── FASE 4: ESPELHO ── -->
         <div class="phase-section" id="phase-mirror">
-          <div class="step-counter">Passo 4 de 5: Padrão espelho</div>
+          <div class="step-counter">Passo 4 de 6: Padrão espelho</div>
           <h2 class="card-box-title">🔀 Incluir padrão espelho?</h2>
 
           <div class="mirror-preview">
@@ -403,23 +427,71 @@
             <h3 style="text-align: center; margin-bottom: 16px;">📊 Qual direção para o espelho?</h3>
             <div class="direction-grid">
               <button class="direction-btn" onclick="setMirrorDirection('call')">
-                📈 CALL
+                <span style="font-size: 24px;">📈</span><br/>CALL
               </button>
               <button class="direction-btn" onclick="setMirrorDirection('put')">
-                📉 PUT
+                <span style="font-size: 24px;">📉</span><br/>PUT
               </button>
             </div>
           </div>
 
           <div class="pattern-controls">
             <button class="btn btn-sm btn-outline" onclick="goToPhase('anchoring')">⬅ Voltar</button>
-            <button class="btn btn-sm btn-accent" onclick="goToPhase('review')">Próximo ➜</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('pair')">Próximo ➜</button>
           </div>
         </div>
 
-        <!-- ── FASE 5: REVISÃO ── -->
+        <!-- ── FASE 5: PAR ── -->
+        <div class="phase-section" id="phase-pair">
+          <div class="step-counter">Passo 5 de 6: Escolha o par</div>
+          <h2 class="card-box-title">💱 Qual par você quer testar?</h2>
+
+          <div style="margin: 20px 0;">
+            <input type="text" id="pair-search" placeholder="🔍 Buscar par..."
+                   style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary); margin-bottom: 16px;"
+                   oninput="filterPairs()">
+          </div>
+
+          <div id="pairs-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; max-height: 400px; overflow-y: auto;">
+            <!-- Preenchido por JS -->
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('mirror')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('schedule')">Próximo ➜</button>
+          </div>
+        </div>
+
+        <!-- ── FASE 6: HORÁRIO ── -->
+        <div class="phase-section" id="phase-schedule">
+          <div class="step-counter">Passo 6 de 6: Escolha o horário</div>
+          <h2 class="card-box-title">🕐 Qual horário você quer testar?</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+            Escolha a hora de início e fim da sessão que deseja testar
+          </p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; max-width: 400px; margin-left: auto; margin-right: auto;">
+            <div>
+              <label style="display: block; margin-bottom: 8px; font-weight: 600;">🟢 Início</label>
+              <input type="time" id="schedule-start" value="00:00"
+                     style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary);">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 8px; font-weight: 600;">🔴 Fim</label>
+              <input type="time" id="schedule-end" value="23:59"
+                     style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary);">
+            </div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('pair')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('review')">Próximo ➜</button>
+          </div>
+
+
+        <!-- ── FASE 7: REVISÃO ── -->
         <div class="phase-section" id="phase-review">
-          <div class="step-counter">Passo 5 de 5: Revisão</div>
+          <div class="step-counter">Passo 7 de 6: Revisão Final</div>
           <h2 class="card-box-title">✅ Resumo da sua estratégia</h2>
 
           <div id="review-content" style="margin: 24px 0; padding: 20px; background: rgba(99, 102, 241, 0.05); border-radius: 8px;">
@@ -427,7 +499,7 @@
           </div>
 
           <div class="pattern-controls">
-            <button class="btn btn-sm btn-outline" onclick="goToPhase('mirror')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('schedule')">⬅ Voltar</button>
             <button class="btn btn-lg btn-accent" onclick="testStrategy()">⚡ Testar Estratégia</button>
           </div>
         </div>

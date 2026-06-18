@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Strategy Builder Logic
+   BuildCraft OB — Strategy Builder Logic (Updated)
    ============================================================ */
 
 let strategyState = {
@@ -9,6 +9,9 @@ let strategyState = {
   anchoring: null,
   mirror: false,
   mirrorDirection: null,
+  pair: null,
+  scheduleStart: '00:00',
+  scheduleEnd: '23:59',
 };
 
 // ── Cores do padrão ──
@@ -20,19 +23,44 @@ const COLORS = {
 
 const COLOR_ORDER = [COLORS.white, COLORS.green, COLORS.red];
 
+// ── Lista de pares disponíveis (do inventário) ──
+const AVAILABLE_PAIRS = [
+  'EURUSD-OTC', 'GBPUSD-OTC', 'USDJPY-OTC', 'AUDUSD-OTC', 'USDCAD-OTC',
+  'EURUSD-op', 'GBPUSD-op', 'USDJPY-op', 'AUDUSD-op',
+  'BTCUSD-OTC', 'BTCUSD-op', 'ETHUSD-OTC', 'ETHUSD-op',
+  'APPLE-OTC', 'GOOGLE-OTC', 'TESLA-OTC', 'MSFT-OTC',
+  'SP500-OTC', 'UK100-OTC', 'GER30-OTC', 'JP225-OTC',
+];
+
 // ── FASE 1: MONTAR PADRÃO ──
 function setPatternLength(length) {
   strategyState.patternLength = length;
   strategyState.pattern = Array(length).fill(COLORS.white);
 
-  // Mostrar container de padrão
   document.getElementById('pattern-container-wrapper').style.display = 'block';
-  renderPattern();
+  document.getElementById('custom-input-container').style.display = 'none';
+  document.getElementById('custom-length').value = '';
 
-  // Scroll para o padrão
+  renderPattern();
   setTimeout(() => {
     document.getElementById('pattern-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 100);
+}
+
+function showCustomInput() {
+  document.getElementById('custom-input-container').style.display = 'block';
+  document.getElementById('custom-length').focus();
+}
+
+function setCustomPatternLength() {
+  const value = parseInt(document.getElementById('custom-length').value);
+
+  if (isNaN(value) || value < 1 || value > 20) {
+    showToast('⚠️ Valor inválido', 'Digite um número entre 1 e 20.', 'default');
+    return;
+  }
+
+  setPatternLength(value);
 }
 
 function renderPattern() {
@@ -75,7 +103,6 @@ function resetPattern() {
 function setDirection(direction) {
   strategyState.direction = direction;
 
-  // Atualizar botões
   document.querySelectorAll('#phase-direction .direction-btn').forEach(btn => {
     btn.classList.remove('selected');
   });
@@ -102,7 +129,6 @@ function getMirrorPattern() {
 }
 
 function updateMirrorPreview() {
-  // Padrão original
   const original = document.getElementById('original-mirror');
   original.innerHTML = '';
   strategyState.pattern.forEach(color => {
@@ -112,7 +138,6 @@ function updateMirrorPreview() {
     original.appendChild(candle);
   });
 
-  // Padrão espelho
   const mirrored = document.getElementById('mirrored-mirror');
   mirrored.innerHTML = '';
   const mirrorPattern = getMirrorPattern();
@@ -132,7 +157,6 @@ function setMirror(enabled) {
   });
   event.target.closest('.direction-btn').classList.add('selected');
 
-  // Mostrar seleção de direção para espelho
   if (enabled) {
     document.getElementById('mirror-direction-container').style.display = 'block';
   } else {
@@ -149,16 +173,60 @@ function setMirrorDirection(direction) {
   event.target.closest('.direction-btn').classList.add('selected');
 }
 
-// ── NAVEGAÇÃO ENTRE FASES ──
+// ── FASE 5: PAR ──
+function renderPairs(pairs = AVAILABLE_PAIRS) {
+  const container = document.getElementById('pairs-container');
+  container.innerHTML = '';
+
+  pairs.forEach(pair => {
+    const btn = document.createElement('button');
+    btn.className = 'direction-btn';
+    btn.textContent = pair;
+    btn.onclick = () => setPair(pair);
+    container.appendChild(btn);
+  });
+}
+
+function setPair(pair) {
+  strategyState.pair = pair;
+
+  document.querySelectorAll('#phase-pair .direction-btn').forEach(btn => {
+    btn.classList.remove('selected');
+  });
+  event.target.classList.add('selected');
+}
+
+function filterPairs() {
+  const search = document.getElementById('pair-search').value.toUpperCase();
+  const filtered = AVAILABLE_PAIRS.filter(pair => pair.includes(search));
+  renderPairs(filtered);
+
+  // Re-highlight selected pair
+  if (strategyState.pair) {
+    document.querySelectorAll('#phase-pair .direction-btn').forEach(btn => {
+      if (btn.textContent === strategyState.pair) {
+        btn.classList.add('selected');
+      }
+    });
+  }
+}
+
+// ── FASE 6: HORÁRIO ──
+function setSchedule() {
+  strategyState.scheduleStart = document.getElementById('schedule-start').value;
+  strategyState.scheduleEnd = document.getElementById('schedule-end').value;
+}
+
+// ── NAVEGAÇÃO ──
 function goToPhase(phase) {
   // Validações
   if (phase === 'direction' && !strategyState.patternLength) {
-    showToast('⚠️ Escolha a quantidade de velas', 'Selecione 3, 5, 10 ou 20 velas.', 'default');
+    showToast('⚠️ Escolha a quantidade de velas', 'Selecione 3, 5, 10, 20 ou outro número.', 'default');
     return;
   }
 
   if (phase === 'anchoring' && !strategyState.direction) {
-    showToast('⚠️ Escolha a direção', 'Você quer CALL, PUT ou OS DOIS?', 'default');
+    showToast('⚠️ Escolha a direção', 'CALL, PUT ou OS DOIS?', 'default');
     return;
   }
 
@@ -167,13 +235,28 @@ function goToPhase(phase) {
     return;
   }
 
-  if (phase === 'review' && strategyState.mirror && !strategyState.mirrorDirection) {
-    showToast('⚠️ Escolha a direção do espelho', 'CALL ou PUT para o padrão espelho?', 'default');
+  if (phase === 'pair' && strategyState.mirror && !strategyState.mirrorDirection) {
+    showToast('⚠️ Escolha a direção do espelho', 'CALL ou PUT?', 'default');
+    return;
+  }
+
+  if (phase === 'schedule' && !strategyState.pair) {
+    showToast('⚠️ Escolha um par', 'Selecione qual par você quer testar.', 'default');
     return;
   }
 
   if (phase === 'review') {
+    setSchedule();
+    if (!strategyState.scheduleStart || !strategyState.scheduleEnd) {
+      showToast('⚠️ Defina o horário', 'Escolha a hora de início e fim.', 'default');
+      return;
+    }
     updateReviewContent();
+  }
+
+  // Inicializar pares na fase 5
+  if (phase === 'pair') {
+    renderPairs();
   }
 
   // Esconder todas as fases
@@ -188,28 +271,34 @@ function goToPhase(phase) {
   document.querySelector('.strategy-builder').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── FASE 5: REVISÃO ──
+// ── REVISÃO ──
 function updateReviewContent() {
+  const directionEmoji = {
+    call: '📈',
+    put: '📉',
+    both: '⚖️',
+  };
+
   const directionText = {
-    call: '📈 CALL (Vela Verde)',
-    put: '📉 PUT (Vela Vermelha)',
+    call: '📈 CALL (Vela Verde ⬆️)',
+    put: '📉 PUT (Vela Vermelha ⬇️)',
     both: '⚖️ OS DOIS (CALL + PUT)',
   };
 
   const anchoringText = {
-    exato: '📌 Exato (vela anterior deve ser cor diferente)',
-    minimo: '➡️ No Mínimo (vela anterior pode ser qualquer cor)',
+    exato: '📌 Exato',
+    minimo: '➡️ No Mínimo',
   };
 
   let content = `
     <div style="margin-bottom: 20px;">
       <p style="margin-bottom: 12px;"><strong>🎯 Padrão:</strong></p>
-      <div style="display: flex; gap: 4px; justify-content: center; font-size: 24px; margin-bottom: 16px;">
+      <div style="display: flex; gap: 4px; justify-content: center; font-size: 28px; margin-bottom: 16px;">
         ${strategyState.pattern.join('')}
       </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
       <div>
         <p><strong>Direção:</strong></p>
         <p>${directionText[strategyState.direction]}</p>
@@ -219,19 +308,30 @@ function updateReviewContent() {
         <p>${anchoringText[strategyState.anchoring]}</p>
       </div>
     </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+      <div>
+        <p><strong>Par:</strong></p>
+        <p>${strategyState.pair}</p>
+      </div>
+      <div>
+        <p><strong>Horário:</strong></p>
+        <p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p>
+      </div>
+    </div>
   `;
 
   if (strategyState.mirror) {
     const mirrorPattern = getMirrorPattern();
     const mirrorDirectionText = {
-      call: '📈 CALL',
-      put: '📉 PUT',
+      call: '📈 CALL ⬆️',
+      put: '📉 PUT ⬇️',
     };
 
     content += `
       <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
         <p style="margin-bottom: 12px;"><strong>🔀 Padrão Espelho:</strong></p>
-        <div style="display: flex; gap: 4px; justify-content: center; font-size: 24px; margin-bottom: 12px;">
+        <div style="display: flex; gap: 4px; justify-content: center; font-size: 28px; margin-bottom: 12px;">
           ${mirrorPattern.join('')}
         </div>
         <p style="text-align: center; color: var(--text-secondary);">
@@ -244,19 +344,18 @@ function updateReviewContent() {
   document.getElementById('review-content').innerHTML = content;
 }
 
-// ── TESTAR ESTRATÉGIA ──
+// ── TESTAR ──
 function testStrategy() {
-  // Validação final
-  if (!strategyState.patternLength || !strategyState.direction || !strategyState.anchoring) {
-    showToast('⚠️ Informação incompleta', 'Volte e preencha todos os campos.', 'default');
+  if (!strategyState.pair) {
+    showToast('⚠️ Erro', 'Volte e selecione um par.', 'default');
     return;
   }
 
-  // TODO: Conectar com API de backtest
+  console.log('Estratégia para testar:', strategyState);
   showToast('🔬 Iniciando backtest', 'Testando sua estratégia contra o histórico real...', 'default');
 
-  // Por enquanto, só mostra um toast
-  console.log('Strategy para testar:', strategyState);
+  // TODO: Chamar API
+  // callBacktestAPI(strategyState);
 }
 
 // ── TOAST ──
@@ -272,6 +371,5 @@ function showToast(title, message, type = 'default') {
 
 // ── INICIALIZAR ──
 document.addEventListener('DOMContentLoaded', () => {
-  // Renderizar preview do espelho de entrada
   updateMirrorPreview();
 });
