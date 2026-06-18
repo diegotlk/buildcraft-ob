@@ -132,6 +132,26 @@ function initLabSimulation() {
   if (!testBtn) return;
 
   testBtn.addEventListener('click', () => {
+    // Get form values
+    const strategySelect = document.getElementById('select-strategy');
+    const managementSelect = document.getElementById('select-management');
+    const pairSelect = document.getElementById('select-pair');
+    const scheduleSelect = document.getElementById('select-schedule');
+
+    const strategyId = strategySelect?.value;
+    const managementId = managementSelect?.value;
+    const pair = pairSelect?.value;
+    const schedule = scheduleSelect?.value;
+
+    // Get filters
+    const filters = Array.from(document.querySelectorAll('.filter-input:checked')).map(el => el.value);
+
+    // Validate
+    if (!strategyId || !managementId || !pair || !schedule) {
+      showToast('⚠️ Preencha todos os campos', 'Estratégia, gerenciamento, par e horário são obrigatórios.', 'default');
+      return;
+    }
+
     const resultArea = document.getElementById('lab-result-area');
     const loadingArea = document.getElementById('lab-loading');
     const emptyArea = document.getElementById('lab-empty');
@@ -140,16 +160,24 @@ function initLabSimulation() {
     if (resultArea) resultArea.style.display = 'none';
     if (loadingArea) loadingArea.style.display = 'flex';
 
-    // Simulate processing
     testBtn.disabled = true;
     testBtn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px"></div> Processando...';
 
+    // Simulate processing
     setTimeout(() => {
       if (loadingArea) loadingArea.style.display = 'none';
       if (resultArea) {
         resultArea.style.display = 'block';
         resultArea.classList.add('animate-slide-up');
       }
+
+      // Generate result
+      const strategy = MOCK.strategies.find(s => s.id === strategyId);
+      const management = MOCK.managements.find(m => m.id === managementId);
+      const result = generateBuildResult(strategy, management, pair, schedule, filters);
+
+      // Fill result
+      fillBuildResult(result);
 
       testBtn.disabled = false;
       testBtn.innerHTML = '⚡ Testar Build';
@@ -162,10 +190,148 @@ function initLabSimulation() {
         }, 100);
       });
 
-      // Show discovery toast
-      showToast('🏆 Build Épica descoberta!', 'Sua combinação gerou uma carta Épica com nota A!', 'discovery');
+      // Show discovery toast based on rarity
+      const rarityMessages = {
+        common: ['📌 Build Comum criada', 'Você descobriu uma combinação básica.'],
+        rare: ['🎯 Build Rara criada!', 'Sua combinação gerou uma carta Rara!'],
+        epic: ['⭐ Build Épica descoberta!', 'Sua combinação gerou uma carta Épica com nota A!'],
+        legendary: ['👑 Build Lendária descoberta!!!', 'Você encontrou uma das raras combinações Lendárias!'],
+      };
+
+      const msg = rarityMessages[result.rarity] || rarityMessages.common;
+      showToast(msg[0], msg[1], 'discovery');
     }, 2500);
   });
+
+  function generateBuildResult(strategy, management, pair, schedule, filters) {
+    // Base values from strategy and management
+    const baseWinrate = (strategy.winrate + management.rarity === 'legendary' ? 2 : management.rarity === 'epic' ? 1.5 : 0.5) * 0.98;
+    const winrateVariance = (Math.random() - 0.5) * 2;
+    const winrate = Math.max(50.1, Math.min(62, baseWinrate + winrateVariance));
+
+    const baseEntries = Math.floor((strategy.entries + 1000) * (Math.random() * 0.5 + 0.7));
+    const entries = Math.max(500, Math.floor(baseEntries + (filters.length > 0 ? -200 : 0)));
+
+    // Determine rarity based on combination
+    let rarity = 'common';
+    if (strategy.rarity === 'legendary' || management.rarity === 'legendary') rarity = 'legendary';
+    else if (strategy.rarity === 'epic' && management.rarity === 'epic') rarity = 'epic';
+    else if ((strategy.rarity === 'epic' || strategy.rarity === 'rare') && (management.rarity === 'epic' || management.rarity === 'rare')) rarity = 'rare';
+
+    // Randomize rarity a bit
+    const rarityRoll = Math.random();
+    if (rarityRoll > 0.85) rarity = 'epic';
+    else if (rarityRoll > 0.65) rarity = 'rare';
+
+    // Calculate grade based on winrate
+    let grade = 'D';
+    if (winrate >= 58) grade = 'S+';
+    else if (winrate >= 56) grade = 'S';
+    else if (winrate >= 54) grade = 'A';
+    else if (winrate >= 52) grade = 'B';
+    else if (winrate >= 51) grade = 'C';
+
+    // Other metrics
+    const payout = (1.5 + Math.random() * 1.0).toFixed(2);
+    const drawdown = -Math.floor((3000 - winrate * 50) * Math.random());
+    const avgProfit = (winrate - 50) * entries * 10 * (Math.random() * 0.8 + 0.6);
+
+    // Insights
+    const insights = generateInsights(strategy, management, pair, schedule, filters, winrate);
+
+    return {
+      name: `${strategy.name} + ${management.name}`,
+      strategy: strategy.name,
+      management: management.name,
+      pair: pair,
+      schedule: schedule,
+      filters: filters,
+      creator: 'Você',
+      rarity: rarity,
+      grade: grade,
+      winrate: parseFloat(winrate.toFixed(1)),
+      entries: entries,
+      payout: parseFloat(payout),
+      drawdown: drawdown,
+      avgProfit: avgProfit,
+      insights: insights,
+    };
+  }
+
+  function generateInsights(strategy, management, pair, schedule, filters, winrate) {
+    const insights = [];
+
+    // Pair-specific
+    const bestPairs = {
+      'EURUSD': 'Esta build funciona melhor em EUR/USD',
+      'GBPUSD': 'GBP/USD é o melhor par para esta combinação',
+      'USDJPY': 'USD/JPY oferece resultados mais estáveis',
+      'AUDUSD': 'AUD/USD tem boa volatilidade para esta estratégia',
+      'USDCAD': 'USD/CAD é adequado para este gerenciamento',
+    };
+    if (bestPairs[pair]) insights.push('✓ ' + bestPairs[pair]);
+
+    // Schedule-specific
+    if (schedule.includes('06h-12h')) insights.push('✓ Melhor performance na sessão europeia');
+    else if (schedule.includes('12h-18h')) insights.push('✓ Sessão de sobreposição é ideal');
+    else if (schedule.includes('18h-00h')) insights.push('✓ Sessão americana mostra bons resultados');
+
+    // Filters
+    if (filters.includes('Sem Doji')) insights.push('✓ Filtro de Doji reduz ruído com sucesso');
+    if (filters.includes('RSI > 70')) insights.push('✓ RSI alto confirma força do movimento');
+
+    // Performance-based
+    if (winrate >= 56) insights.push('⭐ Combinação acima da média');
+    if (winrate <= 51.5) insights.push('💡 Adicionar filtro pode melhorar resultados');
+    if (strategy.rarity === 'legendary') insights.push('👑 Estratégia lendária em uso');
+
+    return insights.slice(0, 4);
+  }
+
+  function fillBuildResult(result) {
+    const pairNames = {
+      'EURUSD': 'EUR/USD',
+      'GBPUSD': 'GBP/USD',
+      'USDJPY': 'USD/JPY',
+      'AUDUSD': 'AUD/USD',
+      'USDCAD': 'USD/CAD',
+    };
+
+    // Fill header
+    document.getElementById('result-name').textContent = `${result.strategy} + ${result.management}`;
+    document.getElementById('result-creator').textContent = 'Criado por ' + result.creator;
+
+    const rarityBadge = document.getElementById('result-rarity-badge');
+    rarityBadge.className = `card-rarity-badge ${getRarityClass(result.rarity)}`;
+    rarityBadge.textContent = getRarityLabel(result.rarity);
+
+    // Fill components
+    document.getElementById('result-strategy').textContent = result.strategy;
+    document.getElementById('result-management').textContent = result.management;
+    document.getElementById('result-pair').textContent = pairNames[result.pair] || result.pair;
+    document.getElementById('result-schedule').textContent = result.schedule;
+
+    // Fill stats
+    document.getElementById('result-winrate').textContent = result.winrate + '%';
+    document.getElementById('result-winrate').parentElement.querySelector('.stat-bar-fill').dataset.width = result.winrate + '%';
+
+    document.getElementById('result-entries').textContent = result.entries.toLocaleString('pt-BR');
+
+    const drawdownEl = document.getElementById('result-drawdown');
+    drawdownEl.textContent = 'R$ ' + Math.abs(result.drawdown).toLocaleString('pt-BR');
+    drawdownEl.className = 'stat-value ' + (result.drawdown < 0 ? 'negative' : 'positive');
+
+    document.getElementById('result-payout').textContent = result.payout.toFixed(2) + 'x';
+
+    // Fill insights
+    const insightsList = document.getElementById('result-insights');
+    insightsList.innerHTML = result.insights.map(insight => `
+      <div class="insight-item">
+        <span class="insight-icon">${insight.includes('✓') ? '✓' : (insight.includes('⭐') ? '⭐' : (insight.includes('💡') ? '💡' : '👑'))}</span>
+        <span>${insight.replace(/^[✓⭐💡👑] /, '')}</span>
+      </div>
+    `).join('');
+  }
 }
 
 /* ==================== BATTLE ANIMATION ==================== */
@@ -388,4 +554,60 @@ function populateSelect(selectId, items, labelKey) {
     opt.textContent = typeof item === 'string' ? item : item[labelKey || 'name'];
     select.appendChild(opt);
   });
+}
+
+/* ==================== RARITY & GRADE HELPERS ==================== */
+function getRarityClass(rarity) {
+  const map = {
+    'common': 'common',
+    'rare': 'rare',
+    'epic': 'epic',
+    'legendary': 'legendary',
+  };
+  return map[rarity] || 'common';
+}
+
+function getRarityLabel(rarity) {
+  const map = {
+    'common': 'Comum',
+    'rare': 'Rara',
+    'epic': 'Épica',
+    'legendary': 'Lendária',
+  };
+  return map[rarity] || 'Comum';
+}
+
+function getGradeClass(grade) {
+  const classMap = {
+    'D': 'grade-d',
+    'C': 'grade-c',
+    'B': 'grade-b',
+    'A': 'grade-a',
+    'S': 'grade-s',
+    'S+': 'grade-s-plus',
+  };
+  return classMap[grade] || 'grade-b';
+}
+
+function getClassIcon(className) {
+  const icons = {
+    'Tendência': '📈',
+    'Reversão': '📉',
+    'Anti-meta': '⚡',
+    'Padrão': '🔷',
+    'Conservador': '🛡️',
+    'Agressivo': '⚔️',
+    'Progressivo': '📊',
+    'Proteção': '🔒',
+    'Híbrido': '🔄',
+  };
+  return icons[className] || '🎯';
+}
+
+function formatPercent(value) {
+  return parseFloat(value).toFixed(1) + '%';
+}
+
+function formatCurrency(value) {
+  return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
