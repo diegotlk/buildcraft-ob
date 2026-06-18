@@ -112,7 +112,15 @@ main {
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.navbar-toggle:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent);
 }
 @media (max-width: 968px) {
   .navbar-links { display: none; }
