@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Criar Estratégia — Construa seu padrão de velas e teste contra histórico real.">
+  <title>Criar Estratégia | BuildCraft OB</title>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+
+  <style>
+    .strategy-builder {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .phase-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    .phase-section.active {
+      display: block;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── Fase 1: Montar Padrão ── */
+    .pattern-container {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 24px 0;
+      justify-content: center;
+    }
+
+    .candle {
+      width: 56px;
+      height: 80px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid var(--border-color);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      user-select: none;
+    }
+
+    .candle:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .candle.white {
+      background: var(--bg);
+      color: var(--text-secondary);
+    }
+
+    .candle.green {
+      background: linear-gradient(135deg, rgba(38, 166, 121, 0.2), rgba(38, 166, 121, 0.1));
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    .candle.red {
+      background: linear-gradient(135deg, rgba(224, 78, 74, 0.2), rgba(224, 78, 74, 0.1));
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .pattern-info {
+      text-align: center;
+      margin: 20px 0;
+      padding: 16px;
+      background: rgba(99, 102, 241, 0.05);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .pattern-controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Fase 2: Direção ── */
+    .direction-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .direction-btn {
+      padding: 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .direction-btn:hover {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .direction-btn.selected {
+      background: linear-gradient(135deg, var(--accent), var(--rarity-epic));
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* ── Fase 3: Ancoragem ── */
+    .anchoring-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .anchoring-card {
+      padding: 20px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .anchoring-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+
+    .anchoring-card.selected {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.05));
+      border-color: var(--accent);
+    }
+
+    .anchoring-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .anchoring-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ── Fase 4: Espelho ── */
+    .mirror-preview {
+      background: rgba(99, 102, 241, 0.05);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .mirror-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .mirror-patterns {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+
+    .mirror-pattern-group {
+      text-align: center;
+    }
+
+    .mirror-pattern {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .mirror-candle {
+      width: 40px;
+      height: 56px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .mirror-candle.green {
+      background: linear-gradient(135deg, rgba(38, 166, 121, 0.2), rgba(38, 166, 121, 0.1));
+      color: var(--success);
+    }
+
+    .mirror-candle.red {
+      background: linear-gradient(135deg, rgba(224, 78, 74, 0.2), rgba(224, 78, 74, 0.1));
+      color: var(--danger);
+    }
+
+    .mirror-label-small {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* ── Buttons ── */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+
+    .step-counter {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span class="brand-icon">⚗️</span>
+      <span class="brand-text-craft">BuildCraft OB</span>
+    </a>
+
+    <div class="navbar-links">
+      <a href="index.html" class="navbar-link">Início</a>
+      <a href="laboratorio.html" class="navbar-link">Laboratório</a>
+      <a href="criar_estrategia.html" class="navbar-link active">Criar Estratégia</a>
+      <a href="rankings.html" class="navbar-link">Ranking</a>
+      <a href="batalhas.html" class="navbar-link">Batalhas</a>
+      <a href="loja.html" class="navbar-link">Loja</a>
+    </div>
+
+    <div class="navbar-actions">
+      <a href="planos.html" class="btn btn-sm btn-primary">Começar Grátis</a>
+      <a href="painel.html" class="navbar-avatar">D</a>
+    </div>
+
+    <button class="navbar-toggle" aria-label="Menu">☰</button>
+  </nav>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Header -->
+      <div class="lab-header" style="margin-top: 40px; margin-bottom: 40px;">
+        <h1 class="page-title">🎨 Criar Estratégia</h1>
+        <p class="page-subtitle">Monte seu padrão de velas, escolha a direção e teste contra histórico real.</p>
+      </div>
+
+      <!-- Builder -->
+      <div class="strategy-builder">
+
+        <!-- ── FASE 1: MONTAR PADRÃO ── -->
+        <div class="phase-section active" id="phase-pattern">
+          <div class="step-counter">Passo 1 de 5: Monte seu padrão</div>
+          <h2 class="card-box-title">🎯 Quantas velas você quer?</h2>
+
+          <div style="display: flex; gap: 12px; justify-content: center; margin: 20px 0; flex-wrap: wrap;">
+            <button class="btn btn-outline" onclick="setPatternLength(3)">3 velas</button>
+            <button class="btn btn-outline" onclick="setPatternLength(5)">5 velas</button>
+            <button class="btn btn-outline" onclick="setPatternLength(10)">10 velas</button>
+            <button class="btn btn-outline" onclick="setPatternLength(20)">20 velas</button>
+          </div>
+
+          <div id="pattern-container-wrapper" style="display: none;">
+            <h3 style="text-align: center; margin: 24px 0 12px;">Clique para colorir</h3>
+            <div class="pattern-container" id="pattern-container"></div>
+
+            <div class="pattern-info">
+              ⬜ = Qualquer cor | 🟩 = Verde | 🟥 = Vermelho<br/>
+              Clique em uma vela para ciclar as cores
+            </div>
+
+            <div class="pattern-controls">
+              <button class="btn btn-sm btn-outline" onclick="resetPattern()">🔄 Limpar</button>
+              <button class="btn btn-sm btn-accent" onclick="goToPhase('direction')">Próximo ➜</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── FASE 2: DIREÇÃO ── -->
+        <div class="phase-section" id="phase-direction">
+          <div class="step-counter">Passo 2 de 5: Escolha a direção</div>
+          <h2 class="card-box-title">📈 Você quer apostar em CALL ou PUT?</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+            <strong>CALL</strong> = aposta em vela verde (subida)<br/>
+            <strong>PUT</strong> = aposta em vela vermelha (queda)
+          </p>
+
+          <div class="direction-grid">
+            <button class="direction-btn" onclick="setDirection('call')">
+              📈 CALL<br/><span style="font-size: 12px;">Vela Verde</span>
+            </button>
+            <button class="direction-btn" onclick="setDirection('put')">
+              📉 PUT<br/><span style="font-size: 12px;">Vela Vermelha</span>
+            </button>
+            <button class="direction-btn" onclick="setDirection('both')">
+              ⚖️ OS DOIS<br/><span style="font-size: 12px;">Testar ambas</span>
+            </button>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('pattern')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('anchoring')">Próximo ➜</button>
+          </div>
+        </div>
+
+        <!-- ── FASE 3: ANCORAGEM ── -->
+        <div class="phase-section" id="phase-anchoring">
+          <div class="step-counter">Passo 3 de 5: Escolha a ancoragem</div>
+          <h2 class="card-box-title">⚓ Exato ou No Mínimo?</h2>
+
+          <div class="anchoring-grid">
+            <div class="anchoring-card" onclick="setAnchoring('exato')">
+              <div class="anchoring-title">📌 Exato</div>
+              <div class="anchoring-desc">
+                A vela anterior tem que ser de cor DIFERENTE. Padrão fixo e rigoroso.
+              </div>
+            </div>
+            <div class="anchoring-card" onclick="setAnchoring('minimo')">
+              <div class="anchoring-title">➡️ No Mínimo</div>
+              <div class="anchoring-desc">
+                A vela anterior pode ser qualquer cor. Aceita variações do padrão.
+              </div>
+            </div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('direction')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('mirror')">Próximo ➜</button>
+          </div>
+        </div>
+
+        <!-- ── FASE 4: ESPELHO ── -->
+        <div class="phase-section" id="phase-mirror">
+          <div class="step-counter">Passo 4 de 5: Padrão espelho</div>
+          <h2 class="card-box-title">🔀 Incluir padrão espelho?</h2>
+
+          <div class="mirror-preview">
+            <div class="mirror-patterns">
+              <div class="mirror-pattern-group">
+                <div class="mirror-label">Padrão Original</div>
+                <div class="mirror-pattern" id="original-mirror"></div>
+              </div>
+              <div style="display: flex; align-items: center; color: var(--text-secondary);">
+                ↔️
+              </div>
+              <div class="mirror-pattern-group">
+                <div class="mirror-label">Padrão Espelho</div>
+                <div class="mirror-pattern" id="mirrored-mirror"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="direction-grid">
+            <button class="direction-btn" onclick="setMirror(false)">
+              ❌ Só o Meu
+            </button>
+            <button class="direction-btn" onclick="setMirror(true)">
+              ✅ Os Dois
+            </button>
+          </div>
+
+          <div id="mirror-direction-container" style="display: none; margin-top: 24px;">
+            <h3 style="text-align: center; margin-bottom: 16px;">📊 Qual direção para o espelho?</h3>
+            <div class="direction-grid">
+              <button class="direction-btn" onclick="setMirrorDirection('call')">
+                📈 CALL
+              </button>
+              <button class="direction-btn" onclick="setMirrorDirection('put')">
+                📉 PUT
+              </button>
+            </div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('anchoring')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('review')">Próximo ➜</button>
+          </div>
+        </div>
+
+        <!-- ── FASE 5: REVISÃO ── -->
+        <div class="phase-section" id="phase-review">
+          <div class="step-counter">Passo 5 de 5: Revisão</div>
+          <h2 class="card-box-title">✅ Resumo da sua estratégia</h2>
+
+          <div id="review-content" style="margin: 24px 0; padding: 20px; background: rgba(99, 102, 241, 0.05); border-radius: 8px;">
+            <!-- Preenchido por JS -->
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('mirror')">⬅ Voltar</button>
+            <button class="btn btn-lg btn-accent" onclick="testStrategy()">⚡ Testar Estratégia</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==================== TOAST ==================== -->
+  <div id="toast" class="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/strategy-builder.js"></script>
+</body>
+</html>
