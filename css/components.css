@@ -129,6 +129,7 @@ main {
 
 /* ==================== SIDEBAR ==================== */
 .sidebar {
+  display: none;
   position: fixed;
   top: var(--header-height);
   left: 0;
