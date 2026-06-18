@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BuildCraft OB — O primeiro laboratório gamificado de estratégias, gerenciamentos e builds estatísticas. Monte sua build, teste no histórico, descubra cartas raras e entre no ranking.">
+  <title>BuildCraft OB — Laboratório Gamificado de Estratégias</title>
+
+  <!-- Open Graph / compartilhamento em redes sociais -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="BuildCraft OB — Laboratório Gamificado de Estratégias">
+  <meta property="og:description" content="Monte sua build, teste no histórico real de velas, descubra cartas raras e entre no ranking.">
+  <meta property="og:image" content="https://buildcraftob.com/og-cover.png">
+  <meta property="og:url" content="https://buildcraftob.com">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#0d0d14">
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span class="brand-icon">⚗️</span>
+      Build<span class="brand-text-craft">Craft</span> OB
+    </a>
+
+    <div class="navbar-links hide-mobile">
+      <a href="index.html" class="navbar-link active">Home</a>
+      <a href="laboratorio.html" class="navbar-link">Laboratório</a>
+      <a href="rankings.html" class="navbar-link">Rankings</a>
+      <a href="batalhas.html" class="navbar-link">Batalhas</a>
+      <a href="marketplace.html" class="navbar-link">Marketplace</a>
+      <a href="cartas.html" class="navbar-link">Cartas</a>
+    </div>
+
+    <div class="navbar-actions">
+      <a href="planos.html" class="btn btn-sm btn-primary hide-mobile">Começar Grátis</a>
+      <a href="dashboard.html" class="navbar-avatar">D</a>
+    </div>
+
+    <button class="navbar-toggle" aria-label="Menu">☰</button>
+  </nav>
+
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-particles"></div>
+
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          ⚡ O primeiro laboratório gamificado de estratégias
+        </div>
+
+        <h1 class="hero-title">
+          Monte sua build.<br>
+          Descubra <span class="glow-legendary">cartas raras</span>.<br>
+          Entre no ranking.
+        </h1>
+
+        <p class="hero-subtitle">
+          Combine estratégias, gerenciamentos, pares e filtros.
+          Teste contra o histórico real de velas.
+          Transforme dados em descobertas — e descobertas em status.
+        </p>
+
+        <div class="hero-actions">
+          <a href="laboratorio.html" class="btn btn-lg btn-legendary">⚗️ Criar Minha Build</a>
+          <a href="#how-it-works" class="btn btn-lg btn-outline">Como Funciona →</a>
+        </div>
+
+        <!-- Floating demo cards -->
+        <div class="hero-cards">
+          <!-- Card 1: Common -->
+          <div class="hero-card-float scroll-animate" style="transform-origin:center">
+            <div class="card-collectible card-common" style="width:220px;pointer-events:none">
+              <div class="card-holo-overlay"></div>
+              <div class="card-header">
+                <span class="card-type-tag">Estratégia</span>
+                <span class="card-rarity-badge common">Comum</span>
+              </div>
+              <div class="card-body">
+                <div class="card-title">MHI 1</div>
+                <div class="card-creator">por <span>Sistema</span></div>
+                <div class="card-stats">
+                  <div class="card-stat">
+                    <div class="card-stat-label">Winrate</div>
+                    <div class="card-stat-value positive">52,1%</div>
+                  </div>
+                  <div class="card-stat">
+                    <div class="card-stat-label">Entradas</div>
+                    <div class="card-stat-value neutral">2.340</div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <div class="card-footer-stat"><strong>812</strong> usuários</div>
+                <div class="grade grade-b">B</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Epic -->
+          <div class="hero-card-float scroll-animate" style="animation-delay:.3s">
+            <div class="card-collectible card-epic" style="width:240px;pointer-events:none">
+              <div class="card-holo-overlay"></div>
+              <div class="card-header">
+                <span class="card-type-tag">Build</span>
+                <span class="card-rarity-badge epic">Épica</span>
+              </div>
+              <div class="card-body">
+                <div class="card-title">Tanque Reflexo</div>
+                <div class="card-creator">por <span>Diego</span></div>
+                <div class="card-stats">
+                  <div class="card-stat">
+                    <div class="card-stat-label">Winrate</div>
+                    <div class="card-stat-value positive">56,2%</div>
+                  </div>
+                  <div class="card-stat">
+                    <div class="card-stat-label">Lucro Sim.</div>
+                    <div class="card-stat-value positive">R$ 923,80</div>
+                  </div>
+                </div>
+                <div class="card-class-icon">
+                  <span class="icon">🛡️</span> Tanque
+                </div>
+              </div>
+              <div class="card-footer">
+                <div class="card-footer-stat"><strong>536</strong> usuários · <strong>34</strong> vendas</div>
+                <div class="grade grade-s">S</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Legendary -->
+          <div class="hero-card-float scroll-animate" style="animation-delay:.6s">
+            <div class="card-collectible card-legendary" style="width:240px;pointer-events:none">
+              <div class="card-holo-overlay"></div>
+              <div class="card-header">
+                <span class="card-type-tag">Build</span>
+                <span class="card-rarity-badge legendary">Lendária</span>
+              </div>
+              <div class="card-body">
+                <div class="card-title">Healer Crítico</div>
+                <div class="card-creator">por <span>Diego</span></div>
+                <div class="card-stats">
+                  <div class="card-stat">
+                    <div class="card-stat-label">Winrate</div>
+                    <div class="card-stat-value positive">59,4%</div>
+                  </div>
+                  <div class="card-stat">
+                    <div class="card-stat-label">Lucro Sim.</div>
+                    <div class="card-stat-value positive">R$ 1.847,50</div>
+                  </div>
+                </div>
+                <div class="card-class-icon">
+                  <span class="icon">⚡</span> Anti-meta
+                </div>
+              </div>
+              <div class="card-footer">
+                <div class="card-footer-stat"><strong>156</strong> usuários · <strong>67</strong> vendas</div>
+                <div class="grade grade-sp">S+</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== HOW IT WORKS ==================== -->
+  <section class="section how-it-works" id="how-it-works">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:48px">
+        <h2 class="section-title scroll-animate">Como Funciona</h2>
+        <p class="section-subtitle scroll-animate" style="margin:0 auto">
+          Quatro passos para transformar dados em descobertas raras.
+        </p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card scroll-animate">
+          <div class="step-number">1</div>
+          <h3 class="step-title">Escolha</h3>
+          <p class="step-desc">Selecione uma estratégia, gerenciamento, par, horário e filtros.</p>
+        </div>
+        <div class="step-card scroll-animate">
+          <div class="step-number">2</div>
+          <h3 class="step-title">Combine</h3>
+          <p class="step-desc">Monte sua build combinando componentes como peças de RPG.</p>
+        </div>
+        <div class="step-card scroll-animate">
+          <div class="step-number">3</div>
+          <h3 class="step-title">Teste</h3>
+          <p class="step-desc">Rode contra o histórico real de velas e veja o resultado gamificado.</p>
+        </div>
+        <div class="step-card scroll-animate">
+          <div class="step-number">4</div>
+          <h3 class="step-title">Descubra</h3>
+          <p class="step-desc">Receba sua carta com raridade, nota, classe e potenciais escondidos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== FEATURED CARDS ==================== -->
+  <section class="section featured-section">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:48px">
+        <h2 class="section-title scroll-animate">Cartas em Destaque</h2>
+        <p class="section-subtitle scroll-animate" style="margin:0 auto">
+          As melhores descobertas da comunidade nesta temporada.
+        </p>
+      </div>
+
+      <div class="card-grid" id="featured-cards" style="justify-items:center">
+        <!-- Cards are rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== RANKINGS PREVIEW ==================== -->
+  <section class="section" style="background:var(--bg-base)">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap;gap:16px">
+        <div>
+          <h2 class="section-title scroll-animate">🏆 Rankings</h2>
+          <p class="section-subtitle scroll-animate">As melhores builds da temporada atual.</p>
+        </div>
+        <a href="rankings.html" class="btn btn-outline scroll-animate">Ver todos os rankings →</a>
+      </div>
+
+      <div class="scroll-animate" style="overflow-x:auto">
+        <table class="ranking-table" id="ranking-preview">
+          <thead>
+            <tr>
+              <th style="width:60px">Pos</th>
+              <th>Build</th>
+              <th>Raridade</th>
+              <th>Winrate</th>
+              <th>Entradas</th>
+              <th>Nota</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-body">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== BATTLE PREVIEW ==================== -->
+  <section class="section battle-preview">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:48px">
+        <h2 class="section-title scroll-animate">⚔️ Batalhas de Cartas</h2>
+        <p class="section-subtitle scroll-animate" style="margin:0 auto">
+          Coloque suas cartas frente a frente e descubra qual domina.
+        </p>
+      </div>
+
+      <div class="scroll-animate" style="max-width:800px;margin:0 auto">
+        <div class="glass-card" style="padding:32px;border-radius:var(--radius-xl)">
+          <div class="versus-display">
+            <div class="versus-card">
+              <div style="margin-bottom:12px">
+                <span class="badge badge-rare" style="font-size:.75rem">Rara</span>
+              </div>
+              <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:4px">MHI 2</div>
+              <div style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Estratégia de Tendência</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between;font-size:.85rem">
+                  <span style="color:var(--text-muted)">Winrate</span>
+                  <span style="font-weight:700;color:var(--success)">54,3%</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.85rem">
+                  <span style="color:var(--text-muted)">Drawdown</span>
+                  <span style="font-weight:700">R$ 245</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.85rem">
+                  <span style="color:var(--text-muted)">Estabilidade</span>
+                  <span style="font-weight:700">72%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="versus-vs">VS</div>
+
+            <div class="versus-card">
+              <div style="margin-bottom:12px">
+                <span class="badge badge-epic" style="font-size:.75rem">Épica</span>
+              </div>
+              <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:4px">Torres Gêmeas</div>
+              <div style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Estratégia de Reversão</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between;font-size:.85rem">
+                  <span style="color:var(--text-muted)">Winrate</span>
+                  <span style="font-weight:700;color:var(--success)">55,8%</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.85rem">
+                  <span style="color:var(--text-muted)">Drawdown</span>
+                  <span style="font-weight:700">R$ 165</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.85rem">
+                  <span style="color:var(--text-muted)">Estabilidade</span>
+                  <span style="font-weight:700">82%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monthly results -->
+          <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border)">
+            <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;text-align:center">Melhor de 12 Meses</div>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap" id="monthly-battle">
+              <!-- Rendered by JS -->
+            </div>
+            <div style="text-align:center;margin-top:20px">
+              <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800">
+                🏆 Vencedora: <span style="color:var(--rarity-epic)">Torres Gêmeas</span>
+              </div>
+              <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Placar: 7 x 4 (1 empate)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== STATS COUNTER ==================== -->
+  <section class="section" style="background:var(--bg-deepest)">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:32px;text-align:center" class="scroll-animate">
+        <div>
+          <div class="text-4xl font-black glow-text" data-count="500" data-suffix="+">0</div>
+          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Estratégias no sistema</div>
+        </div>
+        <div>
+          <div class="text-4xl font-black glow-text" data-count="12847" data-suffix="">0</div>
+          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Builds testadas</div>
+        </div>
+        <div>
+          <div class="text-4xl font-black glow-legendary" data-count="47" data-suffix="">0</div>
+          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Cartas Lendárias</div>
+        </div>
+        <div>
+          <div class="text-4xl font-black glow-text" data-count="2340" data-suffix="">0</div>
+          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Criadores ativos</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== PRICING ==================== -->
+  <section class="section" id="pricing" style="background:var(--bg-base)">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:48px">
+        <h2 class="section-title scroll-animate">Planos</h2>
+        <p class="section-subtitle scroll-animate" style="margin:0 auto">
+          Comece grátis. Evolua quando quiser.
+        </p>
+      </div>
+
+      <div class="pricing-grid scroll-animate">
+        <!-- Free -->
+        <div class="pricing-card">
+          <div class="pricing-name">Free</div>
+          <div class="pricing-price">
+            <span class="amount">R$ 0</span>
+            <span class="period">/mês</span>
+          </div>
+          <div class="pricing-features">
+            <div class="pricing-feature"><span class="check">✓</span> 3 estratégias básicas</div>
+            <div class="pricing-feature"><span class="check">✓</span> 3 pares</div>
+            <div class="pricing-feature"><span class="check">✓</span> 5 testes por dia</div>
+            <div class="pricing-feature"><span class="check">✓</span> Histórico limitado</div>
+            <div class="pricing-feature disabled"><span class="check">✗</span> Ranking</div>
+            <div class="pricing-feature disabled"><span class="check">✗</span> Marketplace</div>
+          </div>
+          <a href="#" class="btn btn-outline" style="width:100%">Começar Grátis</a>
+        </div>
+
+        <!-- Premium -->
+        <div class="pricing-card featured">
+          <div class="pricing-name" style="color:var(--accent-hover)">Premium</div>
+          <div class="pricing-price">
+            <span class="amount" style="color:var(--accent-hover)">R$ 29</span>
+            <span class="period">/mês</span>
+          </div>
+          <div class="pricing-features">
+            <div class="pricing-feature"><span class="check">✓</span> Todas as estratégias</div>
+            <div class="pricing-feature"><span class="check">✓</span> Todos os pares</div>
+            <div class="pricing-feature"><span class="check">✓</span> Testes ilimitados</div>
+            <div class="pricing-feature"><span class="check">✓</span> Histórico completo</div>
+            <div class="pricing-feature"><span class="check">✓</span> Rankings avançados</div>
+            <div class="pricing-feature"><span class="check">✓</span> Mutações</div>
+          </div>
+          <a href="#" class="btn btn-primary" style="width:100%">Assinar Premium</a>
+        </div>
+
+        <!-- Criador -->
+        <div class="pricing-card">
+          <div class="pricing-name" style="color:var(--rarity-epic)">Criador</div>
+          <div class="pricing-price">
+            <span class="amount" style="color:var(--rarity-epic)">R$ 49</span>
+            <span class="period">/mês</span>
+          </div>
+          <div class="pricing-features">
+            <div class="pricing-feature"><span class="check">✓</span> Tudo do Premium</div>
+            <div class="pricing-feature"><span class="check">✓</span> Criar estratégias</div>
+            <div class="pricing-feature"><span class="check">✓</span> Publicar cartas</div>
+            <div class="pricing-feature"><span class="check">✓</span> Vender no marketplace</div>
+            <div class="pricing-feature"><span class="check">✓</span> Estatísticas de venda</div>
+            <div class="pricing-feature"><span class="check">✓</span> Ranking de criador</div>
+          </div>
+          <a href="#" class="btn btn-outline" style="width:100%;border-color:var(--rarity-epic);color:var(--rarity-epic)">Começar a criar</a>
+        </div>
+
+        <!-- Pro -->
+        <div class="pricing-card">
+          <div class="pricing-name" style="color:var(--rarity-legendary)">Pro</div>
+          <div class="pricing-price">
+            <span class="amount" style="color:var(--rarity-legendary)">R$ 99</span>
+            <span class="period">/mês</span>
+          </div>
+          <div class="pricing-features">
+            <div class="pricing-feature"><span class="check">✓</span> Tudo do Criador</div>
+            <div class="pricing-feature"><span class="check">✓</span> Datasets premium</div>
+            <div class="pricing-feature"><span class="check">✓</span> Simulações pesadas</div>
+            <div class="pricing-feature"><span class="check">✓</span> Marketplace completo</div>
+            <div class="pricing-feature"><span class="check">✓</span> Exportação avançada</div>
+            <div class="pricing-feature"><span class="check">✓</span> Suporte prioritário</div>
+          </div>
+          <a href="#" class="btn btn-outline" style="width:100%;border-color:var(--rarity-legendary);color:var(--rarity-legendary)">Ir Pro</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== CTA FINAL ==================== -->
+  <section class="section" style="background:var(--bg-deepest)">
+    <div class="container">
+      <div class="cta-banner scroll-animate">
+        <h2 style="font-family:var(--font-display);font-size:2.25rem;font-weight:900;margin-bottom:12px;position:relative;z-index:2">
+          Pronto para caçar <span class="glow-legendary">builds raras</span>?
+        </h2>
+        <p style="color:var(--text-secondary);font-size:1.05rem;max-width:500px;margin:0 auto 28px;position:relative;z-index:2">
+          Estratégias deixam de ser regras frias e viram personagens vivos.
+          Sua próxima descoberta lendária está esperando.
+        </p>
+        <div style="position:relative;z-index:2">
+          <a href="laboratorio.html" class="btn btn-lg btn-legendary">⚗️ Começar Agora</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="landing-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">⚗️ Build<span style="color:var(--accent-hover)">Craft</span> OB</div>
+          <p class="footer-desc">
+            O primeiro laboratório gamificado de estratégias.
+            Monte, teste, descubra e colecione.
+          </p>
+        </div>
+        <div>
+          <div class="footer-title">Produto</div>
+          <a href="laboratorio.html" class="footer-link">Laboratório</a>
+          <a href="rankings.html" class="footer-link">Rankings</a>
+          <a href="batalhas.html" class="footer-link">Batalhas</a>
+          <a href="marketplace.html" class="footer-link">Marketplace</a>
+          <a href="builddex.html" class="footer-link">BuildDex</a>
+        </div>
+        <div>
+          <div class="footer-title">Comunidade</div>
+          <a href="rankings.html" class="footer-link">Top Criadores</a>
+          <a href="#" class="footer-link">Hall da Fama</a>
+          <a href="#" class="footer-link">Eventos</a>
+          <a href="#" class="footer-link">Educação</a>
+        </div>
+        <div>
+          <div class="footer-title">Planos</div>
+          <a href="planos.html" class="footer-link">Free</a>
+          <a href="planos.html" class="footer-link">Premium</a>
+          <a href="planos.html" class="footer-link">Criador</a>
+          <a href="planos.html" class="footer-link">Pro</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 BuildCraft OB. Todos os direitos reservados.</span>
+        <span>Feito com ⚡ por Diego</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Render featured cards
+    const featuredContainer = document.getElementById('featured-cards');
+    if (featuredContainer) {
+      const featured = [MOCK.builds[0], MOCK.builds[5], MOCK.builds[1], MOCK.builds[2]];
+      featuredContainer.innerHTML = featured.map(b => renderCard(b)).join('');
+      // Re-init tilt after rendering
+      setTimeout(() => initCardTilt(), 100);
+    }
+
+    // Render ranking preview
+    const rankingBody = document.getElementById('ranking-body');
+    if (rankingBody) {
+      const sorted = [...MOCK.builds].sort((a, b) => a.ranking - b.ranking);
+      rankingBody.innerHTML = sorted.map((b, i) => renderRankingRow(b, i + 1)).join('');
+    }
+
+    // Render monthly battle results
+    const monthlyBattle = document.getElementById('monthly-battle');
+    if (monthlyBattle) {
+      monthlyBattle.innerHTML = MOCK.battleExample.monthlyResults.map(r => {
+        let color = 'var(--text-muted)';
+        let bg = 'var(--bg-elevated)';
+        let icon = '—';
+        if (r.winner === 'MHI 2') { color = 'var(--rarity-rare)'; bg = 'rgba(59,130,246,.1)'; icon = 'M'; }
+        else if (r.winner === 'Torres Gêmeas') { color = 'var(--rarity-epic)'; bg = 'rgba(139,92,246,.1)'; icon = 'T'; }
+        else { icon = '='; }
+        return `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:${bg};display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--font-display);color:${color}">${icon}</div>
+            <div style="font-size:.65rem;color:var(--text-muted)">${r.month}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+
+</body>
+</html>
