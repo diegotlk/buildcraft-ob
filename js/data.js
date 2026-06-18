@@ -21,12 +21,12 @@ const MOCK = {
   // ==================== MANAGEMENTS ====================
   managements: [
     { id: 'ger-001', name: 'Entrada Fixa', type: 'Gerenciamento', category: 'Conservador', rarity: 'common', grade: 'B', description: 'Valor fixo por entrada, sem progressão.' },
-    { id: 'ger-002', name: 'Martingale 1', type: 'Gerenciamento', category: 'Agressivo', rarity: 'common', grade: 'C', description: 'Dobra o valor após cada loss (1 gale).' },
-    { id: 'ger-003', name: 'Martingale 2', type: 'Gerenciamento', category: 'Agressivo', rarity: 'rare', grade: 'B', description: 'Dobra o valor após cada loss (até 2 gales).' },
-    { id: 'ger-004', name: 'Soros 1', type: 'Gerenciamento', category: 'Progressivo', rarity: 'rare', grade: 'A', description: 'Reinveste lucro após win (1 soros).' },
-    { id: 'ger-005', name: 'Soros 2', type: 'Gerenciamento', category: 'Progressivo', rarity: 'epic', grade: 'A', description: 'Reinveste lucro após win (até 2 soros).' },
-    { id: 'ger-006', name: 'Soros Defensivo', type: 'Gerenciamento', category: 'Proteção', rarity: 'epic', grade: 'S', description: 'Soros com stop loss automático e proteção de banca.' },
-    { id: 'ger-007', name: 'Soros Gale', type: 'Gerenciamento', category: 'Híbrido', rarity: 'legendary', grade: 'S', description: 'Combina Soros em win com Martingale em loss.' },
+    { id: 'ger-002', name: 'Martingale 1', type: 'Gerenciamento', category: 'Agressivo', rarity: 'common', grade: 'C', description: 'Dobra o valor após cada perda (1 gale).' },
+    { id: 'ger-003', name: 'Martingale 2', type: 'Gerenciamento', category: 'Agressivo', rarity: 'rare', grade: 'B', description: 'Dobra o valor após cada perda (até 2 gales).' },
+    { id: 'ger-004', name: 'Soros 1', type: 'Gerenciamento', category: 'Progressivo', rarity: 'rare', grade: 'A', description: 'Reinveste lucro após ganho (1 soros).' },
+    { id: 'ger-005', name: 'Soros 2', type: 'Gerenciamento', category: 'Progressivo', rarity: 'epic', grade: 'A', description: 'Reinveste lucro após ganho (até 2 soros).' },
+    { id: 'ger-006', name: 'Soros Defensivo', type: 'Gerenciamento', category: 'Proteção', rarity: 'epic', grade: 'S', description: 'Soros com parada de perda automática e proteção de banca.' },
+    { id: 'ger-007', name: 'Soros Gale', type: 'Gerenciamento', category: 'Híbrido', rarity: 'legendary', grade: 'S', description: 'Combina Soros em ganho com Martingale em perda.' },
   ],
 
   // ==================== BUILDS ====================
