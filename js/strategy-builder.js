@@ -397,17 +397,24 @@ function updateReviewContent() {
 }
 
 // ── TESTAR CONTRA API ──
+const API_URL = 'http://127.0.0.1:5000';
+
 function testStrategy() {
   if (!strategyState.pair) {
     showToast('⚠️ Erro', 'Volte e selecione um par.', 'default');
     return;
   }
 
-  showToast('🔬 Iniciando backtest', 'Testando sua estratégia contra velas.db...', 'default');
+  // Estado de carregando no botão
+  const btn = document.getElementById('btn-test-strategy');
+  const textoOriginal = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span> Testando contra velas.db...';
+
+  showToast('🔬 Iniciando backtest', 'Testando sua estratégia contra o histórico real...', 'default');
 
   // Preparar dados para API
   const payload = {
-    strategy_id: 'personalizada',
     pattern: strategyState.pattern.map(c => {
       if (c === '🟩') return 1;
       if (c === '🟥') return -1;
@@ -422,37 +429,102 @@ function testStrategy() {
     schedule_end: strategyState.scheduleEnd,
   };
 
-  // Chamar API Flask
-  callBacktestAPI(payload);
+  callBacktestAPI(payload, btn, textoOriginal);
 }
 
-function callBacktestAPI(payload) {
-  fetch('http://localhost:5000/api/test-build', {
+function callBacktestAPI(payload, btn, textoOriginal) {
+  fetch(`${API_URL}/api/test-build`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        showToast('✅ Backtest concluído!', 'Estratégia testada com sucesso.', 'discovery');
-        console.log('Resultado do backtest:', data);
-        // TODO: Mostrar resultado visual (cartão)
+    .then(response => response.json().then(data => ({ ok: response.ok, data })))
+    .then(({ ok, data }) => {
+      if (ok && data.success) {
+        showToast('✅ Backtest concluído!', 'Veja o resultado abaixo.', 'discovery');
+        renderResult(data.resultado);
       } else {
         showToast('⚠️ Backtest falhou', data.message || 'Tente novamente.', 'default');
       }
     })
     .catch(error => {
       console.error('Erro na API:', error);
-      showToast('❌ Erro de conexão', 'A API não está disponível. Certifique-se de que backtest_api.py está rodando.', 'default');
+      showToast('❌ API offline', 'Inicie o backtest_api.py (clique em start_api.bat) e tente de novo.', 'default');
+    })
+    .finally(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+      }
     });
+}
+
+// ── RENDERIZAR RESULTADO DO BACKTEST ──
+function renderResult(r) {
+  const rarityLabel = {
+    common: 'Comum', rare: 'Rara', epic: 'Épica', legendary: 'Lendária',
+  };
+  const rarityColor = {
+    common: 'var(--text-secondary)', rare: 'var(--rarity-rare)',
+    epic: 'var(--rarity-epic)', legendary: 'var(--rarity-legendary)',
+  };
+  const cor = rarityColor[r.rarity] || 'var(--text-secondary)';
+
+  // winrate vs breakeven (~53.5% para payout 87%)
+  const acima = r.winrate >= 53.5;
+  const corWinrate = acima ? 'var(--success)' : 'var(--danger)';
+
+  const insightsHTML = (r.insights || [])
+    .map(i => `<li style="margin-bottom:6px;">${i}</li>`).join('');
+
+  const html = `
+    <div style="border:2px solid ${cor}; border-radius:12px; padding:24px; background:rgba(99,102,241,0.04);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div>
+          <div style="font-size:12px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em;">Resultado do Backtest</div>
+          <div style="font-size:20px; font-weight:700;">${r.pair} · ${r.timeframe}</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="display:inline-block; padding:4px 16px; border-radius:999px; background:${cor}; color:#fff; font-size:12px; font-weight:700;">${rarityLabel[r.rarity] || 'Comum'}</div>
+          <div style="font-size:40px; font-weight:900; color:${cor}; line-height:1;">${r.grade}</div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:16px; margin-bottom:20px;">
+        <div style="text-align:center; padding:12px; background:var(--bg); border-radius:8px;">
+          <div style="font-size:26px; font-weight:800; color:${corWinrate};">${r.winrate}%</div>
+          <div style="font-size:11px; color:var(--text-secondary);">Taxa de Acerto</div>
+        </div>
+        <div style="text-align:center; padding:12px; background:var(--bg); border-radius:8px;">
+          <div style="font-size:26px; font-weight:800;">${r.entries.toLocaleString('pt-BR')}</div>
+          <div style="font-size:11px; color:var(--text-secondary);">Operações</div>
+        </div>
+        <div style="text-align:center; padding:12px; background:var(--bg); border-radius:8px;">
+          <div style="font-size:26px; font-weight:800; color:var(--success);">${r.wins.toLocaleString('pt-BR')}</div>
+          <div style="font-size:11px; color:var(--text-secondary);">Ganhos</div>
+        </div>
+        <div style="text-align:center; padding:12px; background:var(--bg); border-radius:8px;">
+          <div style="font-size:26px; font-weight:800; color:var(--danger);">${r.losses.toLocaleString('pt-BR')}</div>
+          <div style="font-size:11px; color:var(--text-secondary);">Perdas</div>
+        </div>
+      </div>
+
+      <div style="font-size:13px; color:var(--text-secondary); margin-bottom:16px; padding:12px; background:var(--bg); border-radius:8px;">
+        📅 Período testado: <strong>${r.periodo_de}</strong> até <strong>${r.periodo_ate}</strong>
+        &nbsp;·&nbsp; ${r.velas_usadas.toLocaleString('pt-BR')} velas reais analisadas
+      </div>
+
+      <div style="padding:16px; background:rgba(99,102,241,0.06); border-radius:8px; border-left:3px solid ${cor};">
+        <div style="font-weight:600; margin-bottom:8px;">📊 Análise</div>
+        <ul style="list-style:none; padding:0; margin:0; font-size:13px;">${insightsHTML}</ul>
+      </div>
+    </div>
+  `;
+
+  const container = document.getElementById('test-result');
+  container.innerHTML = html;
+  container.style.display = 'block';
+  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // ── TOAST ──
