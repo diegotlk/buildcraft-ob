@@ -248,6 +248,22 @@
       font-size: 12px;
       margin-bottom: 20px;
     }
+
+    /* ── Ícone do seletor de horário (relógio) ── */
+    /* Por padrão é preto e some no fundo escuro — deixamos branco e bem visível */
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(1.8);
+      opacity: 0.85;
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    input[type="time"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+      transform: scale(1.15);
+    }
   </style>
 </head>
 <body>
