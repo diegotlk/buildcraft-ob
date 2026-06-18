@@ -302,8 +302,9 @@
           </div>
 
           <div id="custom-input-container" style="display: none; margin: 20px 0; text-align: center;">
-            <input type="number" id="custom-length" min="1" max="20" placeholder="Digite entre 1 e 20"
-                   style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary); width: 150px;">
+            <label style="font-size: 13px; color: var(--text-secondary); margin-right: 8px;">Digite entre 1 e 20:</label>
+            <input type="number" id="custom-length" min="1" max="20" placeholder="Ex: 7"
+                   style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary); width: 80px;">
             <button class="btn btn-sm btn-accent" onclick="setCustomPatternLength()" style="margin-left: 8px;">Confirmar</button>
           </div>
 
@@ -334,19 +335,19 @@
 
           <div class="direction-grid">
             <button class="direction-btn" onclick="setDirection('call')">
-              <span style="font-size: 32px; color: var(--success);">📈</span><br/>
+              <span style="font-size: 48px; color: var(--success);">🟢</span><br/>
               <strong>CALL</strong><br/>
-              <span style="font-size: 12px; color: var(--success);">Vela Verde ⬆️</span>
+              <span style="font-size: 12px; color: var(--success);">Vela Verde</span>
             </button>
             <button class="direction-btn" onclick="setDirection('put')">
-              <span style="font-size: 32px; color: var(--danger);">📉</span><br/>
+              <span style="font-size: 48px; color: var(--danger);">🔴</span><br/>
               <strong>PUT</strong><br/>
-              <span style="font-size: 12px; color: var(--danger);">Vela Vermelha ⬇️</span>
+              <span style="font-size: 12px; color: var(--danger);">Vela Vermelha</span>
             </button>
             <button class="direction-btn" onclick="setDirection('both')">
               <span style="font-size: 32px;">⚖️</span><br/>
               <strong>OS DOIS</strong><br/>
-              <span style="font-size: 12px;">Testar ambas direções</span>
+              <span style="font-size: 12px;">Testar ambas</span>
             </button>
           </div>
 
@@ -446,12 +447,27 @@
           <div class="step-counter">Passo 5 de 6: Escolha o par</div>
           <h2 class="card-box-title">💱 Qual par você quer testar?</h2>
 
-          <div style="margin: 20px 0;">
-            <input type="text" id="pair-search" placeholder="🔍 Buscar par..."
-                   style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary); margin-bottom: 16px;"
-                   oninput="filterPairs()">
+          <!-- Filtro OTC/OP -->
+          <div style="margin: 24px 0; display: flex; gap: 12px; justify-content: center;">
+            <button class="direction-btn" id="filter-otc-btn" onclick="setPairFilter('otc')" style="flex: 1; max-width: 200px;">
+              <strong>OTC</strong>
+            </button>
+            <button class="direction-btn" id="filter-op-btn" onclick="setPairFilter('op')" style="flex: 1; max-width: 200px;">
+              <strong>Mercado Aberto</strong>
+            </button>
           </div>
 
+          <!-- Busca -->
+          <div style="margin: 20px 0;">
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="pair-search" placeholder="🔍 Buscar par (ex: USD, EUR)..."
+                     style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary);"
+                     oninput="searchPairs()">
+              <button class="btn btn-sm btn-outline" onclick="clearSearch()" style="width: 100px;">Limpar</button>
+            </div>
+          </div>
+
+          <!-- Pares disponíveis -->
           <div id="pairs-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; max-height: 400px; overflow-y: auto;">
             <!-- Preenchido por JS -->
           </div>
@@ -466,20 +482,27 @@
         <div class="phase-section" id="phase-schedule">
           <div class="step-counter">Passo 6 de 6: Escolha o horário</div>
           <h2 class="card-box-title">🕐 Qual horário você quer testar?</h2>
-          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 24px;">
             Escolha a hora de início e fim da sessão que deseja testar
           </p>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; max-width: 400px; margin-left: auto; margin-right: auto;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 32px 0; max-width: 500px; margin-left: auto; margin-right: auto;">
+            <!-- INÍCIO -->
             <div>
-              <label style="display: block; margin-bottom: 8px; font-weight: 600;">🟢 Início</label>
+              <label style="display: block; margin-bottom: 12px; font-weight: 600; text-align: center;">
+                🟢 <span style="color: var(--success);">Início</span>
+              </label>
               <input type="time" id="schedule-start" value="00:00"
-                     style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary);">
+                     style="width: 100%; padding: 14px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg); color: var(--text-primary); font-size: 16px; font-weight: 600; text-align: center; cursor: pointer;">
             </div>
+
+            <!-- FIM -->
             <div>
-              <label style="display: block; margin-bottom: 8px; font-weight: 600;">🔴 Fim</label>
+              <label style="display: block; margin-bottom: 12px; font-weight: 600; text-align: center;">
+                🔴 <span style="color: var(--danger);">Fim</span>
+              </label>
               <input type="time" id="schedule-end" value="23:59"
-                     style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary);">
+                     style="width: 100%; padding: 14px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg); color: var(--text-primary); font-size: 16px; font-weight: 600; text-align: center; cursor: pointer;">
             </div>
           </div>
 
@@ -512,6 +535,7 @@
   <!-- ==================== TOAST ==================== -->
   <div id="toast" class="toast"></div>
 
+  <script src="js/pares.js"></script>
   <script src="js/data.js"></script>
   <script src="js/strategy-builder.js"></script>
 </body>

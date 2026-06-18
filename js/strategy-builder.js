@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Strategy Builder Logic (Updated)
+   BuildCraft OB — Strategy Builder Logic (Fixed)
    ============================================================ */
 
 let strategyState = {
@@ -9,6 +9,7 @@ let strategyState = {
   anchoring: null,
   mirror: false,
   mirrorDirection: null,
+  pairFilter: 'otc', // 'otc' ou 'op'
   pair: null,
   scheduleStart: '00:00',
   scheduleEnd: '23:59',
@@ -22,15 +23,6 @@ const COLORS = {
 };
 
 const COLOR_ORDER = [COLORS.white, COLORS.green, COLORS.red];
-
-// ── Lista de pares disponíveis (do inventário) ──
-const AVAILABLE_PAIRS = [
-  'EURUSD-OTC', 'GBPUSD-OTC', 'USDJPY-OTC', 'AUDUSD-OTC', 'USDCAD-OTC',
-  'EURUSD-op', 'GBPUSD-op', 'USDJPY-op', 'AUDUSD-op',
-  'BTCUSD-OTC', 'BTCUSD-op', 'ETHUSD-OTC', 'ETHUSD-op',
-  'APPLE-OTC', 'GOOGLE-OTC', 'TESLA-OTC', 'MSFT-OTC',
-  'SP500-OTC', 'UK100-OTC', 'GER30-OTC', 'JP225-OTC',
-];
 
 // ── FASE 1: MONTAR PADRÃO ──
 function setPatternLength(length) {
@@ -174,41 +166,72 @@ function setMirrorDirection(direction) {
 }
 
 // ── FASE 5: PAR ──
-function renderPairs(pairs = AVAILABLE_PAIRS) {
+function setPairFilter(filter) {
+  strategyState.pairFilter = filter;
+
+  document.getElementById('filter-otc-btn').classList.remove('selected');
+  document.getElementById('filter-op-btn').classList.remove('selected');
+
+  if (filter === 'otc') {
+    document.getElementById('filter-otc-btn').classList.add('selected');
+  } else {
+    document.getElementById('filter-op-btn').classList.add('selected');
+  }
+
+  renderPairsForFilter();
+}
+
+function renderPairsForFilter() {
+  const pares = strategyState.pairFilter === 'otc' ? PARES_OTC : PARES_OP;
+  renderPairs(pares);
+}
+
+function renderPairs(pairs) {
   const container = document.getElementById('pairs-container');
   container.innerHTML = '';
 
-  pairs.forEach(pair => {
+  if (pairs.length === 0) {
+    container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Nenhum par encontrado</p>';
+    return;
+  }
+
+  pairs.slice(0, 20).forEach(pair => {
     const btn = document.createElement('button');
     btn.className = 'direction-btn';
     btn.textContent = pair;
     btn.onclick = () => setPair(pair);
+    if (strategyState.pair === pair) {
+      btn.classList.add('selected');
+    }
     container.appendChild(btn);
   });
+}
+
+function searchPairs() {
+  const search = document.getElementById('pair-search').value.toUpperCase();
+
+  if (!search) {
+    renderPairsForFilter();
+    return;
+  }
+
+  // Buscar em TODOS os pares (OTC + op)
+  const filtered = TODOS_OS_PARES.filter(pair => pair.includes(search));
+  renderPairs(filtered);
+}
+
+function clearSearch() {
+  document.getElementById('pair-search').value = '';
+  renderPairsForFilter();
 }
 
 function setPair(pair) {
   strategyState.pair = pair;
 
-  document.querySelectorAll('#phase-pair .direction-btn').forEach(btn => {
+  document.querySelectorAll('#phase-pair .direction-btn:not(#filter-otc-btn):not(#filter-op-btn)').forEach(btn => {
     btn.classList.remove('selected');
   });
   event.target.classList.add('selected');
-}
-
-function filterPairs() {
-  const search = document.getElementById('pair-search').value.toUpperCase();
-  const filtered = AVAILABLE_PAIRS.filter(pair => pair.includes(search));
-  renderPairs(filtered);
-
-  // Re-highlight selected pair
-  if (strategyState.pair) {
-    document.querySelectorAll('#phase-pair .direction-btn').forEach(btn => {
-      if (btn.textContent === strategyState.pair) {
-        btn.classList.add('selected');
-      }
-    });
-  }
 }
 
 // ── FASE 6: HORÁRIO ──
@@ -256,7 +279,7 @@ function goToPhase(phase) {
 
   // Inicializar pares na fase 5
   if (phase === 'pair') {
-    renderPairs();
+    setPairFilter('otc');
   }
 
   // Esconder todas as fases
@@ -273,15 +296,9 @@ function goToPhase(phase) {
 
 // ── REVISÃO ──
 function updateReviewContent() {
-  const directionEmoji = {
-    call: '📈',
-    put: '📉',
-    both: '⚖️',
-  };
-
   const directionText = {
-    call: '📈 CALL (Vela Verde ⬆️)',
-    put: '📉 PUT (Vela Vermelha ⬇️)',
+    call: '🟢 CALL (Vela Verde)',
+    put: '🔴 PUT (Vela Vermelha)',
     both: '⚖️ OS DOIS (CALL + PUT)',
   };
 
@@ -312,7 +329,7 @@ function updateReviewContent() {
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
       <div>
         <p><strong>Par:</strong></p>
-        <p>${strategyState.pair}</p>
+        <p><code style="background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p>
       </div>
       <div>
         <p><strong>Horário:</strong></p>
@@ -324,8 +341,8 @@ function updateReviewContent() {
   if (strategyState.mirror) {
     const mirrorPattern = getMirrorPattern();
     const mirrorDirectionText = {
-      call: '📈 CALL ⬆️',
-      put: '📉 PUT ⬇️',
+      call: '🟢 CALL',
+      put: '🔴 PUT',
     };
 
     content += `
@@ -344,18 +361,63 @@ function updateReviewContent() {
   document.getElementById('review-content').innerHTML = content;
 }
 
-// ── TESTAR ──
+// ── TESTAR CONTRA API ──
 function testStrategy() {
   if (!strategyState.pair) {
     showToast('⚠️ Erro', 'Volte e selecione um par.', 'default');
     return;
   }
 
-  console.log('Estratégia para testar:', strategyState);
-  showToast('🔬 Iniciando backtest', 'Testando sua estratégia contra o histórico real...', 'default');
+  showToast('🔬 Iniciando backtest', 'Testando sua estratégia contra velas.db...', 'default');
 
-  // TODO: Chamar API
-  // callBacktestAPI(strategyState);
+  // Preparar dados para API
+  const payload = {
+    strategy_id: 'personalizada',
+    pattern: strategyState.pattern.map(c => {
+      if (c === '🟩') return 1;
+      if (c === '🟥') return -1;
+      return null;
+    }),
+    anchoring: strategyState.anchoring, // 'exato' ou 'minimo'
+    direction: strategyState.direction, // 'call', 'put' ou 'both'
+    mirror: strategyState.mirror,
+    mirror_direction: strategyState.mirrorDirection,
+    pair: strategyState.pair,
+    schedule_start: strategyState.scheduleStart,
+    schedule_end: strategyState.scheduleEnd,
+  };
+
+  // Chamar API Flask
+  callBacktestAPI(payload);
+}
+
+function callBacktestAPI(payload) {
+  fetch('http://localhost:5000/api/test-build', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        showToast('✅ Backtest concluído!', 'Estratégia testada com sucesso.', 'discovery');
+        console.log('Resultado do backtest:', data);
+        // TODO: Mostrar resultado visual (cartão)
+      } else {
+        showToast('⚠️ Backtest falhou', data.message || 'Tente novamente.', 'default');
+      }
+    })
+    .catch(error => {
+      console.error('Erro na API:', error);
+      showToast('❌ Erro de conexão', 'A API não está disponível. Certifique-se de que backtest_api.py está rodando.', 'default');
+    });
 }
 
 // ── TOAST ──
