@@ -249,13 +249,32 @@ function setSchedule() {
   return true;
 }
 
-// Tornar inputs de horário clicáveis
+// Melhorar a interatividade dos inputs de horário
 document.addEventListener('DOMContentLoaded', () => {
   const startInput = document.getElementById('schedule-start');
   const endInput = document.getElementById('schedule-end');
 
-  if (startInput) startInput.addEventListener('focus', (e) => e.target.click());
-  if (endInput) endInput.addEventListener('focus', (e) => e.target.click());
+  const styleOnFocus = (input) => {
+    input.style.borderColor = 'var(--accent-hover)';
+    input.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.2)';
+  };
+
+  const styleOnBlur = (input) => {
+    input.style.borderColor = 'var(--accent)';
+    input.style.boxShadow = 'none';
+  };
+
+  if (startInput) {
+    startInput.addEventListener('focus', styleOnFocus);
+    startInput.addEventListener('blur', () => styleOnBlur(startInput));
+    startInput.addEventListener('click', (e) => e.target.click());
+  }
+
+  if (endInput) {
+    endInput.addEventListener('focus', styleOnFocus);
+    endInput.addEventListener('blur', () => styleOnBlur(endInput));
+    endInput.addEventListener('click', (e) => e.target.click());
+  }
 });
 
 // ── NAVEGAÇÃO ──
