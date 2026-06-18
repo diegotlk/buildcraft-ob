@@ -586,11 +586,27 @@
 
   <!-- Lab-specific script -->
   <script>
+    const API_URL = 'http://localhost:5000'; // Mudar para seu IP/porta se necessário
+
     document.addEventListener('DOMContentLoaded', () => {
       populateSelects();
       initSelectHints();
       initLabSimulation();
+      checkApiHealth();
     });
+
+    function checkApiHealth() {
+      fetch(`${API_URL}/health`)
+        .then(r => r.json())
+        .then(data => {
+          console.log('✓ API conectada', data);
+          document.body.classList.add('api-connected');
+        })
+        .catch(e => {
+          console.warn('⚠ API indisponível. Usando dados mockados.', e);
+          document.body.classList.add('api-offline');
+        });
+    }
 
     function populateSelects() {
       const strategySelect = document.getElementById('select-strategy');
