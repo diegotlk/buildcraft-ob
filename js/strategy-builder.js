@@ -393,8 +393,7 @@ function goToPhase(phase) {
 
   // Destacar a direção atual ao chegar na fase Q4
   if (phase === 'q-direction') {
-    document.getElementById('q-dir-maioria').classList.toggle('selected', strategyState.q.entradaModo === 'maioria');
-    document.getElementById('q-dir-minoria').classList.toggle('selected', strategyState.q.entradaModo === 'minoria');
+    destacarDirecao(strategyState.q.entradaModo);
   }
 
   // Esconder todas as fases
@@ -526,7 +525,9 @@ function updateReviewQuadrante() {
     return;
   }
   const ordinais = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª'];
-  const entradaTxt = q.entradaModo === 'maioria' ? '➡️ A favor da maioria' : '🔄 Contra (minoria)';
+  const entradaTxt = q.entradaModo === 'maioria' ? '🟢 Entrar pra maioria'
+    : q.entradaModo === 'ambas' ? '⚖️ Ambas (mostra a melhor)'
+    : '🔴 Entrar pra minoria';
 
   let analiseTxt;
   if (q.analiseModo === 'editar') {
@@ -1096,8 +1097,14 @@ function toggleQCandle(i) {
 // ── Q4: direção (a favor/contra) ──
 function setQEntradaModo(modo) {
   strategyState.q.entradaModo = modo;
+  destacarDirecao(modo);
+}
+
+function destacarDirecao(modo) {
   document.getElementById('q-dir-maioria').classList.toggle('selected', modo === 'maioria');
   document.getElementById('q-dir-minoria').classList.toggle('selected', modo === 'minoria');
+  const ambas = document.getElementById('q-dir-ambas');
+  if (ambas) ambas.classList.toggle('selected', modo === 'ambas');
 }
 
 // Navegação da fase de direção (difere entre preset e custom)

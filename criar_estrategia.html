@@ -466,18 +466,23 @@
         <!-- ── Q4: DIREÇÃO ── -->
         <div class="phase-section" id="phase-q-direction">
           <div class="step-counter">Quadrantes · Passo 4</div>
-          <h2 class="card-box-title">📈 Entrar a favor ou contra a maioria?</h2>
+          <h2 class="card-box-title">📈 Em qual direção entrar?</h2>
 
           <div class="direction-grid" style="margin-top: 20px;">
             <button class="direction-btn" id="q-dir-maioria" onclick="setQEntradaModo('maioria')">
-              <span style="font-size: 28px;">➡️</span><br/>
-              <strong>A favor da maioria</strong><br/>
-              <span style="font-size: 12px; color: var(--text-secondary);">Continua na cor predominante</span>
+              <span style="font-size: 28px;">🟢</span><br/>
+              <strong>Entrar pra maioria</strong><br/>
+              <span style="font-size: 12px; color: var(--text-secondary);">Na cor que mais apareceu</span>
             </button>
             <button class="direction-btn" id="q-dir-minoria" onclick="setQEntradaModo('minoria')">
-              <span style="font-size: 28px;">🔄</span><br/>
-              <strong>Contra (minoria)</strong><br/>
-              <span style="font-size: 12px; color: var(--text-secondary);">Aposta na reversão — estilo MHI</span>
+              <span style="font-size: 28px;">🔴</span><br/>
+              <strong>Entrar pra minoria</strong><br/>
+              <span style="font-size: 12px; color: var(--text-secondary);">Na cor que menos apareceu — estilo MHI</span>
+            </button>
+            <button class="direction-btn" id="q-dir-ambas" onclick="setQEntradaModo('ambas')">
+              <span style="font-size: 28px;">⚖️</span><br/>
+              <strong>Entrar pra ambas</strong><br/>
+              <span style="font-size: 12px; color: var(--text-secondary);">Testa as duas e mostra a melhor</span>
             </button>
           </div>
 
