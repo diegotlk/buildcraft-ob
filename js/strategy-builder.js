@@ -16,6 +16,8 @@ let strategyState = {
   scheduleEnd: '23:59',
   // ── Campos do modo quadrante ──
   q: {
+    tipo: 'quadrante',     // 'quadrante' (Família 1) ou 'referencia' (Famílias 2/3)
+    ref: null,             // params da estratégia de referência (quando tipo='referencia')
     approach: null,        // 'preset' ou 'custom'
     presetNome: null,      // nome do preset escolhido (ex: 'MHI 1')
     bloco: 'M5',           // quadrante: 'M5' (5 velas) ou 'M15' (15 velas)
@@ -41,6 +43,27 @@ const PRESETS_QUADRANTE = [
   { nome: 'Vituxo 2.0', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 2, entradaModo: 'maioria', desc: '3 primeiras velas; entra na 3ª do próximo, na maioria.' },
   { nome: 'D21', bloco: 'M5', posicoes: [0, 2, 3], posicoesLabel: 'velas 1, 3 e 4', entradaPos: 0, entradaModo: 'minoria', desc: 'Velas 1, 3 e 4; entra na 1ª do próximo, na minoria.' },
   { nome: 'Padrão 3x1', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 0, entradaModo: 'minoria', desc: '3 primeiras velas; entra na 1ª do próximo, na minoria.' },
+];
+
+// Presets de Repetição de posição (Família 2) e Reversão/Flip (Família 3).
+// tipo 'referencia': olha a vela em refPos e entra em entryPos repetindo ou
+// invertendo a cor. refBloco 'atual' (mesmo ciclo) ou 'anterior'.
+// condPosicoes: exige mesma cor nessas posições (Triplicação/Não Triplicação).
+const PRESETS_REFERENCIA = [
+  // ── Família 2: Repetição de posição ──
+  { nome: 'Torres Gêmeas', familia: 'Repetição', blocoVelas: 5, refPos: 0, entryPos: 4, relacao: 'repete', refBloco: 'atual', condPosicoes: null, desc: '1ª vela referência; entra na 5ª repetindo a cor.' },
+  { nome: 'Padrão 23', familia: 'Repetição', blocoVelas: 5, refPos: 0, entryPos: 1, relacao: 'repete', refBloco: 'atual', condPosicoes: null, desc: '1ª vela referência; entra na 2ª repetindo a cor.' },
+  { nome: 'Padrão Ímpar', familia: 'Repetição', blocoVelas: 5, refPos: 2, entryPos: 3, relacao: 'repete', refBloco: 'atual', condPosicoes: null, desc: '3ª vela referência; entra na 4ª na mesma cor.' },
+  { nome: '3 Mosqueteiros', familia: 'Repetição', blocoVelas: 5, refPos: 2, entryPos: 3, relacao: 'repete', refBloco: 'atual', condPosicoes: null, desc: '3ª vela referência; entra na 4ª na mesma cor.' },
+  { nome: '3 Vizinhos', familia: 'Repetição', blocoVelas: 5, refPos: 3, entryPos: 4, relacao: 'repete', refBloco: 'atual', condPosicoes: null, desc: '4ª vela referência; entra na 5ª na mesma cor.' },
+  { nome: 'Triplicação', familia: 'Repetição', blocoVelas: 5, refPos: 0, entryPos: 2, relacao: 'repete', refBloco: 'atual', condPosicoes: [0, 1], desc: '1ª e 2ª iguais; entra na 3ª formando trio.' },
+  { nome: 'DAKA', familia: 'Repetição', blocoVelas: 5, refPos: 3, entryPos: 0, relacao: 'repete', refBloco: 'anterior', condPosicoes: null, desc: '4ª vela do ciclo anterior; entra na 1ª do atual na mesma cor.' },
+  { nome: 'R7', familia: 'Repetição', blocoVelas: 10, refPos: 7, entryPos: 6, relacao: 'repete', refBloco: 'anterior', condPosicoes: null, desc: 'Ciclo de 10: 8ª do anterior; entra na 7ª do atual na mesma cor.' },
+  // ── Família 3: Reversão / Flip ──
+  { nome: 'Seven Flip', familia: 'Flip', blocoVelas: 8, refPos: 6, entryPos: 7, relacao: 'flip', refBloco: 'atual', condPosicoes: null, desc: '7ª vela; entra na 8ª na cor oposta.' },
+  { nome: 'Five Flip', familia: 'Flip', blocoVelas: 6, refPos: 4, entryPos: 5, relacao: 'flip', refBloco: 'atual', condPosicoes: null, desc: '5ª vela; entra na 6ª na cor oposta.' },
+  { nome: 'Não Triplicação', familia: 'Flip', blocoVelas: 5, refPos: 0, entryPos: 2, relacao: 'flip', refBloco: 'atual', condPosicoes: [0, 1], desc: '1ª e 2ª iguais; entra na 3ª na cor oposta (quebra o trio).' },
+  { nome: 'MSF', familia: 'Flip', blocoVelas: 5, refPos: 0, entryPos: 4, relacao: 'flip', refBloco: 'anterior', condPosicoes: null, desc: '1ª vela do ciclo anterior; entra na 5ª do atual na cor oposta.' },
 ];
 
 // ── Cores do padrão ──
@@ -437,6 +460,32 @@ function updateReviewContent() {
 // ── REVISÃO (modo quadrante) ──
 function updateReviewQuadrante() {
   const q = strategyState.q;
+
+  // Estratégia de referência/flip (Famílias 2 e 3)
+  if (q.tipo === 'referencia' && q.ref) {
+    const ref = q.ref;
+    const ordinais = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª', '7ª', '8ª', '9ª', '10ª'];
+    const relTxt = ref.relacao === 'repete' ? '🔁 Repete a cor' : '🔄 Inverte a cor (flip)';
+    const refTxt = ref.condPosicoes
+      ? `Velas ${ref.condPosicoes.map(p => ordinais[p]).join(' e ')} iguais`
+      : `${ordinais[ref.refPos]} vela${ref.refBloco === 'anterior' ? ' (ciclo anterior)' : ''}`;
+    document.getElementById('review-content').innerHTML = `
+      <div style="margin-bottom: 16px;">
+        <p style="margin-bottom: 8px;"><strong>🔲 ${ref.nome}</strong></p>
+        <p style="color: var(--text-secondary); font-size: 14px;">Ciclo de ${ref.blocoVelas} velas de 1 min</p>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
+        <div><p><strong>Referência:</strong></p><p>${refTxt}</p></div>
+        <div><p><strong>Relação:</strong></p><p>${relTxt}</p></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
+        <div><p><strong>Vela de entrada:</strong></p><p>${ordinais[ref.entryPos]} vela do ciclo</p></div>
+        <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
+      </div>
+      <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+    `;
+    return;
+  }
   const ordinais = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª'];
   const entradaTxt = q.entradaModo === 'maioria' ? '➡️ A favor da maioria' : '🔄 Contra (minoria)';
 
@@ -492,7 +541,22 @@ function testStrategy() {
   const emojiParaNum = (c) => (c === '🟩' ? 1 : c === '🟥' ? -1 : null);
   let payload;
 
-  if (strategyState.mode === 'quadrante') {
+  if (strategyState.mode === 'quadrante' && strategyState.q.tipo === 'referencia') {
+    const ref = strategyState.q.ref;
+    payload = {
+      mode: 'referencia',
+      nome: ref.nome,
+      bloco_velas: ref.blocoVelas,
+      ref_pos: ref.refPos,
+      entry_pos: ref.entryPos,
+      relacao: ref.relacao,
+      ref_bloco: ref.refBloco,
+      cond_posicoes: ref.condPosicoes,
+      pair: strategyState.pair,
+      schedule_start: strategyState.scheduleStart,
+      schedule_end: strategyState.scheduleEnd,
+    };
+  } else if (strategyState.mode === 'quadrante') {
     const q = strategyState.q;
     payload = {
       mode: 'quadrante',
@@ -642,6 +706,7 @@ function resetStrategy() {
     scheduleStart: '00:00',
     scheduleEnd: '23:59',
     q: {
+      tipo: 'quadrante', ref: null,
       approach: null, presetNome: null, bloco: 'M5',
       analiseModo: 'contar', analisePadrao: [], posicoes: null, posicoesLabel: 'todas',
       entradaModo: 'minoria', entradaPos: 0, entradaCor: 1,
@@ -815,7 +880,16 @@ function setQApproach(approach, el) {
 function renderPresets() {
   const container = document.getElementById('q-presets-container');
   container.innerHTML = '';
-  PRESETS_QUADRANTE.forEach(p => {
+
+  const addGrupo = (titulo, lista, render) => {
+    const head = document.createElement('div');
+    head.style.cssText = 'grid-column:1/-1; margin-top:8px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-secondary);';
+    head.textContent = titulo;
+    container.appendChild(head);
+    lista.forEach(render);
+  };
+
+  addGrupo('Maioria / Minoria', PRESETS_QUADRANTE, p => {
     const card = document.createElement('div');
     card.className = 'anchoring-card';
     card.onclick = () => loadPreset(p.nome);
@@ -826,21 +900,59 @@ function renderPresets() {
     `;
     container.appendChild(card);
   });
+
+  const refRepete = PRESETS_REFERENCIA.filter(p => p.familia === 'Repetição');
+  const refFlip = PRESETS_REFERENCIA.filter(p => p.familia === 'Flip');
+
+  const renderRef = p => {
+    const card = document.createElement('div');
+    card.className = 'anchoring-card';
+    card.onclick = () => loadPreset(p.nome);
+    card.innerHTML = `
+      <div class="anchoring-title">${p.nome}</div>
+      <div class="anchoring-desc">${p.desc}</div>
+      <div style="margin-top:8px; font-size:11px; color:var(--accent-hover);">Ciclo de ${p.blocoVelas} velas</div>
+    `;
+    container.appendChild(card);
+  };
+
+  addGrupo('Repetição de posição', refRepete, renderRef);
+  addGrupo('Reversão / Flip', refFlip, renderRef);
 }
 
 function loadPreset(nome) {
-  const p = PRESETS_QUADRANTE.find(x => x.nome === nome);
-  if (!p) return;
+  // Procura nas duas listas
+  const pQ = PRESETS_QUADRANTE.find(x => x.nome === nome);
+  const pR = PRESETS_REFERENCIA.find(x => x.nome === nome);
   strategyState.q.approach = 'preset';
-  strategyState.q.presetNome = p.nome;
-  strategyState.q.bloco = p.bloco;
-  strategyState.q.analiseModo = 'contar';
-  strategyState.q.posicoes = p.posicoes;
-  strategyState.q.posicoesLabel = p.posicoesLabel;
-  strategyState.q.entradaModo = p.entradaModo || 'minoria';
-  strategyState.q.entradaPos = p.entradaPos;
-  const dirTxt = strategyState.q.entradaModo === 'maioria' ? 'maioria' : 'minoria';
-  showToast('⚡ Preset carregado', `${p.nome} · entra na ${dirTxt}. Agora escolha o par.`, 'default');
+  strategyState.q.presetNome = nome;
+
+  if (pQ) {
+    strategyState.q.tipo = 'quadrante';
+    strategyState.q.ref = null;
+    strategyState.q.bloco = pQ.bloco;
+    strategyState.q.analiseModo = 'contar';
+    strategyState.q.posicoes = pQ.posicoes;
+    strategyState.q.posicoesLabel = pQ.posicoesLabel;
+    strategyState.q.entradaModo = pQ.entradaModo || 'minoria';
+    strategyState.q.entradaPos = pQ.entradaPos;
+    const dirTxt = strategyState.q.entradaModo === 'maioria' ? 'maioria' : 'minoria';
+    showToast('⚡ Preset carregado', `${pQ.nome} · entra na ${dirTxt}. Agora escolha o par.`, 'default');
+  } else if (pR) {
+    strategyState.q.tipo = 'referencia';
+    strategyState.q.ref = {
+      nome: pR.nome,
+      blocoVelas: pR.blocoVelas,
+      refPos: pR.refPos,
+      entryPos: pR.entryPos,
+      relacao: pR.relacao,
+      refBloco: pR.refBloco,
+      condPosicoes: pR.condPosicoes,
+    };
+    showToast('⚡ Preset carregado', `${pR.nome}. Agora escolha o par.`, 'default');
+  } else {
+    return;
+  }
   goToPhase('pair');
 }
 
