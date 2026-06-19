@@ -524,7 +524,64 @@ function renderResult(r) {
   const container = document.getElementById('test-result');
   container.innerHTML = html;
   container.style.display = 'block';
+
+  // Mostra o botão de criar nova estratégia agora que há um resultado
+  const btnNova = document.getElementById('btn-nova-estrategia');
+  if (btnNova) btnNova.style.display = 'inline-flex';
+
   container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── CRIAR NOVA ESTRATÉGIA (recomeçar do zero) ──
+function resetStrategy() {
+  // Zera todo o estado
+  strategyState = {
+    patternLength: null,
+    pattern: [],
+    direction: null,
+    anchoring: null,
+    mirror: false,
+    mirrorDirection: null,
+    pairFilter: 'otc',
+    pair: null,
+    scheduleStart: '00:00',
+    scheduleEnd: '23:59',
+  };
+
+  // Esconde e limpa o resultado do backtest
+  const container = document.getElementById('test-result');
+  if (container) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+  }
+  const btnNova = document.getElementById('btn-nova-estrategia');
+  if (btnNova) btnNova.style.display = 'none';
+
+  // Reseta a fase 1 (esconde o padrão e o input customizado)
+  const wrapper = document.getElementById('pattern-container-wrapper');
+  if (wrapper) wrapper.style.display = 'none';
+  const custom = document.getElementById('custom-input-container');
+  if (custom) custom.style.display = 'none';
+
+  // Reseta seleções visuais (direção, ancoragem, espelho, par)
+  document.querySelectorAll('.direction-btn.selected, .anchoring-card.selected')
+    .forEach(el => el.classList.remove('selected'));
+  const mirrorDir = document.getElementById('mirror-direction-container');
+  if (mirrorDir) mirrorDir.style.display = 'none';
+  const busca = document.getElementById('pair-search');
+  if (busca) busca.value = '';
+
+  // Reseta os horários
+  const inicio = document.getElementById('schedule-start');
+  if (inicio) inicio.value = '00:00';
+  const fim = document.getElementById('schedule-end');
+  if (fim) fim.value = '23:59';
+
+  // Atualiza o preview do espelho (vazio) e volta para a fase 1
+  updateMirrorPreview();
+  goToPhase('pattern');
+
+  showToast('🆕 Nova estratégia', 'Tudo limpo. Monte seu próximo padrão!', 'default');
 }
 
 // ── TOAST ──
