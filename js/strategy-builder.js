@@ -29,14 +29,18 @@ let strategyState = {
   },
 };
 
-// Presets clássicos de quadrante (do bot do Telegram)
+// Presets clássicos de quadrante — Família 1 (Maioria/Minoria).
+// entradaModo: 'minoria' (contra a maioria) ou 'maioria' (a favor).
 const PRESETS_QUADRANTE = [
-  { nome: 'MHI 1', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 0, desc: '3 últimas velas do bloco; entra na 1ª do próximo.' },
-  { nome: 'MHI 2', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 1, desc: '3 últimas velas; entra na 2ª do próximo.' },
-  { nome: 'MHI 3', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 2, desc: '3 últimas velas; entra na 3ª do próximo.' },
-  { nome: 'Milhão', bloco: 'M5', posicoes: null, posicoesLabel: 'todas (5)', entradaPos: 0, desc: '5 velas do bloco; entra na 1ª do próximo.' },
-  { nome: 'Vituxo 2.0', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 2, desc: '3 primeiras velas; entra na 3ª do próximo.' },
-  { nome: 'D21', bloco: 'M5', posicoes: [0, 2, 3], posicoesLabel: 'velas 1, 3 e 4', entradaPos: 0, desc: 'Velas 1, 3 e 4; entra na 1ª do próximo.' },
+  { nome: 'MHI 1', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 0, entradaModo: 'minoria', desc: '3 últimas velas; entra na 1ª do próximo, na minoria.' },
+  { nome: 'MHI 2', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 1, entradaModo: 'minoria', desc: '3 últimas velas; entra na 2ª do próximo, na minoria.' },
+  { nome: 'MHI 3', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 2, entradaModo: 'minoria', desc: '3 últimas velas; entra na 3ª do próximo, na minoria.' },
+  { nome: 'MHI Maioria', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 0, entradaModo: 'maioria', desc: '3 últimas velas; entra na 1ª do próximo, na maioria.' },
+  { nome: 'Milhão Minoria', bloco: 'M5', posicoes: null, posicoesLabel: 'todas (5)', entradaPos: 0, entradaModo: 'minoria', desc: '5 velas do bloco; entra na 1ª do próximo, na minoria.' },
+  { nome: 'Milhão Maioria', bloco: 'M5', posicoes: null, posicoesLabel: 'todas (5)', entradaPos: 0, entradaModo: 'maioria', desc: '5 velas do bloco; entra na 1ª do próximo, na maioria.' },
+  { nome: 'Vituxo 2.0', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 2, entradaModo: 'maioria', desc: '3 primeiras velas; entra na 3ª do próximo, na maioria.' },
+  { nome: 'D21', bloco: 'M5', posicoes: [0, 2, 3], posicoesLabel: 'velas 1, 3 e 4', entradaPos: 0, entradaModo: 'minoria', desc: 'Velas 1, 3 e 4; entra na 1ª do próximo, na minoria.' },
+  { nome: 'Padrão 3x1', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 0, entradaModo: 'minoria', desc: '3 primeiras velas; entra na 1ª do próximo, na minoria.' },
 ];
 
 // ── Cores do padrão ──
@@ -833,9 +837,10 @@ function loadPreset(nome) {
   strategyState.q.analiseModo = 'contar';
   strategyState.q.posicoes = p.posicoes;
   strategyState.q.posicoesLabel = p.posicoesLabel;
-  strategyState.q.entradaModo = 'minoria'; // clássico MHI = minoria
+  strategyState.q.entradaModo = p.entradaModo || 'minoria';
   strategyState.q.entradaPos = p.entradaPos;
-  showToast('⚡ Preset carregado', `${p.nome} · entre na minoria. Agora escolha o par.`, 'default');
+  const dirTxt = strategyState.q.entradaModo === 'maioria' ? 'maioria' : 'minoria';
+  showToast('⚡ Preset carregado', `${p.nome} · entra na ${dirTxt}. Agora escolha o par.`, 'default');
   goToPhase('pair');
 }
 
