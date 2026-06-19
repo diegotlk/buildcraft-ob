@@ -304,8 +304,37 @@
       <!-- Builder -->
       <div class="strategy-builder">
 
+        <!-- ── FASE 0: ESCOLHER MODO ── -->
+        <div class="phase-section active" id="phase-mode">
+          <div class="step-counter">Como você quer montar sua estratégia?</div>
+          <h2 class="card-box-title">🧩 Escolha o tipo de estratégia</h2>
+
+          <div class="anchoring-grid" style="margin-top: 28px;">
+            <div class="anchoring-card" onclick="setMode('pintar')">
+              <div class="anchoring-title">🎨 Pintar velas</div>
+              <div class="anchoring-desc">
+                Você desenha um padrão de velas (ex: 🟩🟩🟥) e aposta na próxima vela.
+                Simples e direto.
+              </div>
+              <div style="margin-top: 12px; display: flex; gap: 4px; justify-content: center; font-size: 24px;">
+                🟩🟩🟥
+              </div>
+            </div>
+            <div class="anchoring-card" onclick="setMode('quadrante')">
+              <div class="anchoring-title">🔲 Usar quadrantes</div>
+              <div class="anchoring-desc">
+                Olha um bloco maior de velas (ex: quadrante de 5 min = 5 velas de 1 min),
+                analisa a maioria/minoria e entra na próxima. Estilo MHI, Milhão.
+              </div>
+              <div style="margin-top: 12px; display: flex; gap: 3px; justify-content: center; font-size: 18px;">
+                <span style="opacity:.5;">🟩🟥🟩🟩🟥</span> ➜ 🟥
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ── FASE 1: MONTAR PADRÃO ── -->
-        <div class="phase-section active" id="phase-pattern">
+        <div class="phase-section" id="phase-pattern">
           <div class="step-counter">Passo 1 de 6: Monte seu padrão</div>
           <h2 class="card-box-title">🎯 Quantas velas você quer?</h2>
 
@@ -334,9 +363,143 @@
             </div>
 
             <div class="pattern-controls">
+              <button class="btn btn-sm btn-outline" onclick="goToPhase('mode')">⬅ Trocar modo</button>
               <button class="btn btn-sm btn-outline" onclick="resetPattern()">🔄 Limpar</button>
               <button class="btn btn-sm btn-accent" onclick="goToPhase('direction')">Próximo ➜</button>
             </div>
+          </div>
+        </div>
+
+        <!-- ════════════ FLUXO DE QUADRANTES ════════════ -->
+
+        <!-- ── Q1: PRESETS ou MONTAR DO ZERO ── -->
+        <div class="phase-section" id="phase-q-approach">
+          <div class="step-counter">Quadrantes · Passo 1</div>
+          <h2 class="card-box-title">🔲 Estratégia pronta ou montar do zero?</h2>
+
+          <div class="anchoring-grid" style="margin-top: 24px;">
+            <div class="anchoring-card" onclick="setQApproach('preset', this)">
+              <div class="anchoring-title">⚡ Usar uma pronta</div>
+              <div class="anchoring-desc">Escolha clássicas como MHI 1/2/3, Milhão, Vituxo e D21 com um clique.</div>
+            </div>
+            <div class="anchoring-card" onclick="setQApproach('custom', this)">
+              <div class="anchoring-title">🛠️ Montar do zero</div>
+              <div class="anchoring-desc">Defina o quadrante, a análise (maioria/minoria ou pintar), a direção e em qual vela entrar.</div>
+            </div>
+          </div>
+
+          <!-- Lista de presets (aparece ao escolher "pronta") -->
+          <div id="q-presets-list" style="display: none; margin-top: 28px;">
+            <h3 style="text-align: center; margin-bottom: 16px;">Escolha uma estratégia</h3>
+            <div id="q-presets-container" class="anchoring-grid"></div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('mode')">⬅ Trocar modo</button>
+          </div>
+        </div>
+
+        <!-- ── Q2: QUADRANTE (bloco) ── -->
+        <div class="phase-section" id="phase-q-bloco">
+          <div class="step-counter">Quadrantes · Passo 2</div>
+          <h2 class="card-box-title">📦 Qual o tamanho do quadrante?</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 8px;">
+            O quadrante é um bloco de velas de 1 minuto que você analisa em conjunto.
+          </p>
+
+          <div class="anchoring-grid" style="margin-top: 24px;">
+            <div class="anchoring-card" onclick="setQBloco('M5', this)">
+              <div class="anchoring-title">🕔 Quadrante de 5 min</div>
+              <div class="anchoring-desc">5 velas de 1 minuto. O mais usado (MHI, Milhão).</div>
+            </div>
+            <div class="anchoring-card" onclick="setQBloco('M15', this)">
+              <div class="anchoring-title">🕒 Quadrante de 15 min</div>
+              <div class="anchoring-desc">15 velas de 1 minuto. Blocos maiores, menos sinais.</div>
+            </div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('q-approach')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('q-analise')">Próximo ➜</button>
+          </div>
+        </div>
+
+        <!-- ── Q3: ANÁLISE ── -->
+        <div class="phase-section" id="phase-q-analise">
+          <div class="step-counter">Quadrantes · Passo 3</div>
+          <h2 class="card-box-title">🔍 Como analisar o quadrante?</h2>
+
+          <div class="anchoring-grid" style="margin-top: 20px;">
+            <div class="anchoring-card" id="q-analise-contar" onclick="setQAnaliseModo('contar')">
+              <div class="anchoring-title">🔢 Maioria / Minoria</div>
+              <div class="anchoring-desc">Conta a cor predominante das velas do quadrante.</div>
+            </div>
+            <div class="anchoring-card" id="q-analise-editar" onclick="setQAnaliseModo('editar')">
+              <div class="anchoring-title">🎨 Pintar o quadrante</div>
+              <div class="anchoring-desc">Define a cor exata de cada vela do bloco (⬜ = qualquer).</div>
+            </div>
+          </div>
+
+          <!-- Sub-área: quais velas olhar (modo contar) -->
+          <div id="q-posicoes-area" style="display: none; margin-top: 24px;">
+            <h3 style="text-align: center; margin-bottom: 12px;">Quais velas do quadrante olhar?</h3>
+            <div class="direction-grid">
+              <button class="direction-btn" id="q-pos-todas" onclick="setQPosicoes('todas')">Todas</button>
+              <button class="direction-btn" id="q-pos-primeiras" onclick="setQPosicoes('primeiras')">3 primeiras</button>
+              <button class="direction-btn" id="q-pos-ultimas" onclick="setQPosicoes('ultimas')">3 últimas</button>
+            </div>
+          </div>
+
+          <!-- Sub-área: pintar o bloco (modo editar) -->
+          <div id="q-paint-area" style="display: none; margin-top: 24px;">
+            <h3 style="text-align: center; margin-bottom: 12px;">Pinte as velas do quadrante</h3>
+            <div class="pattern-container" id="q-block-container"></div>
+            <div class="pattern-info">⬜ = Qualquer | 🟩 = Verde | 🟥 = Vermelho · Clique para mudar</div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('q-bloco')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('q-direction')">Próximo ➜</button>
+          </div>
+        </div>
+
+        <!-- ── Q4: DIREÇÃO ── -->
+        <div class="phase-section" id="phase-q-direction">
+          <div class="step-counter">Quadrantes · Passo 4</div>
+          <h2 class="card-box-title">📈 Entrar a favor ou contra a maioria?</h2>
+
+          <div class="direction-grid" style="margin-top: 20px;">
+            <button class="direction-btn" id="q-dir-maioria" onclick="setQEntradaModo('maioria')">
+              <span style="font-size: 28px;">➡️</span><br/>
+              <strong>A favor da maioria</strong><br/>
+              <span style="font-size: 12px; color: var(--text-secondary);">Continua na cor predominante</span>
+            </button>
+            <button class="direction-btn" id="q-dir-minoria" onclick="setQEntradaModo('minoria')">
+              <span style="font-size: 28px;">🔄</span><br/>
+              <strong>Contra (minoria)</strong><br/>
+              <span style="font-size: 12px; color: var(--text-secondary);">Aposta na reversão — estilo MHI</span>
+            </button>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('q-analise')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('q-entrada')">Próximo ➜</button>
+          </div>
+        </div>
+
+        <!-- ── Q5: VELA DE ENTRADA ── -->
+        <div class="phase-section" id="phase-q-entrada">
+          <div class="step-counter">Quadrantes · Passo 5</div>
+          <h2 class="card-box-title">🎯 Em qual vela do próximo quadrante entrar?</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 8px;">
+            MHI entra na 1ª · MHI 2 na 2ª · MHI 3 na 3ª.
+          </p>
+
+          <div class="direction-grid" id="q-entrada-container" style="margin-top: 20px;"></div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('q-direction')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="goToPhase('pair')">Próximo ➜</button>
           </div>
         </div>
 
@@ -489,7 +652,7 @@
           </div>
 
           <div class="pattern-controls">
-            <button class="btn btn-sm btn-outline" onclick="goToPhase('mirror')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-outline" onclick="voltarDoPair()">⬅ Voltar</button>
             <button class="btn btn-sm btn-accent" onclick="goToPhase('schedule')">Próximo ➜</button>
           </div>
         </div>

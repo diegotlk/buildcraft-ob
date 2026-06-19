@@ -3,6 +3,7 @@
    ============================================================ */
 
 let strategyState = {
+  mode: 'pintar', // 'pintar' (colorir velas) ou 'quadrante'
   patternLength: null,
   pattern: [],
   direction: null,
@@ -13,7 +14,30 @@ let strategyState = {
   pair: null,
   scheduleStart: '00:00',
   scheduleEnd: '23:59',
+  // ── Campos do modo quadrante ──
+  q: {
+    approach: null,        // 'preset' ou 'custom'
+    presetNome: null,      // nome do preset escolhido (ex: 'MHI 1')
+    bloco: 'M5',           // quadrante: 'M5' (5 velas) ou 'M15' (15 velas)
+    analiseModo: 'contar', // 'contar' (maioria/minoria) ou 'editar' (pintar)
+    analisePadrao: [],     // se editar: cores das velas do bloco
+    posicoes: null,        // se contar: quais velas olhar (null=todas)
+    posicoesLabel: 'todas',
+    entradaModo: 'minoria', // 'maioria' (a favor) ou 'minoria' (contra)
+    entradaPos: 0,          // 1ª=0, 2ª=1, 3ª=2... do próximo bloco
+    entradaCor: 1,          // se direção por cor fixa (1=verde, -1=vermelha)
+  },
 };
+
+// Presets clássicos de quadrante (do bot do Telegram)
+const PRESETS_QUADRANTE = [
+  { nome: 'MHI 1', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 0, desc: '3 últimas velas do bloco; entra na 1ª do próximo.' },
+  { nome: 'MHI 2', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 1, desc: '3 últimas velas; entra na 2ª do próximo.' },
+  { nome: 'MHI 3', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 2, desc: '3 últimas velas; entra na 3ª do próximo.' },
+  { nome: 'Milhão', bloco: 'M5', posicoes: null, posicoesLabel: 'todas (5)', entradaPos: 0, desc: '5 velas do bloco; entra na 1ª do próximo.' },
+  { nome: 'Vituxo 2.0', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 2, desc: '3 primeiras velas; entra na 3ª do próximo.' },
+  { nome: 'D21', bloco: 'M5', posicoes: [0, 2, 3], posicoesLabel: 'velas 1, 3 e 4', entradaPos: 0, desc: 'Velas 1, 3 e 4; entra na 1ª do próximo.' },
+];
 
 // ── Cores do padrão ──
 const COLORS = {
@@ -317,6 +341,11 @@ function goToPhase(phase) {
     setPairFilter('otc');
   }
 
+  // Renderizar botões de vela de entrada ao chegar na fase Q5
+  if (phase === 'q-entrada') {
+    renderEntradaPos();
+  }
+
   // Esconder todas as fases
   document.querySelectorAll('.phase-section').forEach(section => {
     section.classList.remove('active');
@@ -331,6 +360,11 @@ function goToPhase(phase) {
 
 // ── REVISÃO ──
 function updateReviewContent() {
+  if (strategyState.mode === 'quadrante') {
+    updateReviewQuadrante();
+    return;
+  }
+
   const directionText = {
     call: '🟢 CALL (Vela Verde)',
     put: '🔴 PUT (Vela Vermelha)',
@@ -396,6 +430,44 @@ function updateReviewContent() {
   document.getElementById('review-content').innerHTML = content;
 }
 
+// ── REVISÃO (modo quadrante) ──
+function updateReviewQuadrante() {
+  const q = strategyState.q;
+  const ordinais = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª'];
+  const entradaTxt = q.entradaModo === 'maioria' ? '➡️ A favor da maioria' : '🔄 Contra (minoria)';
+
+  let analiseTxt;
+  if (q.analiseModo === 'editar') {
+    analiseTxt = `🎨 Bloco pintado: <span style="font-size:20px;">${q.analisePadrao.join('')}</span>`;
+  } else {
+    analiseTxt = `🔢 Maioria/minoria · olhando ${q.posicoesLabel}`;
+  }
+
+  let content = `
+    <div style="margin-bottom: 16px;">
+      <p style="margin-bottom: 8px;"><strong>🔲 Estratégia de Quadrante${q.presetNome ? ' — ' + q.presetNome : ''}</strong></p>
+      <p style="color: var(--text-secondary); font-size: 14px;">Quadrante de ${q.bloco === 'M15' ? '15' : '5'} min (${velasPorBloco()} velas de 1 min)</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
+      <div><p><strong>Análise:</strong></p><p>${analiseTxt}</p></div>
+      <div><p><strong>Direção:</strong></p><p>${entradaTxt}</p></div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
+      <div><p><strong>Vela de entrada:</strong></p><p>${ordinais[q.entradaPos] || (q.entradaPos + 1) + 'ª'} vela do próximo quadrante</p></div>
+      <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
+    </div>
+
+    <div style="font-size: 14px;">
+      <p><strong>Horário:</strong></p>
+      <p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p>
+    </div>
+  `;
+
+  document.getElementById('review-content').innerHTML = content;
+}
+
 // ── TESTAR CONTRA API ──
 const API_URL = 'http://127.0.0.1:5000';
 
@@ -413,21 +485,36 @@ function testStrategy() {
 
   showToast('🔬 Iniciando backtest', 'Testando sua estratégia contra o histórico real...', 'default');
 
-  // Preparar dados para API
-  const payload = {
-    pattern: strategyState.pattern.map(c => {
-      if (c === '🟩') return 1;
-      if (c === '🟥') return -1;
-      return null;
-    }),
-    anchoring: strategyState.anchoring, // 'exato' ou 'minimo'
-    direction: strategyState.direction, // 'call', 'put' ou 'both'
-    mirror: strategyState.mirror,
-    mirror_direction: strategyState.mirrorDirection,
-    pair: strategyState.pair,
-    schedule_start: strategyState.scheduleStart,
-    schedule_end: strategyState.scheduleEnd,
-  };
+  const emojiParaNum = (c) => (c === '🟩' ? 1 : c === '🟥' ? -1 : null);
+  let payload;
+
+  if (strategyState.mode === 'quadrante') {
+    const q = strategyState.q;
+    payload = {
+      mode: 'quadrante',
+      tf_entrada: 'M1',
+      bloco: q.bloco,
+      analise_modo: q.analiseModo,
+      analise_padrao: q.analiseModo === 'editar' ? q.analisePadrao.map(emojiParaNum) : null,
+      posicoes_analise: q.analiseModo === 'contar' ? q.posicoes : null,
+      entrada_modo: q.entradaModo,
+      entrada_pos: q.entradaPos,
+      pair: strategyState.pair,
+      schedule_start: strategyState.scheduleStart,
+      schedule_end: strategyState.scheduleEnd,
+    };
+  } else {
+    payload = {
+      pattern: strategyState.pattern.map(emojiParaNum),
+      anchoring: strategyState.anchoring, // 'exato' ou 'minimo'
+      direction: strategyState.direction, // 'call', 'put' ou 'both'
+      mirror: strategyState.mirror,
+      mirror_direction: strategyState.mirrorDirection,
+      pair: strategyState.pair,
+      schedule_start: strategyState.scheduleStart,
+      schedule_end: strategyState.scheduleEnd,
+    };
+  }
 
   callBacktestAPI(payload, btn, textoOriginal);
 }
@@ -539,6 +626,7 @@ function renderResult(r) {
 function resetStrategy() {
   // Zera todo o estado
   strategyState = {
+    mode: 'pintar',
     patternLength: null,
     pattern: [],
     direction: null,
@@ -549,7 +637,18 @@ function resetStrategy() {
     pair: null,
     scheduleStart: '00:00',
     scheduleEnd: '23:59',
+    q: {
+      approach: null, presetNome: null, bloco: 'M5',
+      analiseModo: 'contar', analisePadrao: [], posicoes: null, posicoesLabel: 'todas',
+      entradaModo: 'minoria', entradaPos: 0, entradaCor: 1,
+    },
   };
+
+  // Esconde sub-áreas do quadrante e a lista de presets
+  ['q-presets-list', 'q-posicoes-area', 'q-paint-area'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
 
   // Esconde e limpa o resultado do backtest
   const container = document.getElementById('test-result');
@@ -584,11 +683,11 @@ function resetStrategy() {
   const fim = document.getElementById('schedule-end');
   if (fim) fim.value = '23:59';
 
-  // Atualiza o preview do espelho (vazio) e volta para a fase 1
+  // Atualiza o preview do espelho (vazio) e volta para a escolha de modo
   updateMirrorPreview();
-  goToPhase('pattern');
+  goToPhase('mode');
 
-  showToast('🆕 Nova estratégia', 'Tudo limpo. Monte seu próximo padrão!', 'default');
+  showToast('🆕 Nova estratégia', 'Tudo limpo. Escolha como montar a próxima!', 'default');
 }
 
 // ── SALVAR ESTRATÉGIA (leque de estratégias do usuário) ──
@@ -673,6 +772,172 @@ function confirmSaveStrategy() {
 
   document.getElementById('save-form').style.display = 'none';
   showToast('✅ Estratégia salva!', `"${nome}" foi adicionada ao seu leque (${lista.length} no total).`, 'discovery');
+}
+
+// ════════════════════════════════════════════════
+// MODO QUADRANTE
+// ════════════════════════════════════════════════
+const Q_CORES = ['⬜', '🟩', '🟥'];
+
+function velasPorBloco() {
+  return strategyState.q.bloco === 'M15' ? 15 : 5;
+}
+
+// ── Escolha de modo (pintar vs quadrante) ──
+function setMode(mode) {
+  strategyState.mode = mode;
+  if (mode === 'quadrante') {
+    goToPhase('q-approach');
+  } else {
+    goToPhase('pattern');
+  }
+}
+
+// ── Q1: presets ou custom ──
+function setQApproach(approach, el) {
+  strategyState.q.approach = approach;
+  document.querySelectorAll('#phase-q-approach .anchoring-card').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+
+  if (approach === 'preset') {
+    renderPresets();
+    document.getElementById('q-presets-list').style.display = 'block';
+  } else {
+    document.getElementById('q-presets-list').style.display = 'none';
+    goToPhase('q-bloco');
+  }
+}
+
+function renderPresets() {
+  const container = document.getElementById('q-presets-container');
+  container.innerHTML = '';
+  PRESETS_QUADRANTE.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'anchoring-card';
+    card.onclick = () => loadPreset(p.nome);
+    card.innerHTML = `
+      <div class="anchoring-title">${p.nome}</div>
+      <div class="anchoring-desc">${p.desc}</div>
+      <div style="margin-top:8px; font-size:11px; color:var(--accent-hover);">Quadrante ${p.bloco} · ${p.posicoesLabel}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function loadPreset(nome) {
+  const p = PRESETS_QUADRANTE.find(x => x.nome === nome);
+  if (!p) return;
+  strategyState.q.approach = 'preset';
+  strategyState.q.presetNome = p.nome;
+  strategyState.q.bloco = p.bloco;
+  strategyState.q.analiseModo = 'contar';
+  strategyState.q.posicoes = p.posicoes;
+  strategyState.q.posicoesLabel = p.posicoesLabel;
+  strategyState.q.entradaModo = 'minoria'; // clássico MHI = minoria
+  strategyState.q.entradaPos = p.entradaPos;
+  showToast('⚡ Preset carregado', `${p.nome} · entre na minoria. Agora escolha o par.`, 'default');
+  goToPhase('pair');
+}
+
+// ── Q2: bloco ──
+function setQBloco(bloco, el) {
+  strategyState.q.bloco = bloco;
+  document.querySelectorAll('#phase-q-bloco .anchoring-card').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+// ── Q3: análise ──
+function setQAnaliseModo(modo) {
+  strategyState.q.analiseModo = modo;
+  document.getElementById('q-analise-contar').classList.toggle('selected', modo === 'contar');
+  document.getElementById('q-analise-editar').classList.toggle('selected', modo === 'editar');
+
+  const posArea = document.getElementById('q-posicoes-area');
+  const paintArea = document.getElementById('q-paint-area');
+  if (modo === 'contar') {
+    posArea.style.display = 'block';
+    paintArea.style.display = 'none';
+  } else {
+    posArea.style.display = 'none';
+    paintArea.style.display = 'block';
+    // inicializa o bloco pintado com ⬜
+    strategyState.q.analisePadrao = Array(velasPorBloco()).fill('⬜');
+    renderQBlock();
+  }
+}
+
+function setQPosicoes(label) {
+  const n = velasPorBloco();
+  if (label === 'todas') {
+    strategyState.q.posicoes = null;
+    strategyState.q.posicoesLabel = `todas (${n})`;
+  } else if (label === 'primeiras') {
+    strategyState.q.posicoes = [0, 1, 2];
+    strategyState.q.posicoesLabel = '3 primeiras';
+  } else if (label === 'ultimas') {
+    strategyState.q.posicoes = [n - 3, n - 2, n - 1];
+    strategyState.q.posicoesLabel = '3 últimas';
+  }
+  document.getElementById('q-pos-todas').classList.toggle('selected', label === 'todas');
+  document.getElementById('q-pos-primeiras').classList.toggle('selected', label === 'primeiras');
+  document.getElementById('q-pos-ultimas').classList.toggle('selected', label === 'ultimas');
+}
+
+function renderQBlock() {
+  const container = document.getElementById('q-block-container');
+  container.innerHTML = '';
+  strategyState.q.analisePadrao.forEach((cor, i) => {
+    const candle = document.createElement('div');
+    candle.className = 'candle ' + getColorClass(cor);
+    candle.textContent = cor;
+    candle.onclick = () => toggleQCandle(i);
+    container.appendChild(candle);
+  });
+}
+
+function toggleQCandle(i) {
+  const atual = strategyState.q.analisePadrao[i];
+  const prox = (Q_CORES.indexOf(atual) + 1) % Q_CORES.length;
+  strategyState.q.analisePadrao[i] = Q_CORES[prox];
+  renderQBlock();
+}
+
+// ── Q4: direção (a favor/contra) ──
+function setQEntradaModo(modo) {
+  strategyState.q.entradaModo = modo;
+  document.getElementById('q-dir-maioria').classList.toggle('selected', modo === 'maioria');
+  document.getElementById('q-dir-minoria').classList.toggle('selected', modo === 'minoria');
+}
+
+// ── Q5: vela de entrada ──
+function renderEntradaPos() {
+  const container = document.getElementById('q-entrada-container');
+  container.innerHTML = '';
+  const n = Math.min(velasPorBloco(), 6); // até 6 opções
+  const ordinais = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª'];
+  for (let i = 0; i < n; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'direction-btn';
+    if (strategyState.q.entradaPos === i) btn.classList.add('selected');
+    btn.innerHTML = `<strong>${ordinais[i]} vela</strong><br/><span style="font-size:11px;color:var(--text-secondary);">do próximo quadrante</span>`;
+    btn.onclick = () => setQEntradaPos(i, btn);
+    container.appendChild(btn);
+  }
+}
+
+function setQEntradaPos(pos, btn) {
+  strategyState.q.entradaPos = pos;
+  document.querySelectorAll('#q-entrada-container .direction-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// ── Voltar da fase de par (depende do modo) ──
+function voltarDoPair() {
+  if (strategyState.mode === 'quadrante') {
+    goToPhase(strategyState.q.approach === 'preset' ? 'q-approach' : 'q-entrada');
+  } else {
+    goToPhase('mirror');
+  }
 }
 
 // ── TOAST ──
