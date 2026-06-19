@@ -521,6 +521,9 @@ function renderResult(r) {
     </div>
   `;
 
+  // Guarda o último resultado para poder salvar junto com a estratégia
+  strategyState.lastResult = r;
+
   const container = document.getElementById('test-result');
   container.innerHTML = html;
   container.style.display = 'block';
@@ -557,6 +560,10 @@ function resetStrategy() {
   const btnNova = document.getElementById('btn-nova-estrategia');
   if (btnNova) btnNova.style.display = 'none';
 
+  // Esconde o formulário de salvar (caso esteja aberto)
+  const saveForm = document.getElementById('save-form');
+  if (saveForm) saveForm.style.display = 'none';
+
   // Reseta a fase 1 (esconde o padrão e o input customizado)
   const wrapper = document.getElementById('pattern-container-wrapper');
   if (wrapper) wrapper.style.display = 'none';
@@ -582,6 +589,90 @@ function resetStrategy() {
   goToPhase('pattern');
 
   showToast('🆕 Nova estratégia', 'Tudo limpo. Monte seu próximo padrão!', 'default');
+}
+
+// ── SALVAR ESTRATÉGIA (leque de estratégias do usuário) ──
+const STORAGE_KEY = 'buildcraft_estrategias';
+
+function getEstrategiasSalvas() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function salvarEstrategias(lista) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+}
+
+function showSaveForm() {
+  // Validações: precisa de padrão, direção e ancoragem definidos
+  if (!strategyState.pattern || strategyState.pattern.length === 0) {
+    showToast('⚠️ Nada para salvar', 'Monte um padrão antes de salvar.', 'default');
+    return;
+  }
+  if (!strategyState.direction || !strategyState.anchoring) {
+    showToast('⚠️ Estratégia incompleta', 'Defina a direção e a ancoragem antes de salvar.', 'default');
+    return;
+  }
+
+  const form = document.getElementById('save-form');
+  form.style.display = 'block';
+  const input = document.getElementById('strategy-name');
+  input.value = '';
+  input.focus();
+  form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelSaveStrategy() {
+  document.getElementById('save-form').style.display = 'none';
+}
+
+function confirmSaveStrategy() {
+  const input = document.getElementById('strategy-name');
+  const nome = input.value.trim();
+
+  if (!nome) {
+    showToast('⚠️ Nome obrigatório', 'Digite um nome para a estratégia.', 'default');
+    input.focus();
+    return;
+  }
+
+  const lista = getEstrategiasSalvas();
+
+  // Evita nomes duplicados
+  if (lista.some(e => e.nome.toLowerCase() === nome.toLowerCase())) {
+    showToast('⚠️ Nome já existe', 'Você já tem uma estratégia com esse nome.', 'default');
+    input.focus();
+    return;
+  }
+
+  // Salva apenas a DEFINIÇÃO da estratégia (sem par/horário, que variam).
+  // O último resultado fica como referência do par em que foi testada.
+  const estrategia = {
+    id: 'est_' + Date.now(),
+    nome: nome,
+    pattern: [...strategyState.pattern],
+    direction: strategyState.direction,
+    anchoring: strategyState.anchoring,
+    mirror: strategyState.mirror,
+    mirrorDirection: strategyState.mirrorDirection,
+    criadaEm: new Date().toISOString(),
+    ultimoTeste: strategyState.lastResult
+      ? {
+          pair: strategyState.lastResult.pair,
+          winrate: strategyState.lastResult.winrate,
+          grade: strategyState.lastResult.grade,
+        }
+      : null,
+  };
+
+  lista.push(estrategia);
+  salvarEstrategias(lista);
+
+  document.getElementById('save-form').style.display = 'none';
+  showToast('✅ Estratégia salva!', `"${nome}" foi adicionada ao seu leque (${lista.length} no total).`, 'discovery');
 }
 
 // ── TOAST ──

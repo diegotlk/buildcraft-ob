@@ -540,9 +540,22 @@
           <!-- Resultado do backtest (preenchido por JS após o teste) -->
           <div id="test-result" style="display: none; margin: 24px 0;"></div>
 
+          <!-- Formulário para dar nome e salvar a estratégia -->
+          <div id="save-form" style="display: none; margin: 20px auto; max-width: 480px; padding: 20px; background: rgba(99, 102, 241, 0.06); border: 1px solid var(--accent); border-radius: 10px;">
+            <label style="display: block; margin-bottom: 10px; font-weight: 600; text-align: center;">💾 Dê um nome para esta estratégia</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="strategy-name" maxlength="40" placeholder="Ex: Reversão 3 velas"
+                     style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary); font-size: 15px;"
+                     onkeydown="if(event.key==='Enter') confirmSaveStrategy()">
+              <button class="btn btn-accent" onclick="confirmSaveStrategy()">Salvar</button>
+              <button class="btn btn-outline" onclick="cancelSaveStrategy()">Cancelar</button>
+            </div>
+          </div>
+
           <div class="pattern-controls">
             <button class="btn btn-sm btn-outline" onclick="goToPhase('schedule')">⬅ Voltar</button>
             <button class="btn btn-lg btn-accent" id="btn-test-strategy" onclick="testStrategy()">⚡ Testar Estratégia</button>
+            <button class="btn btn-lg btn-primary" id="btn-salvar-estrategia" onclick="showSaveForm()">💾 Salvar Estratégia</button>
             <button class="btn btn-lg btn-outline" id="btn-nova-estrategia" onclick="resetStrategy()" style="display: none;">🔄 Criar Nova Estratégia</button>
           </div>
         </div>
