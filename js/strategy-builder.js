@@ -32,17 +32,15 @@ let strategyState = {
 };
 
 // Presets clássicos de quadrante — Família 1 (Maioria/Minoria).
-// entradaModo: 'minoria' (contra a maioria) ou 'maioria' (a favor).
+// A direção (maioria/minoria) é escolhida pelo usuário ao clicar no preset.
 const PRESETS_QUADRANTE = [
-  { nome: 'MHI 1', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 0, entradaModo: 'minoria', desc: '3 últimas velas; entra na 1ª do próximo, na minoria.' },
-  { nome: 'MHI 2', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 1, entradaModo: 'minoria', desc: '3 últimas velas; entra na 2ª do próximo, na minoria.' },
-  { nome: 'MHI 3', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 2, entradaModo: 'minoria', desc: '3 últimas velas; entra na 3ª do próximo, na minoria.' },
-  { nome: 'MHI Maioria', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 0, entradaModo: 'maioria', desc: '3 últimas velas; entra na 1ª do próximo, na maioria.' },
-  { nome: 'Milhão Minoria', bloco: 'M5', posicoes: null, posicoesLabel: 'todas (5)', entradaPos: 0, entradaModo: 'minoria', desc: '5 velas do bloco; entra na 1ª do próximo, na minoria.' },
-  { nome: 'Milhão Maioria', bloco: 'M5', posicoes: null, posicoesLabel: 'todas (5)', entradaPos: 0, entradaModo: 'maioria', desc: '5 velas do bloco; entra na 1ª do próximo, na maioria.' },
-  { nome: 'Vituxo 2.0', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 2, entradaModo: 'maioria', desc: '3 primeiras velas; entra na 3ª do próximo, na maioria.' },
-  { nome: 'D21', bloco: 'M5', posicoes: [0, 2, 3], posicoesLabel: 'velas 1, 3 e 4', entradaPos: 0, entradaModo: 'minoria', desc: 'Velas 1, 3 e 4; entra na 1ª do próximo, na minoria.' },
-  { nome: 'Padrão 3x1', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 0, entradaModo: 'minoria', desc: '3 primeiras velas; entra na 1ª do próximo, na minoria.' },
+  { nome: 'MHI 1', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 0, desc: '3 últimas velas; entra na 1ª do próximo.' },
+  { nome: 'MHI 2', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 1, desc: '3 últimas velas; entra na 2ª do próximo.' },
+  { nome: 'MHI 3', bloco: 'M5', posicoes: [2, 3, 4], posicoesLabel: '3 últimas', entradaPos: 2, desc: '3 últimas velas; entra na 3ª do próximo.' },
+  { nome: 'Milhão', bloco: 'M5', posicoes: null, posicoesLabel: 'todas (5)', entradaPos: 0, desc: '5 velas do bloco; entra na 1ª do próximo.' },
+  { nome: 'Vituxo 2.0', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 2, desc: '3 primeiras velas; entra na 3ª do próximo.' },
+  { nome: 'D21', bloco: 'M5', posicoes: [0, 2, 3], posicoesLabel: 'velas 1, 3 e 4', entradaPos: 0, desc: 'Velas 1, 3 e 4; entra na 1ª do próximo.' },
+  { nome: 'Padrão 3x1', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 0, desc: '3 primeiras velas; entra na 1ª do próximo.' },
 ];
 
 // Presets de Repetição de posição (Família 2) e Reversão/Flip (Família 3).
@@ -391,6 +389,12 @@ function goToPhase(phase) {
   // Renderizar botões de vela de entrada ao chegar na fase Q5
   if (phase === 'q-entrada') {
     renderEntradaPos();
+  }
+
+  // Destacar a direção atual ao chegar na fase Q4
+  if (phase === 'q-direction') {
+    document.getElementById('q-dir-maioria').classList.toggle('selected', strategyState.q.entradaModo === 'maioria');
+    document.getElementById('q-dir-minoria').classList.toggle('selected', strategyState.q.entradaModo === 'minoria');
   }
 
   // Esconder todas as fases
@@ -1002,10 +1006,12 @@ function loadPreset(nome) {
     strategyState.q.analiseModo = 'contar';
     strategyState.q.posicoes = pQ.posicoes;
     strategyState.q.posicoesLabel = pQ.posicoesLabel;
-    strategyState.q.entradaModo = pQ.entradaModo || 'minoria';
+    strategyState.q.entradaModo = 'minoria'; // padrão; usuário escolhe na próxima tela
     strategyState.q.entradaPos = pQ.entradaPos;
-    const dirTxt = strategyState.q.entradaModo === 'maioria' ? 'maioria' : 'minoria';
-    showToast('⚡ Preset carregado', `${pQ.nome} · entra na ${dirTxt}. Agora escolha o par.`, 'default');
+    // Família 1 tem duas interpretações: deixa o usuário escolher maioria/minoria
+    showToast('⚡ Preset carregado', `${pQ.nome} · agora escolha maioria ou minoria.`, 'default');
+    goToPhase('q-direction');
+    return;
   } else if (pR) {
     strategyState.q.tipo = 'referencia';
     strategyState.q.ref = {
@@ -1094,6 +1100,16 @@ function setQEntradaModo(modo) {
   document.getElementById('q-dir-minoria').classList.toggle('selected', modo === 'minoria');
 }
 
+// Navegação da fase de direção (difere entre preset e custom)
+function voltarDaDirecao() {
+  goToPhase(strategyState.q.approach === 'preset' ? 'q-approach' : 'q-analise');
+}
+function proximoDaDirecao() {
+  // No preset a posição de entrada já está definida -> vai direto para o par.
+  // No custom o usuário ainda escolhe em qual vela entrar.
+  goToPhase(strategyState.q.approach === 'preset' ? 'pair' : 'q-entrada');
+}
+
 // ── Q5: vela de entrada ──
 function renderEntradaPos() {
   const container = document.getElementById('q-entrada-container');
@@ -1116,12 +1132,19 @@ function setQEntradaPos(pos, btn) {
   btn.classList.add('selected');
 }
 
-// ── Voltar da fase de par (depende do modo) ──
+// ── Voltar da fase de par (depende do modo/tipo) ──
 function voltarDoPair() {
-  if (strategyState.mode === 'quadrante') {
-    goToPhase(strategyState.q.approach === 'preset' ? 'q-approach' : 'q-entrada');
-  } else {
+  if (strategyState.mode !== 'quadrante') {
     goToPhase('mirror');
+    return;
+  }
+  const q = strategyState.q;
+  if (q.approach === 'custom') {
+    goToPhase('q-entrada');
+  } else if (q.tipo === 'quadrante') {
+    goToPhase('q-direction'); // preset Família 1: deixa trocar maioria/minoria
+  } else {
+    goToPhase('q-approach');  // presets de referência/confluência
   }
 }
 
