@@ -66,6 +66,26 @@ const PRESETS_REFERENCIA = [
   { nome: 'MSF', familia: 'Flip', blocoVelas: 5, refPos: 0, entryPos: 4, relacao: 'flip', refBloco: 'anterior', condPosicoes: null, desc: '1ª vela do ciclo anterior; entra na 5ª do atual na cor oposta.' },
 ];
 
+// Specs reutilizáveis (formato que a API entende em _mapa_sinais)
+const SPEC = {
+  mhi1: { tipo: 'quadrante', bloco: 'M5', analise_modo: 'maioria', posicoes_analise: [2, 3, 4], entrada_modo: 'minoria', entrada_pos: 0 },
+  mhi2: { tipo: 'quadrante', bloco: 'M5', analise_modo: 'maioria', posicoes_analise: [2, 3, 4], entrada_modo: 'minoria', entrada_pos: 1 },
+  mhi3: { tipo: 'quadrante', bloco: 'M5', analise_modo: 'maioria', posicoes_analise: [2, 3, 4], entrada_modo: 'minoria', entrada_pos: 2 },
+  p3x1: { tipo: 'quadrante', bloco: 'M5', analise_modo: 'maioria', posicoes_analise: [0, 1, 2], entrada_modo: 'minoria', entrada_pos: 0 },
+  impar: { tipo: 'referencia', bloco_velas: 5, ref_pos: 2, entry_pos: 3, relacao: 'repete', ref_bloco: 'atual', cond_posicoes: null },
+  r7: { tipo: 'referencia', bloco_velas: 10, ref_pos: 7, entry_pos: 6, relacao: 'repete', ref_bloco: 'anterior', cond_posicoes: null },
+  sevenFlip: { tipo: 'referencia', bloco_velas: 8, ref_pos: 6, entry_pos: 7, relacao: 'flip', ref_bloco: 'atual', cond_posicoes: null },
+  torres: { tipo: 'referencia', bloco_velas: 5, ref_pos: 0, entry_pos: 4, relacao: 'repete', ref_bloco: 'atual', cond_posicoes: null },
+};
+
+// Presets de Confluência (Família 4) — A é a principal, B confirma a direção.
+const PRESETS_CONFLUENCIA = [
+  { nome: 'MHI + Ímpar', specA: SPEC.mhi1, specB: SPEC.impar, desc: 'MHI 1 confirmada pelo Padrão Ímpar.' },
+  { nome: 'MHI2 + R7', specA: SPEC.mhi2, specB: SPEC.r7, desc: 'MHI 2 confirmada pelo R7.' },
+  { nome: 'MHI3 + Seven Flip', specA: SPEC.mhi3, specB: SPEC.sevenFlip, desc: 'MHI 3 confirmada pelo Seven Flip.' },
+  { nome: 'Torres Gêmeas + 3x1', specA: SPEC.torres, specB: SPEC.p3x1, desc: 'Torres Gêmeas confirmada pelo 3x1.' },
+];
+
 // ── Cores do padrão ──
 const COLORS = {
   white: '⬜',
@@ -461,6 +481,21 @@ function updateReviewContent() {
 function updateReviewQuadrante() {
   const q = strategyState.q;
 
+  // Confluência (Família 4)
+  if (q.tipo === 'confluencia' && q.conf) {
+    document.getElementById('review-content').innerHTML = `
+      <div style="margin-bottom: 16px;">
+        <p style="margin-bottom: 8px;"><strong>🔗 Confluência — ${q.conf.nome}</strong></p>
+        <p style="color: var(--text-secondary); font-size: 14px;">Só entra quando as duas estratégias apontam a mesma direção.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+        <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
+        <div><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+      </div>
+    `;
+    return;
+  }
+
   // Estratégia de referência/flip (Famílias 2 e 3)
   if (q.tipo === 'referencia' && q.ref) {
     const ref = q.ref;
@@ -541,7 +576,18 @@ function testStrategy() {
   const emojiParaNum = (c) => (c === '🟩' ? 1 : c === '🟥' ? -1 : null);
   let payload;
 
-  if (strategyState.mode === 'quadrante' && strategyState.q.tipo === 'referencia') {
+  if (strategyState.mode === 'quadrante' && strategyState.q.tipo === 'confluencia') {
+    const conf = strategyState.q.conf;
+    payload = {
+      mode: 'confluencia',
+      nome: conf.nome,
+      spec_a: conf.specA,
+      spec_b: conf.specB,
+      pair: strategyState.pair,
+      schedule_start: strategyState.scheduleStart,
+      schedule_end: strategyState.scheduleEnd,
+    };
+  } else if (strategyState.mode === 'quadrante' && strategyState.q.tipo === 'referencia') {
     const ref = strategyState.q.ref;
     payload = {
       mode: 'referencia',
@@ -918,14 +964,36 @@ function renderPresets() {
 
   addGrupo('Repetição de posição', refRepete, renderRef);
   addGrupo('Reversão / Flip', refFlip, renderRef);
+
+  addGrupo('Confluência (duas concordam)', PRESETS_CONFLUENCIA, p => {
+    const card = document.createElement('div');
+    card.className = 'anchoring-card';
+    card.onclick = () => loadPreset(p.nome);
+    card.innerHTML = `
+      <div class="anchoring-title">${p.nome}</div>
+      <div class="anchoring-desc">${p.desc}</div>
+      <div style="margin-top:8px; font-size:11px; color:var(--accent-hover);">Só entra quando as duas concordam</div>
+    `;
+    container.appendChild(card);
+  });
 }
 
 function loadPreset(nome) {
-  // Procura nas duas listas
+  // Procura nas três listas
   const pQ = PRESETS_QUADRANTE.find(x => x.nome === nome);
   const pR = PRESETS_REFERENCIA.find(x => x.nome === nome);
+  const pC = PRESETS_CONFLUENCIA.find(x => x.nome === nome);
   strategyState.q.approach = 'preset';
   strategyState.q.presetNome = nome;
+
+  if (pC) {
+    strategyState.q.tipo = 'confluencia';
+    strategyState.q.ref = null;
+    strategyState.q.conf = { nome: pC.nome, specA: pC.specA, specB: pC.specB };
+    showToast('⚡ Confluência carregada', `${pC.nome}. Agora escolha o par.`, 'default');
+    goToPhase('pair');
+    return;
+  }
 
   if (pQ) {
     strategyState.q.tipo = 'quadrante';
