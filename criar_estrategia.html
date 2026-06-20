@@ -331,16 +331,95 @@
                 <span style="opacity:.5;">🟩🟥🟩🟩🟥</span> ➜ 🟥
               </div>
             </div>
-            <div class="anchoring-card" onclick="setMode('indicador')">
-              <div class="anchoring-title">📈 Usar indicadores</div>
+            <div class="anchoring-card" onclick="goToPhase('tec-escolher')">
+              <div class="anchoring-title">📈 Indicadores e Figuras</div>
               <div class="anchoring-desc">
-                Estratégia baseada em indicadores técnicos: Média Móvel, RSI, MACD,
-                Bandas de Bollinger. Tudo personalizável.
+                Indicadores técnicos (Média, RSI, MACD, Bollinger) ou figuras de
+                candlestick (engolfo, martelo, três corvos…).
               </div>
               <div style="margin-top: 12px; display: flex; gap: 8px; justify-content: center; font-size: 22px;">
-                📈 📉 〽️
+                📈 〽️ 🕯️
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- ── T0: INDICADOR ou FIGURA ── -->
+        <div class="phase-section" id="phase-tec-escolher">
+          <div class="step-counter">Indicador ou figura?</div>
+          <h2 class="card-box-title">📈 O que você quer usar?</h2>
+
+          <div class="anchoring-grid" style="margin-top: 24px;">
+            <div class="anchoring-card" onclick="setMode('indicador')">
+              <div class="anchoring-title">📈 Indicador técnico</div>
+              <div class="anchoring-desc">Cálculo sobre o preço: Média Móvel, RSI, MACD, Bollinger — ou monte o seu.</div>
+            </div>
+            <div class="anchoring-card" onclick="setMode('figura')">
+              <div class="anchoring-title">🕯️ Figura gráfica</div>
+              <div class="anchoring-desc">Padrão de velas: engolfo, martelo, estrela cadente, três soldados, três corvos.</div>
+            </div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('mode')">⬅ Trocar modo</button>
+          </div>
+        </div>
+
+        <!-- ── F1: ESCOLHER FIGURA ── -->
+        <div class="phase-section" id="phase-fig-escolher">
+          <div class="step-counter">Figuras · Passo 1</div>
+          <h2 class="card-box-title">🕯️ Qual figura?</h2>
+
+          <div class="anchoring-grid" style="margin-top: 24px;">
+            <div class="anchoring-card" onclick="setFigura('engolfo_alta', this)">
+              <div class="anchoring-title">🟩 Engolfo de Alta</div>
+              <div class="anchoring-desc">Vela verde engole a vermelha anterior. → CALL</div>
+            </div>
+            <div class="anchoring-card" onclick="setFigura('engolfo_baixa', this)">
+              <div class="anchoring-title">🟥 Engolfo de Baixa</div>
+              <div class="anchoring-desc">Vela vermelha engole a verde anterior. → PUT</div>
+            </div>
+            <div class="anchoring-card" onclick="setFigura('martelo', this)">
+              <div class="anchoring-title">🔨 Martelo</div>
+              <div class="anchoring-desc">Pavio inferior longo (rejeição de baixa). → CALL</div>
+            </div>
+            <div class="anchoring-card" onclick="setFigura('estrela_cadente', this)">
+              <div class="anchoring-title">🌠 Estrela Cadente</div>
+              <div class="anchoring-desc">Pavio superior longo (rejeição de alta). → PUT</div>
+            </div>
+            <div class="anchoring-card" onclick="setFigura('tres_soldados', this)">
+              <div class="anchoring-title">🟩🟩🟩 Três Soldados</div>
+              <div class="anchoring-desc">3 velas verdes subindo. → CALL</div>
+            </div>
+            <div class="anchoring-card" onclick="setFigura('tres_corvos', this)">
+              <div class="anchoring-title">🟥🟥🟥 Três Corvos</div>
+              <div class="anchoring-desc">3 velas vermelhas caindo. → PUT</div>
+            </div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('tec-escolher')">⬅ Voltar</button>
+          </div>
+        </div>
+
+        <!-- ── F2: TIMEFRAME DA FIGURA ── -->
+        <div class="phase-section" id="phase-fig-config">
+          <div class="step-counter">Figuras · Passo 2</div>
+          <h2 class="card-box-title" id="fig-config-titulo">🕯️ Figura</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 8px;" id="fig-config-desc"></p>
+
+          <div style="max-width: 460px; margin: 24px auto 8px;">
+            <label class="form-label" style="display:block; margin-bottom:8px;">⏱️ Timeframe</label>
+            <div class="direction-grid" id="fig-tf-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+              <button class="direction-btn" data-tf="M1" onclick="setFigTimeframe('M1', this)">M1</button>
+              <button class="direction-btn selected" data-tf="M5" onclick="setFigTimeframe('M5', this)">M5</button>
+              <button class="direction-btn" data-tf="M15" onclick="setFigTimeframe('M15', this)">M15</button>
+            </div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('fig-escolher')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="proximoFig()">Próximo ➜</button>
           </div>
         </div>
 
@@ -375,7 +454,7 @@
           </div>
 
           <div class="pattern-controls">
-            <button class="btn btn-sm btn-outline" onclick="goToPhase('mode')">⬅ Trocar modo</button>
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('tec-escolher')">⬅ Voltar</button>
           </div>
         </div>
 

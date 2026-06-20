@@ -31,10 +31,22 @@ let strategyState = {
   },
   // ── Campos do modo indicador ──
   ind: {
-    tipo: null,        // 'media' | 'rsi' | 'macd' | 'bollinger'
+    tipo: null,        // 'media' | 'rsi' | 'macd' | 'bollinger' | 'montador'
     params: {},        // parâmetros do indicador escolhido
     timeframe: 'M5',
   },
+  // ── Campos do modo figura ──
+  fig: { tipo: null, timeframe: 'M5' },
+};
+
+// Figuras gráficas: rótulo, direção e descrição
+const FIGURAS = {
+  engolfo_alta: { nome: 'Engolfo de Alta', dir: 'CALL', desc: 'Vela verde engole a vermelha anterior.' },
+  engolfo_baixa: { nome: 'Engolfo de Baixa', dir: 'PUT', desc: 'Vela vermelha engole a verde anterior.' },
+  martelo: { nome: 'Martelo', dir: 'CALL', desc: 'Pavio inferior longo — rejeição de baixa.' },
+  estrela_cadente: { nome: 'Estrela Cadente', dir: 'PUT', desc: 'Pavio superior longo — rejeição de alta.' },
+  tres_soldados: { nome: 'Três Soldados Brancos', dir: 'CALL', desc: '3 velas verdes consecutivas subindo.' },
+  tres_corvos: { nome: 'Três Corvos', dir: 'PUT', desc: '3 velas vermelhas consecutivas caindo.' },
 };
 
 // Indicadores: rótulo, defaults clássicos e campos editáveis
@@ -462,6 +474,10 @@ function updateReviewContent() {
     updateReviewIndicador();
     return;
   }
+  if (strategyState.mode === 'figura') {
+    updateReviewFigura();
+    return;
+  }
 
   const directionText = {
     call: '🟢 CALL (Vela Verde)',
@@ -609,6 +625,22 @@ function updateReviewQuadrante() {
   document.getElementById('review-content').innerHTML = content;
 }
 
+// ── REVISÃO (modo figura) ──
+function updateReviewFigura() {
+  const f = FIGURAS[strategyState.fig.tipo];
+  document.getElementById('review-content').innerHTML = `
+    <div style="margin-bottom: 16px;">
+      <p style="margin-bottom: 8px;"><strong>🕯️ ${f.nome}</strong></p>
+      <p style="color: var(--text-secondary); font-size: 14px;">${f.desc} → entrar <strong>${f.dir}</strong></p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
+      <div><p><strong>Timeframe:</strong></p><p>${strategyState.fig.timeframe}</p></div>
+      <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
+    </div>
+    <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+  `;
+}
+
 // ── REVISÃO (modo indicador) ──
 function updateReviewIndicador() {
   const ind = strategyState.ind;
@@ -682,7 +714,16 @@ function testStrategy() {
   const emojiParaNum = (c) => (c === '🟩' ? 1 : c === '🟥' ? -1 : null);
   let payload;
 
-  if (strategyState.mode === 'indicador' && strategyState.ind.tipo === 'montador') {
+  if (strategyState.mode === 'figura') {
+    payload = {
+      mode: 'figura',
+      figura: strategyState.fig.tipo,
+      timeframe: strategyState.fig.timeframe,
+      pair: strategyState.pair,
+      schedule_start: strategyState.scheduleStart,
+      schedule_end: strategyState.scheduleEnd,
+    };
+  } else if (strategyState.mode === 'indicador' && strategyState.ind.tipo === 'montador') {
     const m = strategyState.mont;
     payload = {
       mode: 'montador',
@@ -887,6 +928,7 @@ function resetStrategy() {
       entradaModo: 'minoria', entradaPos: 0, entradaCor: 1,
     },
     ind: { tipo: null, params: {}, timeframe: 'M5' },
+    fig: { tipo: null, timeframe: 'M5' },
   };
 
   // Esconde sub-áreas do quadrante e a lista de presets
@@ -1034,10 +1076,36 @@ function setMode(mode) {
   if (mode === 'quadrante') {
     goToPhase('q-approach');
   } else if (mode === 'indicador') {
+    strategyState.ind.tipo = null;
     goToPhase('ind-escolher');
+  } else if (mode === 'figura') {
+    goToPhase('fig-escolher');
   } else {
     goToPhase('pattern');
   }
+}
+
+// ════════════════════════════════════════════════
+// MODO FIGURA GRÁFICA
+// ════════════════════════════════════════════════
+function setFigura(tipo, el) {
+  strategyState.fig.tipo = tipo;
+  document.querySelectorAll('#phase-fig-escolher .anchoring-card').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  const f = FIGURAS[tipo];
+  document.getElementById('fig-config-titulo').textContent = `🕯️ ${f.nome}`;
+  document.getElementById('fig-config-desc').textContent = `${f.desc} Direção fixa: ${f.dir}.`;
+  goToPhase('fig-config');
+}
+
+function setFigTimeframe(tf, el) {
+  strategyState.fig.timeframe = tf;
+  document.querySelectorAll('#fig-tf-grid .direction-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+function proximoFig() {
+  goToPhase('pair');
 }
 
 // ════════════════════════════════════════════════
@@ -1433,6 +1501,10 @@ function setQEntradaPos(pos, btn) {
 
 // ── Voltar da fase de par (depende do modo/tipo) ──
 function voltarDoPair() {
+  if (strategyState.mode === 'figura') {
+    goToPhase('fig-config');
+    return;
+  }
   if (strategyState.mode === 'indicador') {
     goToPhase(strategyState.ind.tipo === 'montador' ? 'mont-builder' : 'ind-config');
     return;
