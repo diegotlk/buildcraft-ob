@@ -3,7 +3,7 @@
    ============================================================ */
 
 let strategyState = {
-  mode: 'pintar', // 'pintar' (colorir velas) ou 'quadrante'
+  mode: 'pintar', // 'pintar', 'quadrante' ou 'indicador'
   patternLength: null,
   pattern: [],
   direction: null,
@@ -28,6 +28,50 @@ let strategyState = {
     entradaModo: 'minoria', // 'maioria' (a favor) ou 'minoria' (contra)
     entradaPos: 0,          // 1ª=0, 2ª=1, 3ª=2... do próximo bloco
     entradaCor: 1,          // se direção por cor fixa (1=verde, -1=vermelha)
+  },
+  // ── Campos do modo indicador ──
+  ind: {
+    tipo: null,        // 'media' | 'rsi' | 'macd' | 'bollinger'
+    params: {},        // parâmetros do indicador escolhido
+    timeframe: 'M5',
+  },
+};
+
+// Indicadores: rótulo, defaults clássicos e campos editáveis
+const INDICADORES = {
+  media: {
+    nome: 'Média Móvel',
+    defaults: { tipo: 'EMA', periodo: 20 },
+    campos: [
+      { key: 'tipo', label: 'Tipo', tipo: 'select', opcoes: ['EMA', 'SMA'] },
+      { key: 'periodo', label: 'Período', tipo: 'number', min: 2, max: 400 },
+    ],
+  },
+  rsi: {
+    nome: 'RSI',
+    defaults: { periodo: 14, sobrevenda: 30, sobrecompra: 70 },
+    campos: [
+      { key: 'periodo', label: 'Período', tipo: 'number', min: 2, max: 100 },
+      { key: 'sobrevenda', label: 'Sobrevenda (CALL abaixo de)', tipo: 'number', min: 1, max: 50 },
+      { key: 'sobrecompra', label: 'Sobrecompra (PUT acima de)', tipo: 'number', min: 50, max: 99 },
+    ],
+  },
+  macd: {
+    nome: 'MACD',
+    defaults: { rapida: 12, lenta: 26, sinal: 9 },
+    campos: [
+      { key: 'rapida', label: 'Média rápida', tipo: 'number', min: 2, max: 100 },
+      { key: 'lenta', label: 'Média lenta', tipo: 'number', min: 3, max: 200 },
+      { key: 'sinal', label: 'Linha de sinal', tipo: 'number', min: 2, max: 100 },
+    ],
+  },
+  bollinger: {
+    nome: 'Bandas de Bollinger',
+    defaults: { periodo: 20, desvios: 2 },
+    campos: [
+      { key: 'periodo', label: 'Período', tipo: 'number', min: 2, max: 200 },
+      { key: 'desvios', label: 'Desvios padrão', tipo: 'number', min: 0.5, max: 4, step: 0.1 },
+    ],
   },
 };
 
@@ -414,6 +458,10 @@ function updateReviewContent() {
     updateReviewQuadrante();
     return;
   }
+  if (strategyState.mode === 'indicador') {
+    updateReviewIndicador();
+    return;
+  }
 
   const directionText = {
     call: '🟢 CALL (Vela Verde)',
@@ -561,6 +609,27 @@ function updateReviewQuadrante() {
   document.getElementById('review-content').innerHTML = content;
 }
 
+// ── REVISÃO (modo indicador) ──
+function updateReviewIndicador() {
+  const ind = strategyState.ind;
+  const def = INDICADORES[ind.tipo];
+  const paramsTxt = def.campos
+    .map(c => `${c.label.replace(/\s*\(.*\)/, '')}: <strong>${ind.params[c.key]}</strong>`)
+    .join(' · ');
+
+  document.getElementById('review-content').innerHTML = `
+    <div style="margin-bottom: 16px;">
+      <p style="margin-bottom: 8px;"><strong>📈 ${def.nome}</strong></p>
+      <p style="color: var(--text-secondary); font-size: 14px;">${paramsTxt}</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
+      <div><p><strong>Timeframe:</strong></p><p>${ind.timeframe}</p></div>
+      <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
+    </div>
+    <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+  `;
+}
+
 // ── TESTAR CONTRA API ──
 const API_URL = 'http://127.0.0.1:5000';
 
@@ -581,7 +650,18 @@ function testStrategy() {
   const emojiParaNum = (c) => (c === '🟩' ? 1 : c === '🟥' ? -1 : null);
   let payload;
 
-  if (strategyState.mode === 'quadrante' && strategyState.q.tipo === 'confluencia') {
+  if (strategyState.mode === 'indicador') {
+    const ind = strategyState.ind;
+    payload = {
+      mode: 'indicador',
+      indicador: ind.tipo,
+      params: ind.params,
+      timeframe: ind.timeframe,
+      pair: strategyState.pair,
+      schedule_start: strategyState.scheduleStart,
+      schedule_end: strategyState.scheduleEnd,
+    };
+  } else if (strategyState.mode === 'quadrante' && strategyState.q.tipo === 'confluencia') {
     const conf = strategyState.q.conf;
     payload = {
       mode: 'confluencia',
@@ -762,6 +842,7 @@ function resetStrategy() {
       analiseModo: 'contar', analisePadrao: [], posicoes: null, posicoesLabel: 'todas',
       entradaModo: 'minoria', entradaPos: 0, entradaCor: 1,
     },
+    ind: { tipo: null, params: {}, timeframe: 'M5' },
   };
 
   // Esconde sub-áreas do quadrante e a lista de presets
@@ -903,14 +984,68 @@ function velasPorBloco() {
   return strategyState.q.bloco === 'M15' ? 15 : 5;
 }
 
-// ── Escolha de modo (pintar vs quadrante) ──
+// ── Escolha de modo (pintar / quadrante / indicador) ──
 function setMode(mode) {
   strategyState.mode = mode;
   if (mode === 'quadrante') {
     goToPhase('q-approach');
+  } else if (mode === 'indicador') {
+    goToPhase('ind-escolher');
   } else {
     goToPhase('pattern');
   }
+}
+
+// ════════════════════════════════════════════════
+// MODO INDICADOR
+// ════════════════════════════════════════════════
+function setIndicador(tipo, el) {
+  strategyState.ind.tipo = tipo;
+  // carrega os defaults clássicos (cópia)
+  strategyState.ind.params = { ...INDICADORES[tipo].defaults };
+  document.querySelectorAll('#phase-ind-escolher .anchoring-card').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  renderIndConfig();
+  goToPhase('ind-config');
+}
+
+function renderIndConfig() {
+  const def = INDICADORES[strategyState.ind.tipo];
+  document.getElementById('ind-config-titulo').textContent = `⚙️ Configurar ${def.nome}`;
+  const cont = document.getElementById('ind-config-campos');
+  cont.innerHTML = '';
+  def.campos.forEach(campo => {
+    const valor = strategyState.ind.params[campo.key];
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'margin-bottom:16px;';
+    let input;
+    if (campo.tipo === 'select') {
+      input = `<select id="ind-campo-${campo.key}" class="form-select" onchange="atualizarIndParam('${campo.key}', this.value)">` +
+        campo.opcoes.map(o => `<option value="${o}" ${o === valor ? 'selected' : ''}>${o}</option>`).join('') +
+        '</select>';
+    } else {
+      const step = campo.step ? ` step="${campo.step}"` : '';
+      input = `<input type="number" id="ind-campo-${campo.key}" class="form-input" value="${valor}" min="${campo.min}" max="${campo.max}"${step} oninput="atualizarIndParam('${campo.key}', this.value)">`;
+    }
+    wrap.innerHTML = `<label class="form-label" style="display:block; margin-bottom:6px;">${campo.label}</label>${input}`;
+    cont.appendChild(wrap);
+  });
+}
+
+function atualizarIndParam(key, valor) {
+  // mantém número como número (exceto o 'tipo' da média, que é texto)
+  const num = parseFloat(valor);
+  strategyState.ind.params[key] = (key === 'tipo' || isNaN(num)) ? valor : num;
+}
+
+function setIndTimeframe(tf, el) {
+  strategyState.ind.timeframe = tf;
+  document.querySelectorAll('#ind-tf-grid .direction-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+function proximoIndConfig() {
+  goToPhase('pair');
 }
 
 // ── Q1: presets ou custom ──
@@ -1141,6 +1276,10 @@ function setQEntradaPos(pos, btn) {
 
 // ── Voltar da fase de par (depende do modo/tipo) ──
 function voltarDoPair() {
+  if (strategyState.mode === 'indicador') {
+    goToPhase('ind-config');
+    return;
+  }
   if (strategyState.mode !== 'quadrante') {
     goToPhase('mirror');
     return;
