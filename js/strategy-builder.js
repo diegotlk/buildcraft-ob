@@ -612,6 +612,38 @@ function updateReviewQuadrante() {
 // ── REVISÃO (modo indicador) ──
 function updateReviewIndicador() {
   const ind = strategyState.ind;
+
+  // Montador de condições
+  if (ind.tipo === 'montador') {
+    const m = strategyState.mont;
+    const nomeBloco = (o) => {
+      if (o.tipo === 'numero') return o.valor;
+      if (o.tipo === 'preco') return 'Preço';
+      if (o.tipo === 'rsi') return `RSI(${o.periodo})`;
+      if (o.tipo === 'media') return `${o.matipo}(${o.periodo})`;
+      if (o.tipo === 'macd') return 'MACD';
+      if (o.tipo === 'macd_sinal') return 'MACD sinal';
+      return o.tipo;
+    };
+    const opTxt = { '<': '<', '>': '>', 'cruza_cima': 'cruza ↑', 'cruza_baixo': 'cruza ↓' };
+    const linhas = m.condicoes
+      .map(c => `${nomeBloco(c.esq)} ${opTxt[c.op]} ${nomeBloco(c.dir)}`)
+      .join(`<br/><span style="color:var(--accent-hover);font-weight:700;">${m.combinador}</span><br/>`);
+    document.getElementById('review-content').innerHTML = `
+      <div style="margin-bottom: 16px;">
+        <p style="margin-bottom: 8px;"><strong>🛠️ Meu indicador</strong></p>
+        <div style="font-size: 15px; line-height: 1.8;">${linhas}</div>
+        <p style="margin-top: 10px;">→ entrar <strong>${m.direcao}</strong></p>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
+        <div><p><strong>Timeframe:</strong></p><p>${m.timeframe}</p></div>
+        <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
+      </div>
+      <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+    `;
+    return;
+  }
+
   const def = INDICADORES[ind.tipo];
   const paramsTxt = def.campos
     .map(c => `${c.label.replace(/\s*\(.*\)/, '')}: <strong>${ind.params[c.key]}</strong>`)
@@ -650,7 +682,19 @@ function testStrategy() {
   const emojiParaNum = (c) => (c === '🟩' ? 1 : c === '🟥' ? -1 : null);
   let payload;
 
-  if (strategyState.mode === 'indicador') {
+  if (strategyState.mode === 'indicador' && strategyState.ind.tipo === 'montador') {
+    const m = strategyState.mont;
+    payload = {
+      mode: 'montador',
+      condicoes: m.condicoes,
+      combinador: m.combinador,
+      direcao: m.direcao,
+      timeframe: m.timeframe,
+      pair: strategyState.pair,
+      schedule_start: strategyState.scheduleStart,
+      schedule_end: strategyState.scheduleEnd,
+    };
+  } else if (strategyState.mode === 'indicador') {
     const ind = strategyState.ind;
     payload = {
       mode: 'indicador',
@@ -1048,6 +1092,119 @@ function proximoIndConfig() {
   goToPhase('pair');
 }
 
+// ════════════════════════════════════════════════
+// MONTADOR DE CONDIÇÕES ("crie seu indicador")
+// ════════════════════════════════════════════════
+const BLOCOS_ESQ = [['rsi', 'RSI'], ['media', 'Média'], ['macd', 'MACD'], ['macd_sinal', 'MACD sinal'], ['preco', 'Preço']];
+const BLOCOS_DIR = [['numero', 'Número'], ['preco', 'Preço'], ['media', 'Média'], ['rsi', 'RSI'], ['macd', 'MACD'], ['macd_sinal', 'MACD sinal']];
+const OPERADORES = [['<', '< menor que'], ['>', '> maior que'], ['cruza_cima', 'cruza ↑ pra cima'], ['cruza_baixo', 'cruza ↓ pra baixo']];
+
+function condicaoPadrao() {
+  return {
+    esq: { tipo: 'rsi', periodo: 14, matipo: 'EMA' },
+    op: '<',
+    dir: { tipo: 'numero', valor: 30, periodo: 20, matipo: 'EMA' },
+  };
+}
+
+function abrirMontador() {
+  strategyState.mode = 'indicador';
+  strategyState.ind.tipo = 'montador';
+  strategyState.mont = { condicoes: [condicaoPadrao()], combinador: 'E', direcao: 'CALL', timeframe: 'M5' };
+  goToPhase('mont-builder');
+  renderMontador();
+}
+
+function addCondicao() {
+  if (strategyState.mont.condicoes.length >= 3) {
+    showToast('⚠️ Limite', 'Máximo de 3 condições.', 'default');
+    return;
+  }
+  strategyState.mont.condicoes.push(condicaoPadrao());
+  renderMontador();
+}
+
+function removeCondicao(i) {
+  strategyState.mont.condicoes.splice(i, 1);
+  renderMontador();
+}
+
+function _ladoHTML(cond, lado, i) {
+  const o = cond[lado];
+  const opts = lado === 'esq' ? BLOCOS_ESQ : BLOCOS_DIR;
+  let html = `<select class="form-select" style="flex:1;min-width:90px;" onchange="setBlocoTipo(${i},'${lado}',this.value)">` +
+    opts.map(([v, n]) => `<option value="${v}" ${o.tipo === v ? 'selected' : ''}>${n}</option>`).join('') + '</select>';
+  if (o.tipo === 'numero') {
+    html += `<input type="number" class="form-input" style="width:80px;" value="${o.valor}" step="0.1" oninput="setBlocoParam(${i},'${lado}','valor',this.value)">`;
+  } else if (o.tipo === 'rsi') {
+    html += `<input type="number" class="form-input" style="width:70px;" value="${o.periodo}" min="2" max="100" title="período" oninput="setBlocoParam(${i},'${lado}','periodo',this.value)">`;
+  } else if (o.tipo === 'media') {
+    html += `<select class="form-select" style="width:80px;" onchange="setBlocoParam(${i},'${lado}','matipo',this.value)"><option value="EMA" ${o.matipo === 'EMA' ? 'selected' : ''}>EMA</option><option value="SMA" ${o.matipo === 'SMA' ? 'selected' : ''}>SMA</option></select>`;
+    html += `<input type="number" class="form-input" style="width:70px;" value="${o.periodo}" min="2" max="400" title="período" oninput="setBlocoParam(${i},'${lado}','periodo',this.value)">`;
+  }
+  return html;
+}
+
+function renderMontador() {
+  const cont = document.getElementById('mont-condicoes');
+  cont.innerHTML = '';
+  strategyState.mont.condicoes.forEach((cond, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'background:rgba(99,102,241,0.05); border:1px solid var(--border-color); border-radius:8px; padding:12px; margin-bottom:10px;';
+    const opSel = `<select class="form-select" style="width:130px;" onchange="setOpCondicao(${i},this.value)">` +
+      OPERADORES.map(([v, n]) => `<option value="${v}" ${cond.op === v ? 'selected' : ''}>${n}</option>`).join('') + '</select>';
+    const remover = strategyState.mont.condicoes.length > 1
+      ? `<button class="btn btn-sm btn-outline" style="margin-left:auto;" onclick="removeCondicao(${i})">✕</button>` : '';
+    row.innerHTML = `
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+        <span style="font-size:12px; color:var(--text-secondary);">Condição ${i + 1}</span>
+        ${remover}
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+        ${_ladoHTML(cond, 'esq', i)}
+        ${opSel}
+        ${_ladoHTML(cond, 'dir', i)}
+      </div>`;
+    cont.appendChild(row);
+  });
+}
+
+function setBlocoTipo(i, lado, tipo) {
+  strategyState.mont.condicoes[i][lado].tipo = tipo;
+  renderMontador(); // muda os campos de parâmetro
+}
+
+function setBlocoParam(i, lado, key, valor) {
+  const num = parseFloat(valor);
+  strategyState.mont.condicoes[i][lado][key] = (key === 'matipo' || isNaN(num)) ? valor : num;
+}
+
+function setOpCondicao(i, op) {
+  strategyState.mont.condicoes[i].op = op;
+}
+
+function setMontCombinador(c, el) {
+  strategyState.mont.combinador = c;
+  document.querySelectorAll('#mont-comb-grid .direction-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+function setMontDirecao(d, el) {
+  strategyState.mont.direcao = d;
+  document.querySelectorAll('#mont-dir-grid .direction-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+function setMontTimeframe(tf, el) {
+  strategyState.mont.timeframe = tf;
+  document.querySelectorAll('#mont-tf-grid .direction-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+function proximoMontador() {
+  goToPhase('pair');
+}
+
 // ── Q1: presets ou custom ──
 function setQApproach(approach, el) {
   strategyState.q.approach = approach;
@@ -1277,7 +1434,7 @@ function setQEntradaPos(pos, btn) {
 // ── Voltar da fase de par (depende do modo/tipo) ──
 function voltarDoPair() {
   if (strategyState.mode === 'indicador') {
-    goToPhase('ind-config');
+    goToPhase(strategyState.ind.tipo === 'montador' ? 'mont-builder' : 'ind-config');
     return;
   }
   if (strategyState.mode !== 'quadrante') {

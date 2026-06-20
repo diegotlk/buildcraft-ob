@@ -368,10 +368,63 @@
               <div class="anchoring-title">🎯 Bandas de Bollinger</div>
               <div class="anchoring-desc">Reversão quando o preço toca a banda inferior/superior.</div>
             </div>
+            <div class="anchoring-card" onclick="abrirMontador()" style="border-color: var(--accent);">
+              <div class="anchoring-title">🛠️ Montar meu indicador</div>
+              <div class="anchoring-desc">Crie o seu combinando condições (ex: RSI &lt; 30 <strong>E</strong> preço &lt; EMA 50) e escolha a direção.</div>
+            </div>
           </div>
 
           <div class="pattern-controls">
             <button class="btn btn-sm btn-outline" onclick="goToPhase('mode')">⬅ Trocar modo</button>
+          </div>
+        </div>
+
+        <!-- ── I3: MONTADOR DE CONDIÇÕES ── -->
+        <div class="phase-section" id="phase-mont-builder">
+          <div class="step-counter">Indicadores · Montar meu indicador</div>
+          <h2 class="card-box-title">🛠️ Monte suas condições</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 8px;">
+            A estratégia entra quando as condições forem satisfeitas. Ex: <em>RSI &lt; 30 E preço &lt; EMA 50</em>.
+          </p>
+
+          <!-- Combinador E / OU -->
+          <div style="max-width: 620px; margin: 20px auto 8px;">
+            <label class="form-label" style="display:block; margin-bottom:8px;">Como juntar as condições?</label>
+            <div class="direction-grid" id="mont-comb-grid" style="grid-template-columns: 1fr 1fr;">
+              <button class="direction-btn selected" data-comb="E" onclick="setMontCombinador('E', this)"><strong>E</strong> — todas precisam valer</button>
+              <button class="direction-btn" data-comb="OU" onclick="setMontCombinador('OU', this)"><strong>OU</strong> — qualquer uma vale</button>
+            </div>
+          </div>
+
+          <!-- Condições (preenchidas por JS) -->
+          <div id="mont-condicoes" style="max-width: 620px; margin: 16px auto;"></div>
+
+          <div style="max-width: 620px; margin: 0 auto 20px; text-align: center;">
+            <button class="btn btn-sm btn-outline" onclick="addCondicao()">＋ Adicionar condição</button>
+          </div>
+
+          <!-- Direção -->
+          <div style="max-width: 620px; margin: 0 auto;">
+            <label class="form-label" style="display:block; margin-bottom:8px;">Quando satisfeito, entrar:</label>
+            <div class="direction-grid" id="mont-dir-grid" style="grid-template-columns: 1fr 1fr;">
+              <button class="direction-btn selected" data-dir="CALL" onclick="setMontDirecao('CALL', this)">🟢 CALL</button>
+              <button class="direction-btn" data-dir="PUT" onclick="setMontDirecao('PUT', this)">🔴 PUT</button>
+            </div>
+          </div>
+
+          <!-- Timeframe -->
+          <div style="max-width: 620px; margin: 16px auto 8px;">
+            <label class="form-label" style="display:block; margin-bottom:8px;">⏱️ Timeframe</label>
+            <div class="direction-grid" id="mont-tf-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+              <button class="direction-btn" data-tf="M1" onclick="setMontTimeframe('M1', this)">M1</button>
+              <button class="direction-btn selected" data-tf="M5" onclick="setMontTimeframe('M5', this)">M5</button>
+              <button class="direction-btn" data-tf="M15" onclick="setMontTimeframe('M15', this)">M15</button>
+            </div>
+          </div>
+
+          <div class="pattern-controls">
+            <button class="btn btn-sm btn-outline" onclick="goToPhase('ind-escolher')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-accent" onclick="proximoMontador()">Próximo ➜</button>
           </div>
         </div>
 
