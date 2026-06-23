@@ -5,7 +5,7 @@
    logado (navbar) ou exigir login (Laboratório, Inventário...).
    ============================================================ */
 
-const AUTH_API_BASE = 'http://127.0.0.1:5000';
+const AUTH_API_BASE = 'https://api.binaryzando.com';
 const SESSAO_KEY = 'buildcraft_sessao';
 
 function getSessao() {

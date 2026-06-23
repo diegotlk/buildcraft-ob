@@ -5,7 +5,7 @@
    do gerenciamento e gera uma carta de Build (raridade, nota, classe).
    ============================================================ */
 
-const BUILD_API_URL = 'http://127.0.0.1:5000';
+const BUILD_API_URL = 'https://api.binaryzando.com';
 const BUILD_STRATEGY_MODES = ['pintar', 'quadrante', 'indicador', 'figura'];
 
 const buildState = {

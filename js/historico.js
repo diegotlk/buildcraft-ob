@@ -6,7 +6,7 @@
    ============================================================ */
 
 const HISTORICO_KEY = 'buildcraft_historicos';
-const HISTORICO_API_URL = 'http://127.0.0.1:5000';
+const HISTORICO_API_URL = 'https://api.binaryzando.com';
 
 // ── ARMAZENAMENTO ──
 function getHistoricos() {

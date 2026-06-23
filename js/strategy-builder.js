@@ -830,7 +830,7 @@ function updateReviewIndicador() {
 }
 
 // ── TESTAR CONTRA API ──
-const API_URL = 'http://127.0.0.1:5000';
+const API_URL = 'https://api.binaryzando.com';
 
 function testStrategy() {
   if (!strategyState.pair) {
