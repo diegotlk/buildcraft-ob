@@ -4,23 +4,29 @@
 
 let strategyState = {
   mode: 'pintar', // 'pintar', 'quadrante' ou 'indicador'
+  timeframe: 'M1', // pergunta global, sempre a primeira fase
   patternLength: null,
   pattern: [],
   direction: null,
   anchoring: null,
   mirror: false,
+  mirrorChosen: false,
   mirrorDirection: null,
+  testandoExistente: null, // { origemId, origemNome } quando vem da aba "Testar Estratégia"
   pairFilter: 'otc', // 'otc' ou 'op'
   pair: null,
   scheduleStart: '00:00',
   scheduleEnd: '23:59',
+  periodoModo: 'tudo', // 'tudo' (todo o histórico disponível) ou 'personalizado'
+  periodoDataDe: null,
+  periodoDataAte: null,
   // ── Campos do modo quadrante ──
   q: {
     tipo: 'quadrante',     // 'quadrante' (Família 1) ou 'referencia' (Famílias 2/3)
     ref: null,             // params da estratégia de referência (quando tipo='referencia')
     approach: null,        // 'preset' ou 'custom'
     presetNome: null,      // nome do preset escolhido (ex: 'MHI 1')
-    bloco: 'M5',           // quadrante: 'M5' (5 velas) ou 'M15' (15 velas)
+    bloco: 'M5',           // quadrante: 'M5' (5 velas) ou 'M15' (15 velas) — sempre maior que strategyState.timeframe
     analiseModo: 'contar', // 'contar' (maioria/minoria) ou 'editar' (pintar)
     analisePadrao: [],     // se editar: cores das velas do bloco
     posicoes: null,        // se contar: quais velas olhar (null=todas)
@@ -33,10 +39,9 @@ let strategyState = {
   ind: {
     tipo: null,        // 'media' | 'rsi' | 'macd' | 'bollinger' | 'montador'
     params: {},        // parâmetros do indicador escolhido
-    timeframe: 'M5',
   },
   // ── Campos do modo figura ──
-  fig: { tipo: null, timeframe: 'M5' },
+  fig: { tipo: null },
 };
 
 // Figuras gráficas: rótulo, direção e descrição
@@ -98,6 +103,28 @@ const PRESETS_QUADRANTE = [
   { nome: 'D21', bloco: 'M5', posicoes: [0, 2, 3], posicoesLabel: 'velas 1, 3 e 4', entradaPos: 0, desc: 'Velas 1, 3 e 4; entra na 1ª do próximo.' },
   { nome: 'Padrão 3x1', bloco: 'M5', posicoes: [0, 1, 2], posicoesLabel: '3 primeiras', entradaPos: 0, desc: '3 primeiras velas; entra na 1ª do próximo.' },
 ];
+
+// ── PLANO ──────────────────────────────────────────────────────────────
+// No plano Free só liberamos estes dois presets. Todo o resto (demais presets
+// de quadrante, presets de referência/flip e o modo "montar do zero") é Premium.
+// A coluna 'plano' no servidor é a fonte da verdade; ehPremium() (auth.js) lê o
+// reflexo guardado na sessão.
+const PRESETS_FREE = ['MHI 1', 'Milhão'];
+
+function presetBloqueado(nome) {
+  return !ehPremium() && !PRESETS_FREE.includes(nome);
+}
+
+// Aviso amigável quando um free toca em algo Premium (preset trancado ou o
+// modo "montar do zero"). O servidor controla quem é premium; isto é só a UX.
+function upsellPremium(oQue) {
+  showToast(
+    '🔒 Recurso Premium',
+    `"${oQue}" é do plano Premium. No Free você tem as estratégias MHI 1 e Milhão. ` +
+    'Assine o Premium pra liberar todas.',
+    'default'
+  );
+}
 
 // Presets de Repetição de posição (Família 2) e Reversão/Flip (Família 3).
 // tipo 'referencia': olha a vela em refPos e entra em entryPos repetindo ou
@@ -268,6 +295,7 @@ function updateMirrorPreview() {
 
 function setMirror(enabled) {
   strategyState.mirror = enabled;
+  strategyState.mirrorChosen = true;
 
   document.querySelectorAll('#phase-mirror .direction-btn').forEach(btn => {
     btn.classList.remove('selected');
@@ -371,7 +399,40 @@ function setSchedule() {
 
   strategyState.scheduleStart = start;
   strategyState.scheduleEnd = end;
+
+  if (strategyState.periodoModo === 'personalizado') {
+    const de = document.getElementById('schedule-data-de').value;
+    const ate = document.getElementById('schedule-data-ate').value;
+    if (!de || !ate) {
+      showToast('⚠️ Período inválido', 'Escolha a data de início e fim do período personalizado.', 'default');
+      return false;
+    }
+    strategyState.periodoDataDe = de;
+    strategyState.periodoDataAte = ate;
+  } else {
+    strategyState.periodoDataDe = null;
+    strategyState.periodoDataAte = null;
+  }
   return true;
+}
+
+function setSchedulePeriodo(modo, el) {
+  strategyState.periodoModo = modo;
+  document.querySelectorAll('#schedule-periodo-grid .direction-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  document.getElementById('schedule-periodo-datas').style.display = modo === 'personalizado' ? 'block' : 'none';
+}
+
+function setSchedulePeriodoRapido(dias) {
+  const hoje = new Date();
+  const fim = new Date(hoje);
+  const inicio = new Date(hoje);
+  inicio.setDate(inicio.getDate() - dias);
+
+  const fmt = (d) => d.toISOString().slice(0, 10);
+  document.getElementById('schedule-data-de').value = fmt(inicio);
+  document.getElementById('schedule-data-ate').value = fmt(fim);
+  setSchedulePeriodo('personalizado', document.querySelector('#schedule-periodo-grid [data-periodo="personalizado"]'));
 }
 
 // Melhorar a interatividade dos inputs de horário
@@ -420,6 +481,11 @@ function goToPhase(phase) {
     return;
   }
 
+  if (phase === 'pair' && strategyState.mode === 'pintar' && !strategyState.mirrorChosen) {
+    showToast('⚠️ Escolha uma opção', 'Selecione "Só o Meu" ou "Os Dois" para continuar.', 'default');
+    return;
+  }
+
   if (phase === 'pair' && strategyState.mirror && !strategyState.mirrorDirection) {
     showToast('⚠️ Escolha a direção do espelho', 'CALL ou PUT?', 'default');
     return;
@@ -430,6 +496,11 @@ function goToPhase(phase) {
     return;
   }
 
+  if (phase === 'q-analise' && !strategyState.q.bloco) {
+    showToast('⚠️ Escolha um quadrante válido', 'O quadrante precisa ser maior que o timeframe das velas.', 'default');
+    return;
+  }
+
   if (phase === 'review') {
     if (!setSchedule()) {
       return;
@@ -437,14 +508,73 @@ function goToPhase(phase) {
     updateReviewContent();
   }
 
-  // Inicializar pares na fase 5
+  // Inicializar pares na fase 5 — se já tem um par definido (testando
+  // existente), usa o filtro correspondente pra ele aparecer marcado.
   if (phase === 'pair') {
-    setPairFilter('otc');
+    const filtro = (strategyState.pair && PARES_OP.includes(strategyState.pair)) ? 'op' : 'otc';
+    setPairFilter(filtro);
+  }
+
+  // Renderizar a lista de estratégias/cartas salvas ao entrar na aba "Testar Estratégia"
+  if (phase === 'existente') {
+    renderListaExistente();
+  }
+
+  // Renderizar gerenciamentos e históricos (padrões + criados pelo usuário) ao entrar na aba
+  if (phase === 'gerenciamento') {
+    renderGerenciamentos();
+    renderHistoricos();
+  }
+
+  // Renderizar os seletores de estratégia/gerenciamento ao entrar na aba Build
+  if (phase === 'build') {
+    document.getElementById('build-resultado').style.display = 'none';
+    renderBuildPickers();
+  }
+
+  // Sincroniza os inputs de horário com o estado (útil ao testar uma
+  // estratégia existente, que já vem com horário pré-definido)
+  if (phase === 'schedule') {
+    const inicio = document.getElementById('schedule-start');
+    const fim = document.getElementById('schedule-end');
+    if (inicio) inicio.value = strategyState.scheduleStart;
+    if (fim) fim.value = strategyState.scheduleEnd;
   }
 
   // Renderizar botões de vela de entrada ao chegar na fase Q5
   if (phase === 'q-entrada') {
     renderEntradaPos();
+  }
+
+  // Renderizar as opções de quadrante (filtradas pelo timeframe global) ao chegar na fase Q2
+  if (phase === 'q-bloco') {
+    renderQBlocoOpcoes();
+  }
+
+  // Sincronizar o botão selecionado ao (re)entrar na fase de timeframe
+  if (phase === 'timeframe') {
+    document.querySelectorAll('#global-tf-grid .direction-btn').forEach(b => {
+      b.classList.toggle('selected', b.dataset.tf === strategyState.timeframe);
+    });
+  }
+
+  // Avisar que quadrantes não estão disponíveis em M15 ao chegar na fase de modo
+  if (phase === 'mode') {
+    const cardQuadrante = document.getElementById('card-modo-quadrante');
+    const descQuadrante = document.getElementById('desc-modo-quadrante');
+    const semQuadrante = strategyState.timeframe === 'M15';
+    if (cardQuadrante) {
+      cardQuadrante.style.opacity = semQuadrante ? '.45' : '';
+      cardQuadrante.style.cursor = semQuadrante ? 'not-allowed' : '';
+      cardQuadrante.onclick = semQuadrante
+        ? () => showToast('⚠️ Não disponível em M15', 'Quadrante precisa de um bloco maior que o timeframe. Volte e escolha M1 ou M5.', 'default')
+        : () => setMode('quadrante');
+    }
+    if (descQuadrante) {
+      descQuadrante.textContent = semQuadrante
+        ? 'Não disponível para M15 — não existe bloco maior. Volte e escolha M1 ou M5.'
+        : 'Olha um bloco maior de velas (ex: quadrante de 5 min = 5 velas de 1 min), analisa a maioria/minoria e entra na próxima. Estilo MHI, Milhão.';
+    }
   }
 
   // Destacar a direção atual ao chegar na fase Q4
@@ -509,15 +639,20 @@ function updateReviewContent() {
       </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
+      <div>
+        <p><strong>Timeframe:</strong></p>
+        <p>${strategyState.timeframe}</p>
+      </div>
       <div>
         <p><strong>Par:</strong></p>
         <p><code style="background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p>
       </div>
-      <div>
-        <p><strong>Horário:</strong></p>
-        <p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p>
-      </div>
+    </div>
+
+    <div style="font-size: 14px;">
+      <p><strong>Horário:</strong></p>
+      <p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p>
     </div>
   `;
 
@@ -603,7 +738,7 @@ function updateReviewQuadrante() {
   let content = `
     <div style="margin-bottom: 16px;">
       <p style="margin-bottom: 8px;"><strong>🔲 Estratégia de Quadrante${q.presetNome ? ' — ' + q.presetNome : ''}</strong></p>
-      <p style="color: var(--text-secondary); font-size: 14px;">Quadrante de ${q.bloco === 'M15' ? '15' : '5'} min (${velasPorBloco()} velas de 1 min)</p>
+      <p style="color: var(--text-secondary); font-size: 14px;">Quadrante de ${q.bloco === 'M15' ? '15' : '5'} min (${velasPorBloco()} velas de ${strategyState.timeframe})</p>
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
@@ -634,7 +769,7 @@ function updateReviewFigura() {
       <p style="color: var(--text-secondary); font-size: 14px;">${f.desc} → entrar <strong>${f.dir}</strong></p>
     </div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
-      <div><p><strong>Timeframe:</strong></p><p>${strategyState.fig.timeframe}</p></div>
+      <div><p><strong>Timeframe:</strong></p><p>${strategyState.timeframe}</p></div>
       <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
     </div>
     <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
@@ -668,7 +803,7 @@ function updateReviewIndicador() {
         <p style="margin-top: 10px;">→ entrar <strong>${m.direcao}</strong></p>
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
-        <div><p><strong>Timeframe:</strong></p><p>${m.timeframe}</p></div>
+        <div><p><strong>Timeframe:</strong></p><p>${strategyState.timeframe}</p></div>
         <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
       </div>
       <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
@@ -687,7 +822,7 @@ function updateReviewIndicador() {
       <p style="color: var(--text-secondary); font-size: 14px;">${paramsTxt}</p>
     </div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
-      <div><p><strong>Timeframe:</strong></p><p>${ind.timeframe}</p></div>
+      <div><p><strong>Timeframe:</strong></p><p>${strategyState.timeframe}</p></div>
       <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
     </div>
     <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
@@ -718,7 +853,7 @@ function testStrategy() {
     payload = {
       mode: 'figura',
       figura: strategyState.fig.tipo,
-      timeframe: strategyState.fig.timeframe,
+      timeframe: strategyState.timeframe,
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
@@ -730,7 +865,7 @@ function testStrategy() {
       condicoes: m.condicoes,
       combinador: m.combinador,
       direcao: m.direcao,
-      timeframe: m.timeframe,
+      timeframe: strategyState.timeframe,
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
@@ -741,7 +876,7 @@ function testStrategy() {
       mode: 'indicador',
       indicador: ind.tipo,
       params: ind.params,
-      timeframe: ind.timeframe,
+      timeframe: strategyState.timeframe,
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
@@ -753,6 +888,7 @@ function testStrategy() {
       nome: conf.nome,
       spec_a: conf.specA,
       spec_b: conf.specB,
+      tf_entrada: strategyState.timeframe,
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
@@ -768,6 +904,7 @@ function testStrategy() {
       relacao: ref.relacao,
       ref_bloco: ref.refBloco,
       cond_posicoes: ref.condPosicoes,
+      tf_entrada: strategyState.timeframe,
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
@@ -776,7 +913,7 @@ function testStrategy() {
     const q = strategyState.q;
     payload = {
       mode: 'quadrante',
-      tf_entrada: 'M1',
+      tf_entrada: strategyState.timeframe,
       bloco: q.bloco,
       analise_modo: q.analiseModo,
       analise_padrao: q.analiseModo === 'editar' ? q.analisePadrao.map(emojiParaNum) : null,
@@ -794,9 +931,13 @@ function testStrategy() {
       direction: strategyState.direction, // 'call', 'put' ou 'both'
       mirror: strategyState.mirror,
       mirror_direction: strategyState.mirrorDirection,
+      timeframe: strategyState.timeframe,
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
+      periodo_modo: strategyState.periodoModo,
+      data_de: strategyState.periodoDataDe,
+      data_ate: strategyState.periodoDataAte,
     };
   }
 
@@ -829,6 +970,9 @@ function callBacktestAPI(payload, btn, textoOriginal) {
       }
     });
 }
+
+// renderConfidenceBar() agora vive em inventario.js (carregado antes deste
+// arquivo) — a carta também precisa dela, não só este painel de resultado.
 
 // ── RENDERIZAR RESULTADO DO BACKTEST ──
 function renderResult(r) {
@@ -880,6 +1024,10 @@ function renderResult(r) {
         </div>
       </div>
 
+      <div style="margin-bottom:20px; padding:14px 16px; background:var(--bg); border-radius:8px;">
+        ${renderConfidenceBar(r.entries)}
+      </div>
+
       <div style="font-size:13px; color:var(--text-secondary); margin-bottom:16px; padding:12px; background:var(--bg); border-radius:8px;">
         📅 Período testado: <strong>${r.periodo_de}</strong> até <strong>${r.periodo_ate}</strong>
         &nbsp;·&nbsp; ${r.velas_usadas.toLocaleString('pt-BR')} velas reais analisadas
@@ -899,11 +1047,52 @@ function renderResult(r) {
   container.innerHTML = html;
   container.style.display = 'block';
 
-  // Mostra o botão de criar nova estratégia agora que há um resultado
+  // Mostra os botões de salvar e criar nova estratégia agora que há um resultado real
+  const btnSalvar = document.getElementById('btn-salvar-estrategia');
+  if (btnSalvar) btnSalvar.style.display = 'inline-flex';
   const btnNova = document.getElementById('btn-nova-estrategia');
   if (btnNova) btnNova.style.display = 'inline-flex';
 
+  // Histórico (sequência real W/L) só existe quando o backtest devolveu uma —
+  // não acontece com o espelho ativado, por exemplo (mistura duas ordens cronológicas).
+  const btnHistorico = document.getElementById('btn-salvar-historico');
+  if (btnHistorico) btnHistorico.style.display = (Array.isArray(r.sequencia) && r.sequencia.length) ? 'inline-flex' : 'none';
+
   container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── SALVAR HISTÓRICO (direto do teste, sem precisar salvar a estratégia) ──
+// Cobre o caso de "testar estratégia" (nova ou já existente) quando o usuário
+// só quer o histórico de entradas pra testar um Gerenciamento — sem criar
+// outra carta duplicada no inventário.
+function salvarHistoricoDoTeste() {
+  const r = strategyState.lastResult;
+  if (!r || !Array.isArray(r.sequencia) || !r.sequencia.length) {
+    showToast('⚠️ Sem sequência', 'Esse teste não gerou uma sequência cronológica utilizável.', 'default');
+    return;
+  }
+
+  const nome = `${strategyState.testandoExistente ? strategyState.testandoExistente.origemNome : r.pair} · ${r.timeframe} (${new Date().toLocaleDateString('pt-BR')})`;
+
+  const historicos = getHistoricos();
+  historicos.push({
+    id: 'hist_' + Date.now(),
+    nome,
+    origem: 'estrategia',
+    estrategiaId: strategyState.testandoExistente ? strategyState.testandoExistente.origemId : null,
+    pair: r.pair,
+    timeframe: r.timeframe,
+    winrate: r.winrate,
+    entries: r.entries,
+    periodoDe: r.periodo_de,
+    periodoAte: r.periodo_ate,
+    velasUsadas: r.velas_usadas,
+    sequencia: r.sequencia,
+    criadoEm: new Date().toISOString(),
+  });
+  salvarHistoricos(historicos);
+
+  showToast('✅ Histórico salvo', `"${nome}" tem ${r.sequencia.length} entradas reais — já disponível em Criar Gerenciamento e no Inventário.`, 'discovery');
 }
 
 // ── CRIAR NOVA ESTRATÉGIA (recomeçar do zero) ──
@@ -911,12 +1100,15 @@ function resetStrategy() {
   // Zera todo o estado
   strategyState = {
     mode: 'pintar',
+    timeframe: 'M1',
     patternLength: null,
     pattern: [],
     direction: null,
     anchoring: null,
     mirror: false,
+    mirrorChosen: false,
     mirrorDirection: null,
+    testandoExistente: null,
     pairFilter: 'otc',
     pair: null,
     scheduleStart: '00:00',
@@ -927,8 +1119,8 @@ function resetStrategy() {
       analiseModo: 'contar', analisePadrao: [], posicoes: null, posicoesLabel: 'todas',
       entradaModo: 'minoria', entradaPos: 0, entradaCor: 1,
     },
-    ind: { tipo: null, params: {}, timeframe: 'M5' },
-    fig: { tipo: null, timeframe: 'M5' },
+    ind: { tipo: null, params: {} },
+    fig: { tipo: null },
   };
 
   // Esconde sub-áreas do quadrante e a lista de presets
@@ -945,6 +1137,10 @@ function resetStrategy() {
   }
   const btnNova = document.getElementById('btn-nova-estrategia');
   if (btnNova) btnNova.style.display = 'none';
+  const btnSalvar = document.getElementById('btn-salvar-estrategia');
+  if (btnSalvar) btnSalvar.style.display = 'none';
+  const btnHistorico = document.getElementById('btn-salvar-historico');
+  if (btnHistorico) btnHistorico.style.display = 'none';
 
   // Esconde o formulário de salvar (caso esteja aberto)
   const saveForm = document.getElementById('save-form');
@@ -970,36 +1166,56 @@ function resetStrategy() {
   const fim = document.getElementById('schedule-end');
   if (fim) fim.value = '23:59';
 
-  // Atualiza o preview do espelho (vazio) e volta para a escolha de modo
+  // Atualiza o preview do espelho (vazio) e volta para a aba "Criar Estratégia"
   updateMirrorPreview();
-  goToPhase('mode');
+  const tabCriar = document.getElementById('lab-tab-criar');
+  const tabExistente = document.getElementById('lab-tab-existente');
+  if (tabCriar) tabCriar.classList.add('active');
+  if (tabExistente) tabExistente.classList.remove('active');
+  goToPhase('timeframe');
 
   showToast('🆕 Nova estratégia', 'Tudo limpo. Escolha como montar a próxima!', 'default');
 }
 
-// ── SALVAR ESTRATÉGIA (leque de estratégias do usuário) ──
-const STORAGE_KEY = 'buildcraft_estrategias';
+// ── SALVAR ESTRATÉGIA (vai para o Inventário do usuário) ──
+// Armazenamento, cálculo de período/entradas-por-dia e renderização de
+// carta moram em js/inventario.js (compartilhado com a página Inventário).
 
-function getEstrategiasSalvas() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch (e) {
-    return [];
+function snapshotDefinicao() {
+  const s = strategyState;
+  if (s.mode === 'pintar') {
+    return { pattern: [...s.pattern], direction: s.direction, anchoring: s.anchoring, mirror: s.mirror, mirrorDirection: s.mirrorDirection };
   }
-}
-
-function salvarEstrategias(lista) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+  if (s.mode === 'quadrante') {
+    return { q: JSON.parse(JSON.stringify(s.q)) };
+  }
+  if (s.mode === 'indicador') {
+    return { ind: JSON.parse(JSON.stringify(s.ind)), mont: s.mont ? JSON.parse(JSON.stringify(s.mont)) : null };
+  }
+  if (s.mode === 'figura') {
+    return { fig: { ...s.fig } };
+  }
+  return {};
 }
 
 function showSaveForm() {
-  // Validações: precisa de padrão, direção e ancoragem definidos
-  if (!strategyState.pattern || strategyState.pattern.length === 0) {
-    showToast('⚠️ Nada para salvar', 'Monte um padrão antes de salvar.', 'default');
-    return;
+  // Validações específicas do modo "pintar" (os outros modos já são
+  // validados pela navegação entre fases antes de chegar na revisão).
+  if (strategyState.mode === 'pintar') {
+    if (!strategyState.pattern || strategyState.pattern.length === 0) {
+      showToast('⚠️ Nada para salvar', 'Monte um padrão antes de salvar.', 'default');
+      return;
+    }
+    if (!strategyState.direction || !strategyState.anchoring) {
+      showToast('⚠️ Estratégia incompleta', 'Defina a direção e a ancoragem antes de salvar.', 'default');
+      return;
+    }
   }
-  if (!strategyState.direction || !strategyState.anchoring) {
-    showToast('⚠️ Estratégia incompleta', 'Defina a direção e a ancoragem antes de salvar.', 'default');
+
+  // Precisa do resultado real do backtest: é ele que vai junto pro inventário
+  // (par, horário, período testado, winrate, entradas/dia).
+  if (!strategyState.lastResult) {
+    showToast('⚠️ Teste antes de salvar', 'Rode o backtest primeiro — o inventário guarda o resultado real.', 'default');
     return;
   }
 
@@ -1025,40 +1241,95 @@ function confirmSaveStrategy() {
     return;
   }
 
-  const lista = getEstrategiasSalvas();
+  const lista = getInventario();
 
-  // Evita nomes duplicados
-  if (lista.some(e => e.nome.toLowerCase() === nome.toLowerCase())) {
-    showToast('⚠️ Nome já existe', 'Você já tem uma estratégia com esse nome.', 'default');
+  // Evita nomes duplicados (itens na lixeira não contam — já não existem de fato)
+  if (lista.some(e => !e.deletadoEm && e.nome.toLowerCase() === nome.toLowerCase())) {
+    showToast('⚠️ Nome já existe', 'Você já tem uma estratégia com esse nome no inventário.', 'default');
     input.focus();
     return;
   }
 
-  // Salva apenas a DEFINIÇÃO da estratégia (sem par/horário, que variam).
-  // O último resultado fica como referência do par em que foi testada.
-  const estrategia = {
+  const r = strategyState.lastResult;
+  const dias = diasEntrePeriodo(r.periodo_de, r.periodo_ate);
+
+  // Linhagem: se veio da aba "Testar Estratégia", essa carta é filha da original.
+  // deltaWinrate compara o desempenho com o da carta-mãe (seta pra cima/baixo na exibição).
+  let linhagem = { origemId: null, origemNome: null, geracao: 0, deltaWinrate: null };
+  if (strategyState.testandoExistente) {
+    const origem = lista.find(e => e.id === strategyState.testandoExistente.origemId);
+    linhagem = {
+      origemId: strategyState.testandoExistente.origemId,
+      origemNome: strategyState.testandoExistente.origemNome,
+      geracao: (origem?.linhagem?.geracao || 0) + 1,
+      deltaWinrate: origem ? Math.round((r.winrate - origem.teste.winrate) * 100) / 100 : null,
+    };
+  }
+
+  const item = {
     id: 'est_' + Date.now(),
     nome: nome,
-    pattern: [...strategyState.pattern],
-    direction: strategyState.direction,
-    anchoring: strategyState.anchoring,
-    mirror: strategyState.mirror,
-    mirrorDirection: strategyState.mirrorDirection,
+    mode: strategyState.mode,
+    definicao: snapshotDefinicao(),
     criadaEm: new Date().toISOString(),
-    ultimoTeste: strategyState.lastResult
-      ? {
-          pair: strategyState.lastResult.pair,
-          winrate: strategyState.lastResult.winrate,
-          grade: strategyState.lastResult.grade,
-        }
-      : null,
+    linhagem: linhagem,
+    teste: {
+      pair: r.pair,
+      timeframe: r.timeframe,
+      // valor puro M1/M5/M15 (timeframe pode vir como rótulo composto pro
+      // quadrante, ex: "M1 · quadrante M5" — esse aqui é sempre limpo)
+      timeframeOperado: strategyState.timeframe,
+      scheduleStart: strategyState.scheduleStart,
+      scheduleEnd: strategyState.scheduleEnd,
+      winrate: r.winrate,
+      grade: r.grade,
+      rarity: r.rarity,
+      entries: r.entries,
+      wins: r.wins,
+      losses: r.losses,
+      periodoDe: r.periodo_de,
+      periodoAte: r.periodo_ate,
+      diasTestados: dias,
+      entradasPorDia: dias ? Math.max(1, Math.round(r.entries / dias)) : null,
+      velasUsadas: r.velas_usadas,
+    },
+    carta: { numero: proximoNumeroDescoberta(), transformadaEm: new Date().toISOString() },
   };
 
-  lista.push(estrategia);
-  salvarEstrategias(lista);
+  lista.push(item);
+  salvarInventario(lista);
+
+  // Toda estratégia salva já nasce com seu histórico de backtest (a sequência
+  // real de W/L do teste que acabou de rodar). É esse histórico que habilita a
+  // criação de Gerenciamentos. Sem sequência (ex.: espelho ativado), não dá.
+  if (Array.isArray(r.sequencia) && r.sequencia.length) {
+    const historicos = getHistoricos();
+    historicos.push({
+      id: 'hist_' + Date.now(),
+      nome: `${nome} (histórico)`,
+      origem: 'estrategia',
+      estrategiaId: item.id,
+      pair: r.pair,
+      timeframe: r.timeframe,
+      winrate: r.winrate,
+      entries: r.entries,
+      periodoDe: r.periodo_de,
+      periodoAte: r.periodo_ate,
+      velasUsadas: r.velas_usadas,
+      sequencia: r.sequencia,
+      criadoEm: new Date().toISOString(),
+    });
+    salvarHistoricos(historicos);
+  }
 
   document.getElementById('save-form').style.display = 'none';
-  showToast('✅ Estratégia salva!', `"${nome}" foi adicionada ao seu leque (${lista.length} no total).`, 'discovery');
+
+  if (linhagem.origemId) {
+    const sinal = linhagem.deltaWinrate > 0 ? '▲ melhor' : linhagem.deltaWinrate < 0 ? '▼ pior' : '= igual';
+    showToast('🃏 Carta criada!', `"${nome}" é a carta #${String(item.carta.numero).padStart(3, '0')}, filha de "${linhagem.origemNome}" (geração ${linhagem.geracao}) — desempenho ${sinal} (${linhagem.deltaWinrate > 0 ? '+' : ''}${linhagem.deltaWinrate}%).`, 'discovery');
+  } else {
+    showToast('🃏 Carta criada!', `"${nome}" agora é a carta #${String(item.carta.numero).padStart(3, '0')} do seu inventário.`, 'discovery');
+  }
 }
 
 // ════════════════════════════════════════════════
@@ -1067,7 +1338,178 @@ function confirmSaveStrategy() {
 const Q_CORES = ['⬜', '🟩', '🟥'];
 
 function velasPorBloco() {
-  return strategyState.q.bloco === 'M15' ? 15 : 5;
+  const tf = strategyState.timeframe || 'M1';
+  return Q_BLOCO_SEG[strategyState.q.bloco] / Q_TF_SEG[tf];
+}
+
+// ── ABAS: CRIAR NOVA × TESTAR EXISTENTE ──
+// Grupo de alto nível: "criar" ou "testar". Cada grupo tem suas 3 sub-abas
+// (Estratégia / Gerenciamento / Build) — ver trocarAbaLab().
+function trocarGrupoLab(grupo) {
+  document.getElementById('lab-grupo-criar').classList.toggle('active', grupo === 'criar');
+  document.getElementById('lab-grupo-testar').classList.toggle('active', grupo === 'testar');
+  document.getElementById('lab-subtabs-criar').style.display = grupo === 'criar' ? 'flex' : 'none';
+  document.getElementById('lab-subtabs-testar').style.display = grupo === 'testar' ? 'flex' : 'none';
+
+  trocarAbaLab(grupo === 'criar' ? 'criar-estrategia' : 'testar-estrategia');
+}
+
+const LAB_SUBABAS = [
+  'criar-estrategia', 'criar-gerenciamento', 'criar-build',
+  'testar-estrategia', 'testar-gerenciamento', 'testar-build',
+];
+
+function trocarAbaLab(aba) {
+  LAB_SUBABAS.forEach(a => {
+    const tab = document.getElementById('lab-tab-' + a);
+    if (tab) tab.classList.toggle('active', a === aba);
+  });
+
+  const grupo = aba.startsWith('testar') ? 'testar' : 'criar';
+  document.getElementById('lab-grupo-criar').classList.toggle('active', grupo === 'criar');
+  document.getElementById('lab-grupo-testar').classList.toggle('active', grupo === 'testar');
+  document.getElementById('lab-subtabs-criar').style.display = grupo === 'criar' ? 'flex' : 'none';
+  document.getElementById('lab-subtabs-testar').style.display = grupo === 'testar' ? 'flex' : 'none';
+
+  if (aba === 'criar-estrategia') {
+    strategyState.testandoExistente = null;
+    goToPhase('timeframe');
+  } else if (aba === 'testar-estrategia') {
+    goToPhase('existente');
+  } else if (aba === 'criar-gerenciamento') {
+    goToPhase('gerenciamento');
+    document.getElementById('ger-bloco-criar').style.display = 'block';
+    document.getElementById('ger-bloco-testar').style.display = 'none';
+    document.getElementById('ger-btn-voltar').setAttribute('onclick', "trocarAbaLab('criar-gerenciamento')");
+  } else if (aba === 'testar-gerenciamento') {
+    goToPhase('gerenciamento');
+    document.getElementById('ger-bloco-criar').style.display = 'none';
+    document.getElementById('ger-bloco-testar').style.display = 'block';
+    document.getElementById('ger-btn-voltar').setAttribute('onclick', "trocarAbaLab('testar-gerenciamento')");
+    renderGerenciamentosTestar();
+  } else if (aba === 'criar-build') {
+    goToPhase('build');
+    document.getElementById('build-btn-voltar').setAttribute('onclick', "trocarAbaLab('criar-build')");
+  } else if (aba === 'testar-build') {
+    goToPhase('testar-build');
+    renderListaTestarBuild();
+  }
+}
+
+// ── FASE -1: TIMEFRAME GLOBAL (primeira pergunta, sempre) ──
+function setTimeframeGlobal(tf, el) {
+  strategyState.timeframe = tf;
+  document.querySelectorAll('#global-tf-grid .direction-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+}
+
+// MVP: M5/M15 ainda sem dados — botões desativados disparam só um aviso.
+function avisarTimeframeIndisponivel() {
+  showToast('🔒 Só M1 por enquanto', 'Ainda só temos dados/estratégias de M1. M5 e M15 chegam depois.', 'default');
+}
+
+// Só estratégias aqui — Gerenciamento e Build têm suas próprias sub-abas de
+// teste ("Testar Gerenciamento" / "Testar Build"), pra cada tipo rodar no
+// fluxo certo em vez de tentar adivinhar pelo item clicado.
+function renderListaExistente() {
+  const lista = getInventario().filter(e => !e.deletadoEm && BUILD_STRATEGY_MODES.includes(e.mode));
+  const cont = document.getElementById('existente-lista');
+
+  if (lista.length === 0) {
+    cont.innerHTML = '<p style="text-align:center;color:var(--text-secondary);grid-column:1/-1;">Você ainda não tem nenhuma estratégia salva. Crie uma primeiro na aba "Criar Estratégia".</p>';
+    return;
+  }
+
+  cont.innerHTML = lista.map(item => `
+    <div class="carta-flip-wrap" onclick="carregarDefinicaoExistente('${item.id}')">
+      <div class="carta-flip-inner">
+        ${renderCartaFront(item)}
+      </div>
+    </div>
+  `).join('');
+}
+
+function carregarDefinicaoExistente(id) {
+  const lista = getInventario();
+  const item = lista.find(e => e.id === id);
+  if (!item) return;
+
+  strategyState.mode = item.mode;
+  strategyState.testandoExistente = { origemId: item.id, origemNome: item.nome };
+  // Vem pré-preenchido com o que já foi testado — o usuário edita o que quiser
+  // (par, horário ou até o timeframe) pra criar uma variação.
+  strategyState.timeframe = item.teste.timeframeOperado || 'M1';
+  strategyState.pair = item.teste.pair;
+  strategyState.scheduleStart = item.teste.scheduleStart;
+  strategyState.scheduleEnd = item.teste.scheduleEnd;
+  strategyState.lastResult = undefined;
+
+  const d = item.definicao || {};
+  if (item.mode === 'pintar') {
+    strategyState.pattern = [...d.pattern];
+    strategyState.patternLength = d.pattern.length;
+    strategyState.direction = d.direction;
+    strategyState.anchoring = d.anchoring;
+    strategyState.mirror = d.mirror;
+    strategyState.mirrorChosen = true;
+    strategyState.mirrorDirection = d.mirrorDirection;
+  } else if (item.mode === 'quadrante') {
+    strategyState.q = JSON.parse(JSON.stringify(d.q));
+  } else if (item.mode === 'indicador') {
+    strategyState.ind = JSON.parse(JSON.stringify(d.ind));
+    strategyState.mont = d.mont ? JSON.parse(JSON.stringify(d.mont)) : null;
+  } else if (item.mode === 'figura') {
+    strategyState.fig = { ...d.fig };
+  }
+
+  showToast('♻️ Estratégia carregada', `"${item.nome}" carregada. Ajuste o que quiser e teste em outro cenário.`, 'default');
+  goToPhase('timeframe');
+}
+
+// Reproduz exatamente o mesmo teste de uma carta/estratégia salva: mesma
+// definição, mesmo par/horário, e o período TRAVADO nas datas exatas que
+// geraram o resultado salvo (em vez de "tudo", que desliza conforme o banco
+// de velas cresce e nunca bate na mesma janela de novo).
+function reproduzirCarta(id) {
+  const item = getInventario().find(e => e.id === id);
+  if (!item) return;
+
+  if (item.mode === 'build' || item.mode === 'gerenciamento') {
+    showToast('⚠️ Ainda não suportado', 'Reproduzir builds/gerenciamentos exatos chega em breve. Por enquanto, reproduza a estratégia-base.', 'default');
+    return;
+  }
+  if (!item.teste || !item.teste.periodoDe || item.teste.periodoDe === '—') {
+    showToast('⚠️ Sem período salvo', 'Essa carta não tem um período exato salvo para reproduzir.', 'default');
+    return;
+  }
+
+  carregarDefinicaoExistente(id);
+
+  strategyState.periodoModo = 'personalizado';
+  strategyState.periodoDataDe = item.teste.periodoDe;
+  strategyState.periodoDataAte = item.teste.periodoAte;
+
+  goToPhase('pair');
+  showToast('🔁 Reproduzindo', `Rodando "${item.nome}" travado em ${item.teste.periodoDe} – ${item.teste.periodoAte}, igual a quando foi salva.`, 'default');
+  setTimeout(() => testStrategy(), 50);
+}
+
+// Botão "Próximo" da fase de timeframe: se está testando uma estratégia
+// existente, pula a escolha de tipo (já está definida) e vai pro par.
+function proximoDoTimeframe() {
+  if (strategyState.testandoExistente) {
+    if (strategyState.mode === 'quadrante' && strategyState.q.tipo === 'quadrante') {
+      const validos = QUADRANTES_DISP[strategyState.timeframe] || [];
+      if (!validos.includes(strategyState.q.bloco)) {
+        const tamanho = strategyState.q.bloco === 'M15' ? '15' : '5';
+        showToast('⚠️ Combinação inválida', `O quadrante de ${tamanho} min não funciona com velas de ${strategyState.timeframe}. Escolha outro timeframe.`, 'default');
+        return;
+      }
+    }
+    goToPhase('pair');
+  } else {
+    goToPhase('mode');
+  }
 }
 
 // ── Escolha de modo (pintar / quadrante / indicador) ──
@@ -1075,6 +1517,7 @@ function setMode(mode) {
   strategyState.mode = mode;
   if (mode === 'quadrante') {
     goToPhase('q-approach');
+    setQApproach('preset', null);
   } else if (mode === 'indicador') {
     strategyState.ind.tipo = null;
     goToPhase('ind-escolher');
@@ -1092,19 +1535,6 @@ function setFigura(tipo, el) {
   strategyState.fig.tipo = tipo;
   document.querySelectorAll('#phase-fig-escolher .anchoring-card').forEach(c => c.classList.remove('selected'));
   if (el) el.classList.add('selected');
-  const f = FIGURAS[tipo];
-  document.getElementById('fig-config-titulo').textContent = `🕯️ ${f.nome}`;
-  document.getElementById('fig-config-desc').textContent = `${f.desc} Direção fixa: ${f.dir}.`;
-  goToPhase('fig-config');
-}
-
-function setFigTimeframe(tf, el) {
-  strategyState.fig.timeframe = tf;
-  document.querySelectorAll('#fig-tf-grid .direction-btn').forEach(b => b.classList.remove('selected'));
-  if (el) el.classList.add('selected');
-}
-
-function proximoFig() {
   goToPhase('pair');
 }
 
@@ -1150,12 +1580,6 @@ function atualizarIndParam(key, valor) {
   strategyState.ind.params[key] = (key === 'tipo' || isNaN(num)) ? valor : num;
 }
 
-function setIndTimeframe(tf, el) {
-  strategyState.ind.timeframe = tf;
-  document.querySelectorAll('#ind-tf-grid .direction-btn').forEach(b => b.classList.remove('selected'));
-  if (el) el.classList.add('selected');
-}
-
 function proximoIndConfig() {
   goToPhase('pair');
 }
@@ -1178,7 +1602,7 @@ function condicaoPadrao() {
 function abrirMontador() {
   strategyState.mode = 'indicador';
   strategyState.ind.tipo = 'montador';
-  strategyState.mont = { condicoes: [condicaoPadrao()], combinador: 'E', direcao: 'CALL', timeframe: 'M5' };
+  strategyState.mont = { condicoes: [condicaoPadrao()], combinador: 'E', direcao: 'CALL' };
   goToPhase('mont-builder');
   renderMontador();
 }
@@ -1263,18 +1687,25 @@ function setMontDirecao(d, el) {
   if (el) el.classList.add('selected');
 }
 
-function setMontTimeframe(tf, el) {
-  strategyState.mont.timeframe = tf;
-  document.querySelectorAll('#mont-tf-grid .direction-btn').forEach(b => b.classList.remove('selected'));
-  if (el) el.classList.add('selected');
-}
-
 function proximoMontador() {
   goToPhase('pair');
 }
 
 // ── Q1: presets ou custom ──
 function setQApproach(approach, el) {
+  // Montar do zero é Premium — no Free só dá pra usar os presets liberados.
+  if (approach === 'custom' && !ehPremium()) {
+    upsellPremium('Montar estratégia do zero');
+    return;
+  }
+
+  // Os presets clássicos (MHI, Milhão, Torres Gêmeas...) são todos baseados
+  // em velas M1 — só fazem sentido se o timeframe global escolhido for M1.
+  if (approach === 'preset' && strategyState.timeframe !== 'M1') {
+    showToast('⚠️ Não disponível nesse timeframe', 'As estratégias prontas são todas em M1. Volte e escolha M1, ou monte do zero.', 'default');
+    return;
+  }
+
   strategyState.q.approach = approach;
   document.querySelectorAll('#phase-q-approach .anchoring-card').forEach(c => c.classList.remove('selected'));
   if (el) el.classList.add('selected');
@@ -1301,10 +1732,12 @@ function renderPresets() {
   };
 
   addGrupo('Maioria / Minoria', PRESETS_QUADRANTE, p => {
+    const locked = presetBloqueado(p.nome);
     const card = document.createElement('div');
-    card.className = 'anchoring-card';
-    card.onclick = () => loadPreset(p.nome);
+    card.className = 'anchoring-card' + (locked ? ' preset-locked' : '');
+    card.onclick = locked ? () => upsellPremium(p.nome) : () => loadPreset(p.nome);
     card.innerHTML = `
+      ${locked ? '<div class="preset-lock-badge">🔒 Premium</div>' : ''}
       <div class="anchoring-title">${p.nome}</div>
       <div class="anchoring-desc">${p.desc}</div>
       <div style="margin-top:8px; font-size:11px; color:var(--accent-hover);">Quadrante ${p.bloco} · ${p.posicoesLabel}</div>
@@ -1316,10 +1749,12 @@ function renderPresets() {
   const refFlip = PRESETS_REFERENCIA.filter(p => p.familia === 'Flip');
 
   const renderRef = p => {
+    const locked = presetBloqueado(p.nome);
     const card = document.createElement('div');
-    card.className = 'anchoring-card';
-    card.onclick = () => loadPreset(p.nome);
+    card.className = 'anchoring-card' + (locked ? ' preset-locked' : '');
+    card.onclick = locked ? () => upsellPremium(p.nome) : () => loadPreset(p.nome);
     card.innerHTML = `
+      ${locked ? '<div class="preset-lock-badge">🔒 Premium</div>' : ''}
       <div class="anchoring-title">${p.nome}</div>
       <div class="anchoring-desc">${p.desc}</div>
       <div style="margin-top:8px; font-size:11px; color:var(--accent-hover);">Ciclo de ${p.blocoVelas} velas</div>
@@ -1330,17 +1765,20 @@ function renderPresets() {
   addGrupo('Repetição de posição', refRepete, renderRef);
   addGrupo('Reversão / Flip', refFlip, renderRef);
 
-  addGrupo('Confluência (duas concordam)', PRESETS_CONFLUENCIA, p => {
-    const card = document.createElement('div');
-    card.className = 'anchoring-card';
-    card.onclick = () => loadPreset(p.nome);
-    card.innerHTML = `
-      <div class="anchoring-title">${p.nome}</div>
-      <div class="anchoring-desc">${p.desc}</div>
-      <div style="margin-top:8px; font-size:11px; color:var(--accent-hover);">Só entra quando as duas concordam</div>
-    `;
-    container.appendChild(card);
-  });
+  // MVP: estratégias de Confluência (duas concordam) temporariamente DESATIVADAS
+  // (não remover — os dados em PRESETS_CONFLUENCIA e a lógica em loadPreset
+  // continuam intactos; basta reabilitar o addGrupo abaixo quando for o caso).
+  // addGrupo('Confluência (duas concordam)', PRESETS_CONFLUENCIA, p => {
+  //   const card = document.createElement('div');
+  //   card.className = 'anchoring-card';
+  //   card.onclick = () => loadPreset(p.nome);
+  //   card.innerHTML = `
+  //     <div class="anchoring-title">${p.nome}</div>
+  //     <div class="anchoring-desc">${p.desc}</div>
+  //     <div style="margin-top:8px; font-size:11px; color:var(--accent-hover);">Só entra quando as duas concordam</div>
+  //   `;
+  //   container.appendChild(card);
+  // });
 }
 
 function loadPreset(nome) {
@@ -1391,10 +1829,54 @@ function loadPreset(nome) {
   goToPhase('pair');
 }
 
-// ── Q2: bloco ──
+// ── Q2: bloco do quadrante ──
+// Mesma regra do backend (quadrantes.QUADRANTES_DISP): o quadrante tem que
+// ser maior que o timeframe global escolhido na Fase -1, senão não cabe
+// mais de 1 vela no bloco.
+const QUADRANTES_DISP = { M1: ['M5', 'M15'], M5: ['M15'], M15: [] };
+const Q_TF_SEG = { M1: 60, M5: 300, M15: 900 };
+const Q_BLOCO_SEG = { M5: 300, M15: 900 };
+const Q_BLOCO_INFO = {
+  M5: { titulo: '🕔 Quadrante de 5 min', desc: 'O mais usado (MHI, Milhão).' },
+  M15: { titulo: '🕒 Quadrante de 15 min', desc: 'Blocos maiores, menos sinais.' },
+};
+
+function renderQBlocoOpcoes() {
+  const tf = strategyState.timeframe || 'M1';
+  const lembrete = document.getElementById('q-tf-lembrete');
+  if (lembrete) lembrete.textContent = tf;
+
+  const opcoes = QUADRANTES_DISP[tf];
+  const cont = document.getElementById('q-bloco-grid');
+
+  if (opcoes.length === 0) {
+    cont.innerHTML = `<p style="text-align:center;color:var(--text-secondary);grid-column:1/-1;">
+      Não dá pra usar quadrante com velas de ${tf} — não existe bloco maior. Volte e escolha M1 ou M5.
+    </p>`;
+    strategyState.q.bloco = null;
+    return;
+  }
+
+  if (!opcoes.includes(strategyState.q.bloco)) {
+    strategyState.q.bloco = null;
+  }
+
+  cont.innerHTML = opcoes.map(bloco => {
+    const n = Q_BLOCO_SEG[bloco] / Q_TF_SEG[tf];
+    const info = Q_BLOCO_INFO[bloco];
+    const selecionado = strategyState.q.bloco === bloco ? ' selected' : '';
+    return `
+      <div class="anchoring-card${selecionado}" onclick="setQBloco('${bloco}', this)">
+        <div class="anchoring-title">${info.titulo}</div>
+        <div class="anchoring-desc">${n} velas de ${tf}. ${info.desc}</div>
+      </div>
+    `;
+  }).join('');
+}
+
 function setQBloco(bloco, el) {
   strategyState.q.bloco = bloco;
-  document.querySelectorAll('#phase-q-bloco .anchoring-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#q-bloco-grid .anchoring-card').forEach(c => c.classList.remove('selected'));
   if (el) el.classList.add('selected');
 }
 
@@ -1501,8 +1983,15 @@ function setQEntradaPos(pos, btn) {
 
 // ── Voltar da fase de par (depende do modo/tipo) ──
 function voltarDoPair() {
+  // Testando uma carta/estratégia já existente: a definição (padrão, indicador,
+  // figura, quadrante...) está travada — só pode editar timeframe/par/horário.
+  // Por isso "Voltar" aqui não pode cair nas fases de edição da definição.
+  if (strategyState.testandoExistente) {
+    goToPhase('timeframe');
+    return;
+  }
   if (strategyState.mode === 'figura') {
-    goToPhase('fig-config');
+    goToPhase('fig-escolher');
     return;
   }
   if (strategyState.mode === 'indicador') {
@@ -1537,4 +2026,10 @@ function showToast(title, message, type = 'default') {
 // ── INICIALIZAR ──
 document.addEventListener('DOMContentLoaded', () => {
   updateMirrorPreview();
+
+  const reproduzirId = localStorage.getItem('buildcraft_reproduzir_id');
+  if (reproduzirId) {
+    localStorage.removeItem('buildcraft_reproduzir_id');
+    reproduzirCarta(reproduzirId);
+  }
 });

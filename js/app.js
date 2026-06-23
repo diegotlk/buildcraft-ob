@@ -108,21 +108,26 @@ function initScrollAnimations() {
 }
 
 /* ==================== MOBILE MENU ==================== */
+// O ☰ abre os próprios links da navbar (Início, Laboratório, Inventário,
+// Planos...) como um dropdown — não existe uma .sidebar separada nas páginas.
 function initMobileMenu() {
   const toggle = document.querySelector('.navbar-toggle');
-  const sidebar = document.querySelector('.sidebar');
+  const links = document.querySelector('.navbar-links');
 
-  if (!toggle || !sidebar) return;
+  if (!toggle || !links) return;
 
   toggle.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
+    links.classList.toggle('mobile-open');
   });
 
-  // Close on outside click
+  // Fecha ao clicar fora ou ao escolher um link.
   document.addEventListener('click', (e) => {
-    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
-      sidebar.classList.remove('open');
+    if (links.classList.contains('mobile-open') && !links.contains(e.target) && !toggle.contains(e.target)) {
+      links.classList.remove('mobile-open');
     }
+  });
+  links.addEventListener('click', (e) => {
+    if (e.target.closest('a')) links.classList.remove('mobile-open');
   });
 }
 

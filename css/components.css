@@ -35,7 +35,8 @@ main {
   white-space: nowrap;
 }
 
-.navbar-brand .brand-icon {
+.navbar-brand .brand-icon,
+.footer-brand .brand-icon {
   width: 34px;
   height: 34px;
   border-radius: var(--radius-md);
@@ -44,9 +45,11 @@ main {
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
-.navbar-brand .brand-text-craft {
+.navbar-brand .brand-text-craft,
+.footer-brand .brand-text-craft {
   background: linear-gradient(90deg, #6366f1, #ec4899);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -79,6 +82,17 @@ main {
   color: var(--accent-hover);
 }
 
+/* MVP: abas desativadas temporariamente (sem página/backend real ainda) */
+.navbar-link-disabled {
+  display: none;
+}
+
+/* MVP: botões de timeframe desativados (só M1 por enquanto) */
+.tf-desativado {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
 .navbar-actions {
   display: flex;
   align-items: center;
@@ -103,6 +117,158 @@ main {
   transform: scale(1.08);
 }
 
+/* ==================== MENU DA CONTA (dropdown do avatar) ==================== */
+.account-menu-wrap {
+  position: relative;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 230px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  display: none;
+  z-index: 200;
+}
+.account-menu.open {
+  display: block;
+  animation: fade-in .15s var(--ease-out);
+}
+.account-menu-email {
+  padding: 8px 10px 6px;
+  font-size: .75rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+.account-menu-plano {
+  margin: 0 10px 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: var(--text-secondary);
+}
+.account-menu-plano.premium {
+  color: var(--accent-hover);
+}
+
+/* Cards de estratégia trancados no plano Free (mostram badge "Premium"). */
+.anchoring-card.preset-locked {
+  position: relative;
+  opacity: .55;
+  filter: grayscale(.4);
+}
+.anchoring-card.preset-locked:hover {
+  opacity: .78;
+}
+.preset-lock-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: var(--accent-hover);
+  background: rgba(0, 0, 0, .35);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 2px 8px;
+}
+.account-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  font-size: .85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all .15s;
+}
+.account-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.account-menu-item.destaque {
+  color: var(--accent-hover);
+  font-weight: 700;
+}
+
+/* ==================== FORMULÁRIOS DE CONTA (login + menu da conta) ==================== */
+.auth-error {
+  display: none;
+  background: rgba(239, 68, 68, .1);
+  border: 1px solid var(--danger);
+  color: #fca5a5;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: .82rem;
+  margin-bottom: 16px;
+}
+
+/* Checklist de força da senha — usado no cadastro (login.html) e no modal
+   de "Mudar senha" do menu da conta. */
+.auth-reqs {
+  display: none;
+  margin: -6px 0 18px;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.auth-reqs.show { display: block; }
+.auth-reqs-titulo {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.auth-req {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .8rem;
+  color: var(--text-secondary);
+  padding: 2px 0;
+  transition: color .2s;
+}
+.auth-req .icone {
+  width: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  transition: color .2s;
+}
+.auth-req.ok { color: var(--success); }
+.auth-req.ok .icone { color: var(--success); }
+
+/* ==================== FOTO DE PERFIL (modal "Mudar foto") ==================== */
+.foto-preview-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.foto-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  border: 2px solid var(--border);
+}
+
 /* Mobile menu toggle */
 .navbar-toggle {
   display: none;
@@ -125,6 +291,26 @@ main {
 @media (max-width: 968px) {
   .navbar-links { display: none; }
   .navbar-toggle { display: flex; }
+
+  /* O ☰ abre os próprios links da navbar como um painel dropdown (em vez de
+     uma sidebar separada, que não existe nas páginas). */
+  .navbar-links.mobile-open {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px 16px;
+    box-shadow: var(--shadow-lg);
+  }
+  .navbar-links.mobile-open .navbar-link {
+    padding: 12px 14px;
+  }
 }
 
 /* ==================== SIDEBAR ==================== */
@@ -648,4 +834,44 @@ main {
 .achievement-desc {
   font-size: .78rem;
   color: var(--text-muted);
+}
+
+/* ==================== TABS DE LABORATÓRIO / INVENTÁRIO ==================== */
+.lab-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lab-tab {
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.lab-tab:hover {
+  color: var(--text-primary);
+}
+
+.lab-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.lab-subtabs {
+  margin-top: -14px;
+  margin-bottom: 24px;
+}
+.lab-subtabs .lab-tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-bottom-width: 1px;
 }

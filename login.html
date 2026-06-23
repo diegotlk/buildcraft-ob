@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Entrar ou criar conta no BuildCraft OB.">
+  <title>Entrar | BuildCraft OB</title>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+
+  <style>
+    .auth-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px 40px;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 36px 32px;
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .auth-logo .brand-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .auth-logo .brand-text-craft {
+      display: block;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.3rem;
+      background: linear-gradient(90deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-input);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 9px 0;
+      text-align: center;
+      border-radius: var(--radius-sm);
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .auth-tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .auth-switch {
+      text-align: center;
+      margin-top: 18px;
+      font-size: .82rem;
+      color: var(--text-secondary);
+    }
+    .auth-switch a {
+      color: var(--accent-hover);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .auth-back {
+      text-align: center;
+      margin-top: 14px;
+    }
+    .auth-back a {
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+    .auth-back a:hover {
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span class="brand-icon">⚗️</span>
+      <span class="brand-text-craft">BuildCraft OB</span>
+    </a>
+  </nav>
+
+  <!-- ==================== AUTH ==================== -->
+  <div class="auth-wrap">
+    <div class="glass-card auth-card">
+      <div class="auth-logo">
+        <div class="brand-icon">⚗️</div>
+        <span class="brand-text-craft">BuildCraft OB</span>
+      </div>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-entrar" onclick="trocarAbaAuth('entrar')">Entrar</div>
+        <div class="auth-tab" id="tab-cadastro" onclick="trocarAbaAuth('cadastro')">Criar Conta</div>
+      </div>
+
+      <div class="auth-error" id="auth-error"></div>
+
+      <form id="auth-form" onsubmit="enviarAuth(event)">
+        <div class="form-group">
+          <label class="form-label" for="auth-email">E-mail</label>
+          <input type="email" id="auth-email" class="form-input" placeholder="seu@email.com"
+                 autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="auth-senha">Senha</label>
+          <input type="password" id="auth-senha" class="form-input" placeholder="••••••••"
+                 autocomplete="current-password" minlength="8" required
+                 oninput="atualizarRequisitos()">
+        </div>
+
+        <div class="auth-reqs" id="auth-reqs">
+          <div class="auth-reqs-titulo">Sua senha precisa ter:</div>
+          <div class="auth-req" id="req-tamanho"><span class="icone">○</span> Pelo menos 8 caracteres</div>
+          <div class="auth-req" id="req-maiuscula"><span class="icone">○</span> Uma letra maiúscula (A-Z)</div>
+          <div class="auth-req" id="req-minuscula"><span class="icone">○</span> Uma letra minúscula (a-z)</div>
+          <div class="auth-req" id="req-numero"><span class="icone">○</span> Um número (0-9)</div>
+          <div class="auth-req" id="req-especial"><span class="icone">○</span> Um caractere especial (!@#$%...)</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" id="auth-submit" style="width:100%; margin-top:8px;">
+          Entrar
+        </button>
+      </form>
+
+      <div class="auth-switch">
+        <span id="auth-switch-texto">Não tem conta?</span>
+        <a id="auth-switch-link" onclick="trocarAbaAuth('cadastro')">Criar uma agora</a>
+      </div>
+
+      <div class="auth-back">
+        <a href="index.html">⬅ Voltar para o início</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js?v=3"></script>
+  <script>
+    let abaAuthAtual = 'entrar';
+
+    function trocarAbaAuth(aba) {
+      abaAuthAtual = aba;
+      document.getElementById('tab-entrar').classList.toggle('active', aba === 'entrar');
+      document.getElementById('tab-cadastro').classList.toggle('active', aba === 'cadastro');
+      document.getElementById('auth-submit').textContent = aba === 'entrar' ? 'Entrar' : 'Criar Conta';
+      document.getElementById('auth-senha').setAttribute('autocomplete', aba === 'entrar' ? 'current-password' : 'new-password');
+
+      if (aba === 'entrar') {
+        document.getElementById('auth-switch-texto').textContent = 'Não tem conta?';
+        document.getElementById('auth-switch-link').textContent = 'Criar uma agora';
+        document.getElementById('auth-switch-link').onclick = () => trocarAbaAuth('cadastro');
+      } else {
+        document.getElementById('auth-switch-texto').textContent = 'Já tem conta?';
+        document.getElementById('auth-switch-link').textContent = 'Entrar';
+        document.getElementById('auth-switch-link').onclick = () => trocarAbaAuth('entrar');
+      }
+
+      // O checklist de força só faz sentido ao criar a conta. No login, a senha
+      // já existe — exigir as regras ali só atrapalharia quem tem senha antiga.
+      document.getElementById('auth-reqs').classList.toggle('show', aba === 'cadastro');
+      if (aba === 'cadastro') atualizarRequisitos();
+
+      esconderErroAuth();
+    }
+
+    // regrasSenha/senhaForte vêm de js/auth.js (única fonte da política de
+    // senha no front, reaproveitada também no modal "Mudar senha").
+    function atualizarRequisitos() {
+      aplicarChecklistSenha(document.getElementById('auth-senha').value, (c) => 'req-' + c);
+    }
+
+    function mostrarErroAuth(msg) {
+      const el = document.getElementById('auth-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    function esconderErroAuth() {
+      document.getElementById('auth-error').style.display = 'none';
+    }
+
+    function redirecionarPosLogin() {
+      const params = new URLSearchParams(location.search);
+      const destino = params.get('redirect');
+      const paginasValidas = ['criar_estrategia.html', 'inventario.html', 'index.html', 'planos.html'];
+      window.location.href = (destino && paginasValidas.includes(destino)) ? destino : 'criar_estrategia.html';
+    }
+
+    async function enviarAuth(event) {
+      event.preventDefault();
+      esconderErroAuth();
+
+      const email = document.getElementById('auth-email').value.trim();
+      const senha = document.getElementById('auth-senha').value;
+      const endpoint = abaAuthAtual === 'entrar' ? '/api/auth/login' : '/api/auth/cadastro';
+
+      // Ao criar conta, segura aqui antes de chamar a API (o servidor também
+      // valida — isto é só pra dar um aviso rápido e claro ao usuário).
+      if (abaAuthAtual === 'cadastro' && !senhaForte(senha)) {
+        mostrarErroAuth('Sua senha ainda não cumpre todos os requisitos abaixo.');
+        return;
+      }
+
+      const btn = document.getElementById('auth-submit');
+      const textoOriginal = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = abaAuthAtual === 'entrar' ? 'Entrando...' : 'Criando conta...';
+
+      try {
+        const resp = await fetch(AUTH_API_BASE + endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha }),
+        });
+        const dados = await resp.json();
+
+        if (!resp.ok || !dados.success) {
+          mostrarErroAuth(dados.message || 'Não foi possível continuar. Tente de novo.');
+          btn.disabled = false;
+          btn.textContent = textoOriginal;
+          return;
+        }
+
+        salvarSessao(dados.token, dados.email, dados.plano || 'free');
+        redirecionarPosLogin();
+      } catch (e) {
+        mostrarErroAuth('Não foi possível conectar à API. Verifique se o backend (backtest_api.py) está rodando.');
+        btn.disabled = false;
+        btn.textContent = textoOriginal;
+      }
+    }
+
+    // Já logado? Não tem motivo pra ver a tela de login.
+    if (estaLogado()) {
+      redirecionarPosLogin();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Inventário — Suas estratégias salvas e cartas descobertas no BuildCraft OB.">
+  <title>Inventário | BuildCraft OB</title>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+  <!-- Inventário exige login — manda pra login.html antes de pintar a página. -->
+  <script src="js/auth.js?v=3"></script>
+  <script>exigirLogin();</script>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span class="brand-icon">⚗️</span>
+      <span class="brand-text-craft">BuildCraft OB</span>
+    </a>
+
+    <div class="navbar-links">
+      <a href="index.html" class="navbar-link">Início</a>
+      <a href="criar_estrategia.html" class="navbar-link">Laboratório</a>
+      <a href="inventario.html" class="navbar-link active">Inventário</a>
+      <a href="planos.html" class="navbar-link">Planos</a>
+      <!-- MVP: abas ainda sem página/backend real, temporariamente DESATIVADAS
+           (não remover — só tirar a classe/title quando for reabilitar). -->
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Ranking</a>
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Batalhas</a>
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Loja</a>
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Cartas</a>
+    </div>
+
+    <div class="navbar-actions">
+      <a href="login.html" class="btn btn-sm btn-primary">Começar Grátis</a>
+      <a href="login.html" class="navbar-avatar">?</a>
+    </div>
+
+    <button class="navbar-toggle" aria-label="Menu">☰</button>
+  </nav>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Header -->
+      <div class="lab-header" style="margin-top: 40px; margin-bottom: 32px;">
+        <h1 class="page-title">🎒 Inventário</h1>
+        <p class="page-subtitle">Suas cartas — o resultado real de cada teste, com raridade e nota.</p>
+      </div>
+
+      <!-- Empty state (inventário inteiro vazio) -->
+      <div id="inv-empty" class="card-box" style="display:none; text-align:center; padding:60px 24px;">
+        <div style="font-size:64px; margin-bottom:16px;">🔬</div>
+        <h3 style="margin-bottom:8px;">Seu inventário está vazio</h3>
+        <p style="color:var(--text-secondary); margin-bottom:24px;">Teste uma estratégia, gerenciamento ou build no Laboratório pra ganhar sua primeira carta.</p>
+        <a href="criar_estrategia.html" class="btn btn-accent">⚡ Ir para o Laboratório</a>
+      </div>
+
+      <div id="inv-conteudo">
+        <!-- Abas -->
+        <div class="lab-tabs">
+          <button class="lab-tab active" id="inv-tab-cartas" onclick="trocarAbaInventario('cartas')">🃏 Minhas Cartas</button>
+          <button class="lab-tab" id="inv-tab-historicos" onclick="trocarAbaInventario('historicos')">📊 Históricos</button>
+          <button class="lab-tab" id="inv-tab-lixeira" onclick="trocarAbaInventario('lixeira')">🗑️ Lixeira</button>
+        </div>
+
+        <!-- Cartas -->
+        <div id="inv-cartas-section">
+          <div class="lab-tabs" style="margin-bottom:16px;">
+            <button class="lab-tab active" id="inv-subtab-estrategias" onclick="trocarSubAbaCartas('estrategias')">📋 Estratégias</button>
+            <button class="lab-tab" id="inv-subtab-gerenciamentos" onclick="trocarSubAbaCartas('gerenciamentos')">♻️ Gerenciamentos</button>
+          </div>
+          <p class="carta-hint" style="margin-bottom:16px;">Clique em uma carta para virar e ver os detalhes.</p>
+          <div id="inv-cartas" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:28px;"></div>
+        </div>
+
+        <!-- Históricos (sequências de W/L geradas ao testar estratégias — usadas pra testar Gerenciamentos) -->
+        <div id="inv-historicos-section" style="display:none;">
+          <p class="carta-hint" style="margin-bottom:16px;">Gerados ao testar uma estratégia no Laboratório. Use-os em "Criar Gerenciamento" → "Testar Gerenciamento".</p>
+          <div id="inv-historicos" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+
+        <!-- Lixeira -->
+        <div id="inv-lixeira-section" style="display:none;">
+          <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+            <button class="btn btn-sm btn-outline" onclick="esvaziarLixeiraInventario()">Esvaziar lixeira</button>
+          </div>
+          <p class="carta-hint" style="margin-bottom:16px;">Itens ficam aqui por 30 dias antes de serem apagados pra sempre.</p>
+          <div id="inv-lixeira" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/app.js?v=11"></script>
+  <script src="js/inventario.js?v=10"></script>
+  <script src="js/historico.js?v=9"></script>
+  <script>
+    let abaInventarioAtual = 'cartas';
+    let subAbaCartasAtual = 'estrategias';
+
+    function trocarSubAbaCartas(sub) {
+      subAbaCartasAtual = sub;
+      document.getElementById('inv-subtab-estrategias').classList.toggle('active', sub === 'estrategias');
+      document.getElementById('inv-subtab-gerenciamentos').classList.toggle('active', sub === 'gerenciamentos');
+      renderInventario();
+    }
+
+    function trocarAbaInventario(aba) {
+      abaInventarioAtual = aba;
+      document.getElementById('inv-tab-cartas').classList.toggle('active', aba === 'cartas');
+      document.getElementById('inv-tab-historicos').classList.toggle('active', aba === 'historicos');
+      document.getElementById('inv-tab-lixeira').classList.toggle('active', aba === 'lixeira');
+
+      document.getElementById('inv-cartas-section').style.display = aba === 'cartas' ? 'block' : 'none';
+      document.getElementById('inv-historicos-section').style.display = aba === 'historicos' ? 'block' : 'none';
+      document.getElementById('inv-lixeira-section').style.display = aba === 'lixeira' ? 'block' : 'none';
+    }
+
+    function renderHistoricosInventario() {
+      const lista = getHistoricos();
+      document.getElementById('inv-tab-historicos').innerHTML = `📊 Históricos <span style="color:var(--accent-hover);font-weight:800">(${lista.length})</span>`;
+      document.getElementById('inv-historicos').innerHTML = lista.length
+        ? lista.slice().reverse().map(renderCardHistorico).join('')
+        : vazio('Nenhum histórico ainda. Teste uma estratégia no Laboratório e clique em "📊 Salvar Histórico".');
+    }
+
+    function excluirHistorico(id) {
+      salvarHistoricos(getHistoricos().filter(h => h.id !== id));
+      renderHistoricosInventario();
+    }
+
+    function excluirDoInventario(id) {
+      const item = getInventario().find(e => e.id === id);
+      moverParaLixeira(id);
+      showToast('🗑️ Movido para a lixeira', `"${item?.nome || ''}" pode ser recuperado na lixeira por 30 dias.`, 'default');
+      renderInventario();
+    }
+
+    function restaurarItemLixeira(id) {
+      const item = getInventario().find(e => e.id === id);
+      restaurarDaLixeira(id);
+      showToast('♻️ Restaurado', `"${item?.nome || ''}" voltou para o inventário.`, 'default');
+      renderInventario();
+    }
+
+    function excluirPermanenteInventario(id) {
+      if (!confirm('Excluir definitivamente? Essa ação não pode ser desfeita.')) return;
+      excluirPermanente(id);
+      renderInventario();
+    }
+
+    function esvaziarLixeiraInventario() {
+      if (!confirm('Esvaziar a lixeira inteira? Essa ação não pode ser desfeita.')) return;
+      esvaziarLixeira();
+      renderInventario();
+    }
+
+    function renderItemLixeira(item) {
+      const dias = diasRestantesLixeira(item);
+      const tag = item.carta ? `🃏 Carta #${String(item.carta.numero).padStart(3, '0')}` : '📋 Estratégia salva';
+      return `
+        <div class="card-box" style="padding:14px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div style="font-weight:700">${item.nome}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px">${tag} · expira em ${dias} dia${dias === 1 ? '' : 's'}</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-accent" onclick="restaurarItemLixeira('${item.id}')">♻️ Restaurar</button>
+            <button class="btn btn-sm btn-outline" onclick="excluirPermanenteInventario('${item.id}')">🗑️ Excluir para sempre</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function vazio(texto) {
+      return `<p style="text-align:center;color:var(--text-secondary);padding:40px 0;">${texto}</p>`;
+    }
+
+    function renderInventario() {
+      // Migração: qualquer item antigo salvo sem carta (de antes do padrão
+      // "testar já vira carta direto") ganha o número de descoberta agora.
+      const listaCompleta = getInventario();
+      let precisaMigrar = false;
+      listaCompleta.filter(e => !e.deletadoEm && !e.carta).forEach(e => {
+        e.carta = { numero: proximoNumeroDescoberta(), transformadaEm: new Date().toISOString() };
+        precisaMigrar = true;
+      });
+      if (precisaMigrar) salvarInventario(listaCompleta);
+
+      const lista = getInventario().filter(e => !e.deletadoEm);
+      const lixeira = getLixeira();
+      const cartas = lista.filter(e => e.carta);
+      const historicos = getHistoricos();
+
+      const emptyState = document.getElementById('inv-empty');
+      const conteudo = document.getElementById('inv-conteudo');
+
+      if (lista.length === 0 && lixeira.length === 0 && historicos.length === 0) {
+        emptyState.style.display = 'block';
+        conteudo.style.display = 'none';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      conteudo.style.display = 'block';
+
+      const contador = (n) => `<span style="color:var(--accent-hover);font-weight:800">(${n})</span>`;
+      document.getElementById('inv-tab-cartas').innerHTML = `🃏 Minhas Cartas ${contador(cartas.length)}`;
+      document.getElementById('inv-tab-lixeira').innerHTML = `🗑️ Lixeira ${contador(lixeira.length)}`;
+
+      // Sub-abas dentro de "Minhas Cartas": gerenciamento é o próprio modo;
+      // tudo o mais (pintar/figura/quadrante/indicador/build) é estratégia.
+      const cartasGerenciamento = cartas.filter(e => e.mode === 'gerenciamento');
+      const cartasEstrategia = cartas.filter(e => e.mode !== 'gerenciamento');
+      document.getElementById('inv-subtab-estrategias').innerHTML = `📋 Estratégias ${contador(cartasEstrategia.length)}`;
+      document.getElementById('inv-subtab-gerenciamentos').innerHTML = `♻️ Gerenciamentos ${contador(cartasGerenciamento.length)}`;
+
+      const cartasFiltradas = subAbaCartasAtual === 'gerenciamentos' ? cartasGerenciamento : cartasEstrategia;
+      document.getElementById('inv-cartas').innerHTML = cartasFiltradas.length
+        ? cartasFiltradas.slice().sort((a, b) => a.carta.numero - b.carta.numero).map(renderCartaFlip).join('')
+        : vazio(subAbaCartasAtual === 'gerenciamentos'
+            ? 'Nenhuma carta de gerenciamento ainda. Teste um gerenciamento no Laboratório.'
+            : 'Nenhuma carta de estratégia ainda. Teste uma estratégia no Laboratório.');
+
+      document.getElementById('inv-lixeira').innerHTML = lixeira.length
+        ? lixeira.map(renderItemLixeira).join('')
+        : vazio('Lixeira vazia.');
+
+      renderHistoricosInventario();
+
+      trocarAbaInventario(abaInventarioAtual);
+    }
+
+    document.addEventListener('DOMContentLoaded', renderInventario);
+  </script>
+</body>
+</html>

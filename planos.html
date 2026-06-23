@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Planos — Free e Premium do BuildCraft OB.">
+  <title>Planos | BuildCraft OB</title>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span class="brand-icon">⚗️</span>
+      <span class="brand-text-craft">BuildCraft OB</span>
+    </a>
+
+    <div class="navbar-links">
+      <a href="index.html" class="navbar-link">Início</a>
+      <a href="criar_estrategia.html" class="navbar-link">Laboratório</a>
+      <a href="inventario.html" class="navbar-link">Inventário</a>
+      <a href="planos.html" class="navbar-link active">Planos</a>
+      <!-- MVP: abas ainda sem página/backend real, temporariamente DESATIVADAS
+           (não remover — só tirar a classe/title quando for reabilitar). -->
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Ranking</a>
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Batalhas</a>
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Loja</a>
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Cartas</a>
+    </div>
+
+    <div class="navbar-actions">
+      <a href="login.html" class="btn btn-sm btn-primary">Começar Grátis</a>
+      <a href="login.html" class="navbar-avatar">?</a>
+    </div>
+
+    <button class="navbar-toggle" aria-label="Menu">☰</button>
+  </nav>
+
+  <!-- ==================== PLANOS ==================== -->
+  <section class="section" style="background:var(--bg-base);min-height:80vh">
+    <div class="container">
+      <div style="text-align:center;margin:24px 0 48px">
+        <h1 class="section-title">Planos</h1>
+        <p class="section-subtitle" style="margin:0 auto">
+          Comece grátis. Vire Premium quando quiser desbloquear tudo.
+        </p>
+      </div>
+
+      <div class="pricing-grid" style="max-width:760px;margin:0 auto;grid-template-columns:repeat(2,1fr)">
+        <!-- Free -->
+        <div class="pricing-card">
+          <div class="pricing-name">Free</div>
+          <div class="pricing-price">
+            <span class="amount">R$ 0</span>
+            <span class="period">/mês</span>
+          </div>
+          <div class="pricing-features">
+            <div class="pricing-feature"><span class="check">✓</span> 2 estratégias (MHI 1 e Milhão)</div>
+            <div class="pricing-feature"><span class="check">✓</span> Pares disponíveis</div>
+            <div class="pricing-feature"><span class="check">✓</span> Testes no histórico real</div>
+            <div class="pricing-feature disabled"><span class="check">✗</span> Demais estratégias</div>
+            <div class="pricing-feature disabled"><span class="check">✗</span> Montar estratégia do zero</div>
+          </div>
+          <a href="login.html" class="btn btn-outline" style="width:100%">Começar Grátis</a>
+        </div>
+
+        <!-- Premium -->
+        <div class="pricing-card featured">
+          <div class="pricing-name" style="color:var(--accent-hover)">Premium</div>
+          <div class="pricing-price">
+            <span class="amount" style="color:var(--accent-hover)">R$ 9,90</span>
+            <span class="period">/mês</span>
+          </div>
+          <div class="pricing-features">
+            <div class="pricing-feature"><span class="check">✓</span> Todas as estratégias</div>
+            <div class="pricing-feature"><span class="check">✓</span> Montar estratégia do zero</div>
+            <div class="pricing-feature"><span class="check">✓</span> Todos os pares</div>
+            <div class="pricing-feature"><span class="check">✓</span> Testes ilimitados</div>
+            <div class="pricing-feature"><span class="check">✓</span> Tudo que entrar depois</div>
+          </div>
+          <a href="#" class="btn btn-primary" style="width:100%" onclick="comprarPremium(); return false;">Assinar Premium</a>
+        </div>
+      </div>
+
+      <p style="text-align:center;color:var(--text-muted);font-size:.82rem;margin-top:28px">
+        Pagamento via Pix e cartão. Você pode cancelar quando quiser.
+      </p>
+    </div>
+  </section>
+
+  <script src="js/data.js?v=9"></script>
+  <script src="js/app.js?v=11"></script>
+  <script src="js/auth.js?v=3"></script>
+</body>
+</html>

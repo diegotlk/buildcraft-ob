@@ -31,17 +31,20 @@
 
     <div class="navbar-links">
       <a href="index.html" class="navbar-link active">Início</a>
-      <a href="laboratorio.html" class="navbar-link">Laboratório</a>
-      <a href="criar_estrategia.html" class="navbar-link">Criar Estratégia</a>
-      <a href="rankings.html" class="navbar-link">Ranking</a>
-      <a href="batalhas.html" class="navbar-link">Batalhas</a>
-      <a href="loja.html" class="navbar-link">Loja</a>
-      <a href="cartas.html" class="navbar-link">Cartas</a>
+      <a href="criar_estrategia.html" class="navbar-link">Laboratório</a>
+      <a href="inventario.html" class="navbar-link">Inventário</a>
+      <a href="planos.html" class="navbar-link">Planos</a>
+      <!-- MVP: abas ainda sem página/backend real, temporariamente DESATIVADAS
+           (não remover — só tirar a classe/title quando for reabilitar). -->
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Ranking</a>
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Batalhas</a>
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Loja</a>
+      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Cartas</a>
     </div>
 
     <div class="navbar-actions">
-      <a href="planos.html" class="btn btn-sm btn-primary">Começar Grátis</a>
-      <a href="dashboard.html" class="navbar-avatar">D</a>
+      <a href="login.html" class="btn btn-sm btn-primary">Começar Grátis</a>
+      <a href="login.html" class="navbar-avatar">?</a>
     </div>
 
     <button class="navbar-toggle" aria-label="Menu">☰</button>
@@ -73,7 +76,7 @@
         </p>
 
         <div class="hero-actions">
-          <a href="laboratorio.html" class="btn btn-lg btn-legendary">⚗️ Criar Minha Build</a>
+          <a href="criar_estrategia.html" class="btn btn-lg btn-legendary">⚗️ Criar Minha Build</a>
           <a href="#how-it-works" class="btn btn-lg btn-outline">Como Funciona →</a>
         </div>
 
@@ -376,7 +379,9 @@
         </p>
       </div>
 
-      <div class="pricing-grid scroll-animate">
+      <!-- MVP: só Free e Premium ativos. Criador e Pro foram retirados por
+           enquanto (reintroduzir quando o marketplace/datasets existirem). -->
+      <div class="pricing-grid scroll-animate" style="max-width:760px;margin:0 auto;grid-template-columns:repeat(2,1fr)">
         <!-- Free -->
         <div class="pricing-card">
           <div class="pricing-name">Free</div>
@@ -385,68 +390,30 @@
             <span class="period">/mês</span>
           </div>
           <div class="pricing-features">
-            <div class="pricing-feature"><span class="check">✓</span> 3 estratégias básicas</div>
-            <div class="pricing-feature"><span class="check">✓</span> 3 pares</div>
-            <div class="pricing-feature"><span class="check">✓</span> 5 testes por dia</div>
-            <div class="pricing-feature"><span class="check">✓</span> Histórico limitado</div>
-            <div class="pricing-feature disabled"><span class="check">✗</span> Ranking</div>
-            <div class="pricing-feature disabled"><span class="check">✗</span> Marketplace</div>
+            <div class="pricing-feature"><span class="check">✓</span> 2 estratégias (MHI 1 e Milhão)</div>
+            <div class="pricing-feature"><span class="check">✓</span> Pares disponíveis</div>
+            <div class="pricing-feature"><span class="check">✓</span> Testes no histórico real</div>
+            <div class="pricing-feature disabled"><span class="check">✗</span> Demais estratégias</div>
+            <div class="pricing-feature disabled"><span class="check">✗</span> Montar estratégia do zero</div>
           </div>
-          <a href="#" class="btn btn-outline" style="width:100%">Começar Grátis</a>
+          <a href="login.html" class="btn btn-outline" style="width:100%">Começar Grátis</a>
         </div>
 
         <!-- Premium -->
         <div class="pricing-card featured">
           <div class="pricing-name" style="color:var(--accent-hover)">Premium</div>
           <div class="pricing-price">
-            <span class="amount" style="color:var(--accent-hover)">R$ 29</span>
+            <span class="amount" style="color:var(--accent-hover)">R$ 9,90</span>
             <span class="period">/mês</span>
           </div>
           <div class="pricing-features">
             <div class="pricing-feature"><span class="check">✓</span> Todas as estratégias</div>
+            <div class="pricing-feature"><span class="check">✓</span> Montar estratégia do zero</div>
             <div class="pricing-feature"><span class="check">✓</span> Todos os pares</div>
             <div class="pricing-feature"><span class="check">✓</span> Testes ilimitados</div>
-            <div class="pricing-feature"><span class="check">✓</span> Histórico completo</div>
-            <div class="pricing-feature"><span class="check">✓</span> Rankings avançados</div>
-            <div class="pricing-feature"><span class="check">✓</span> Mutações</div>
+            <div class="pricing-feature"><span class="check">✓</span> Tudo que entrar depois</div>
           </div>
-          <a href="#" class="btn btn-primary" style="width:100%">Assinar Premium</a>
-        </div>
-
-        <!-- Criador -->
-        <div class="pricing-card">
-          <div class="pricing-name" style="color:var(--rarity-epic)">Criador</div>
-          <div class="pricing-price">
-            <span class="amount" style="color:var(--rarity-epic)">R$ 49</span>
-            <span class="period">/mês</span>
-          </div>
-          <div class="pricing-features">
-            <div class="pricing-feature"><span class="check">✓</span> Tudo do Premium</div>
-            <div class="pricing-feature"><span class="check">✓</span> Criar estratégias</div>
-            <div class="pricing-feature"><span class="check">✓</span> Publicar cartas</div>
-            <div class="pricing-feature"><span class="check">✓</span> Vender no marketplace</div>
-            <div class="pricing-feature"><span class="check">✓</span> Estatísticas de venda</div>
-            <div class="pricing-feature"><span class="check">✓</span> Ranking de criador</div>
-          </div>
-          <a href="#" class="btn btn-outline" style="width:100%;border-color:var(--rarity-epic);color:var(--rarity-epic)">Começar a criar</a>
-        </div>
-
-        <!-- Pro -->
-        <div class="pricing-card">
-          <div class="pricing-name" style="color:var(--rarity-legendary)">Pro</div>
-          <div class="pricing-price">
-            <span class="amount" style="color:var(--rarity-legendary)">R$ 99</span>
-            <span class="period">/mês</span>
-          </div>
-          <div class="pricing-features">
-            <div class="pricing-feature"><span class="check">✓</span> Tudo do Criador</div>
-            <div class="pricing-feature"><span class="check">✓</span> Datasets premium</div>
-            <div class="pricing-feature"><span class="check">✓</span> Simulações pesadas</div>
-            <div class="pricing-feature"><span class="check">✓</span> Marketplace completo</div>
-            <div class="pricing-feature"><span class="check">✓</span> Exportação avançada</div>
-            <div class="pricing-feature"><span class="check">✓</span> Suporte prioritário</div>
-          </div>
-          <a href="#" class="btn btn-outline" style="width:100%;border-color:var(--rarity-legendary);color:var(--rarity-legendary)">Ir Pro</a>
+          <a href="#" class="btn btn-primary" style="width:100%" onclick="comprarPremium(); return false;">Assinar Premium</a>
         </div>
       </div>
     </div>
@@ -465,7 +432,7 @@
           Sua próxima descoberta lendária está esperando.
         </p>
         <div style="position:relative;z-index:2">
-          <a href="laboratorio.html" class="btn btn-lg btn-legendary">⚗️ Começar Agora</a>
+          <a href="criar_estrategia.html" class="btn btn-lg btn-legendary">⚗️ Começar Agora</a>
         </div>
       </div>
     </div>
@@ -477,7 +444,7 @@
     <div class="container">
       <div class="footer-grid">
         <div>
-          <div class="footer-brand">⚗️ Build<span style="color:var(--accent-hover)">Craft</span> OB</div>
+          <div class="footer-brand"><span class="brand-icon">⚗️</span><span class="brand-text-craft">BuildCraft OB</span></div>
           <p class="footer-desc">
             O primeiro laboratório gamificado de estratégias.
             Monte, teste, descubra e colecione.
@@ -485,7 +452,7 @@
         </div>
         <div>
           <div class="footer-title">Produto</div>
-          <a href="laboratorio.html" class="footer-link">Laboratório</a>
+          <a href="criar_estrategia.html" class="footer-link">Laboratório</a>
           <a href="rankings.html" class="footer-link">Ranking</a>
           <a href="batalhas.html" class="footer-link">Batalhas</a>
           <a href="loja.html" class="footer-link">Loja</a>
@@ -502,8 +469,6 @@
           <div class="footer-title">Planos</div>
           <a href="planos.html" class="footer-link">Free</a>
           <a href="planos.html" class="footer-link">Premium</a>
-          <a href="planos.html" class="footer-link">Criador</a>
-          <a href="planos.html" class="footer-link">Pro</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -515,8 +480,9 @@
 
 
   <!-- ==================== SCRIPTS ==================== -->
-  <script src="js/data.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/data.js?v=11"></script>
+  <script src="js/app.js?v=11"></script>
+  <script src="js/auth.js?v=3"></script>
   <script>
     // Render featured cards
     const featuredContainer = document.getElementById('featured-cards');
