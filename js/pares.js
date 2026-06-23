@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Real Pairs from velas.db
+   Binaryzando — Real Pairs from velas.db
    ============================================================ */
 
 // MVP: lista restrita aos pares mais usados, 3 OTC + 3 de mercado aberto.

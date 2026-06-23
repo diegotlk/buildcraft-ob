@@ -2,3 +2,4 @@
 __pycache__/
 *.pyc
 start_site.bat
+backtest_api.py

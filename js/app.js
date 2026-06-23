@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — App Logic
+   Binaryzando — App Logic
    Card rendering, animations, interactions, navigation
    ============================================================ */
 

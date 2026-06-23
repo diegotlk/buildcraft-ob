@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Laboratório de Builds
+   Binaryzando — Laboratório de Builds
    Uma Build = Estratégia salva + Gerenciamento salvo + banca/payout.
    Junta o histórico real de W/L da estratégia com o replay de banca
    do gerenciamento e gera uma carta de Build (raridade, nota, classe).

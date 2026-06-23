@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Strategy Builder Logic (Fixed)
+   Binaryzando — Strategy Builder Logic (Fixed)
    ============================================================ */
 
 let strategyState = {

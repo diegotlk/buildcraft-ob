@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Inventário
+   Binaryzando — Inventário
    Armazenamento das estratégias salvas, transformação em carta
    e geração automática de descrição/arte por categoria.
    ============================================================ */

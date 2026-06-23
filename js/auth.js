@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Autenticação
+   Binaryzando — Autenticação
    Sessão do usuário (token + e-mail) guardada no localStorage.
    Carregada em toda página que precisa saber se o usuário está
    logado (navbar) ou exigir login (Laboratório, Inventário...).

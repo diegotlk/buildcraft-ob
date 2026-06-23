@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Gerenciamento
+   Binaryzando — Gerenciamento
    Só existem dois gerenciamentos-base: Soros (avança após vitória)
    e Martingale (avança após derrota). Ao clicar em um deles, um
    assistente pergunta, em sequência: próxima vela ou próxima

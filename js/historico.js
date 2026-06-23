@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Histórico de Entradas
+   Binaryzando — Histórico de Entradas
    Sequências reais de W/L (vindas do motor_backtest, via
    backtest_api.py) usadas para testar Gerenciamentos de verdade,
    em vez de uma simulação abstrata de pior/melhor caso.

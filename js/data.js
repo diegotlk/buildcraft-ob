@@ -1,5 +1,5 @@
 /* ============================================================
-   BuildCraft OB — Mock Data
+   Binaryzando — Mock Data
    Realistic demo data for all site features
    ============================================================ */
 
