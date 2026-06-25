@@ -23,10 +23,16 @@
   --text-muted:     #556178;
   --text-inverse:   #0a0e17;
 
-  /* Accent */
-  --accent:         #6366f1;
-  --accent-hover:   #818cf8;
-  --accent-glow:    rgba(99,102,241,.35);
+  /* Brand — cores reais da logo (laranja → magenta → roxo) */
+  --brand-1:        #ff5e3a;
+  --brand-2:        #d801a6;
+  --brand-3:        #9600ed;
+  --brand-gradient: linear-gradient(135deg, #ff5e3a, #d801a6, #9600ed);
+
+  /* Accent (alinhado à marca) */
+  --accent:         #c026d3;
+  --accent-hover:   #e056d4;
+  --accent-glow:    rgba(192,38,211,.35);
 
   /* Rarity colours */
   --rarity-common:      #6b7280;
@@ -179,12 +185,12 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 .btn:hover::after{opacity:1}
 
 .btn-primary{
-  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  background:linear-gradient(135deg,#c026d3,#8b5cf6);
   color:#fff;
-  box-shadow:0 4px 15px rgba(99,102,241,.3);
+  box-shadow:0 4px 15px rgba(192,38,211,.3);
 }
 .btn-primary:hover{
-  box-shadow:0 6px 25px rgba(99,102,241,.45);
+  box-shadow:0 6px 25px rgba(192,38,211,.45);
   transform:translateY(-1px);
 }
 
@@ -207,7 +213,7 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 .btn-outline:hover{
   border-color:var(--accent);
   color:var(--accent-hover);
-  background:rgba(99,102,241,.06);
+  background:rgba(192,38,211,.06);
 }
 
 .btn-ghost{
@@ -302,7 +308,7 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 
 /* ---------- Glow text ---------- */
 .glow-text{
-  background:linear-gradient(135deg,#e8ecf4,#818cf8,#a78bfa);
+  background:linear-gradient(135deg,#e8ecf4,#e056d4,#a78bfa);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
@@ -330,8 +336,8 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
   50%{transform:translateY(-10px)}
 }
 @keyframes pulse-glow{
-  0%,100%{box-shadow:0 0 15px var(--glow-color,rgba(99,102,241,.3))}
-  50%{box-shadow:0 0 30px var(--glow-color,rgba(99,102,241,.5))}
+  0%,100%{box-shadow:0 0 15px var(--glow-color,rgba(192,38,211,.3))}
+  50%{box-shadow:0 0 30px var(--glow-color,rgba(192,38,211,.5))}
 }
 @keyframes fade-in{
   from{opacity:0;transform:translateY(20px)}
@@ -369,7 +375,7 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 ::-webkit-scrollbar-thumb:hover{background:var(--bg-hover)}
 
 /* ---------- Selection ---------- */
-::selection{background:rgba(99,102,241,.3);color:#fff}
+::selection{background:rgba(192,38,211,.3);color:#fff}
 
 /* ---------- Responsive ---------- */
 @media(max-width:768px){

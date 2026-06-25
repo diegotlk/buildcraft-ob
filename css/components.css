@@ -33,16 +33,22 @@ main {
   font-size: 1.2rem;
   margin-right: auto;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .navbar-logo {
-  height: 30px;
+  height: 26px;
   width: auto;
   display: block;
+  flex-shrink: 0;
+  transition: opacity .2s var(--ease-out);
+}
+.navbar-brand:hover .navbar-logo {
+  opacity: .82;
 }
 
 .footer-logo {
-  height: 26px;
+  height: 24px;
   width: auto;
   display: block;
 }
@@ -93,7 +99,7 @@ main {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #6366f1, #ec4899);
+  background: linear-gradient(135deg, #c026d3, #ec4899);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,7 +253,7 @@ main {
   width: 96px;
   height: 96px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #6366f1, #ec4899);
+  background: linear-gradient(135deg, #c026d3, #ec4899);
   background-size: cover;
   background-position: center;
   display: flex;
@@ -274,7 +280,7 @@ main {
   transition: all 0.2s ease;
 }
 .navbar-toggle:hover {
-  background: rgba(99, 102, 241, 0.1);
+  background: rgba(192, 38, 211, 0.1);
   color: var(--accent);
 }
 @media (max-width: 968px) {
@@ -300,6 +306,12 @@ main {
   .navbar-links.mobile-open .navbar-link {
     padding: 12px 14px;
   }
+}
+
+/* Em telas estreitas, o CTA textual sai (o avatar "?" também leva ao login);
+   evita apertar a logo e o ☰ em celulares pequenos. */
+@media (max-width: 600px) {
+  .navbar-actions .btn-primary { display: none; }
 }
 
 /* ==================== SIDEBAR ==================== */
@@ -349,7 +361,7 @@ main {
   color: var(--text-primary);
 }
 .sidebar-item.active {
-  background: rgba(99,102,241,.1);
+  background: rgba(192,38,211,.1);
   color: var(--accent-hover);
 }
 .sidebar-item .icon {
@@ -362,7 +374,7 @@ main {
   margin-left: auto;
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  background: rgba(99,102,241,.15);
+  background: rgba(192,38,211,.15);
   color: var(--accent-hover);
   font-size: .7rem;
   font-weight: 700;
@@ -764,7 +776,7 @@ main {
   background: var(--bg-base);
 }
 .comparison-bar-left {
-  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  background: linear-gradient(90deg, #3b82f6, #c026d3);
   transition: width .8s var(--ease-out);
 }
 .comparison-bar-right {
