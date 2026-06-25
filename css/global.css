@@ -23,16 +23,17 @@
   --text-muted:     #556178;
   --text-inverse:   #0a0e17;
 
-  /* Brand — cores reais da logo (laranja → magenta → roxo) */
-  --brand-1:        #ff5e3a;
-  --brand-2:        #d801a6;
-  --brand-3:        #9600ed;
-  --brand-gradient: linear-gradient(135deg, #ff5e3a, #d801a6, #9600ed);
+  /* Paleta tech — azul elétrico → ciano → violeta (vibe IQ Option / gaming).
+     O magenta/roxo da logo fica como pop de cor pontual, não domina a UI. */
+  --brand-1:        #22d3ee;
+  --brand-2:        #18a0fb;
+  --brand-3:        #7c3aed;
+  --brand-gradient: linear-gradient(135deg, #22d3ee, #18a0fb, #7c3aed);
 
-  /* Accent (alinhado à marca) */
-  --accent:         #c026d3;
-  --accent-hover:   #e056d4;
-  --accent-glow:    rgba(192,38,211,.35);
+  /* Accent */
+  --accent:         #18a0fb;
+  --accent-hover:   #5cbcff;
+  --accent-glow:    rgba(24,160,251,.35);
 
   /* Rarity colours */
   --rarity-common:      #6b7280;
@@ -54,7 +55,7 @@
   --grade-b:  #3b82f6;
   --grade-a:  #8b5cf6;
   --grade-s:  #f59e0b;
-  --grade-sp: linear-gradient(135deg,#f59e0b,#ef4444,#ec4899);
+  --grade-sp: linear-gradient(135deg,#f59e0b,#ef4444,#22d3ee);
 
   /* Semantic */
   --success:    #22c55e;
@@ -185,12 +186,12 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 .btn:hover::after{opacity:1}
 
 .btn-primary{
-  background:linear-gradient(135deg,#c026d3,#8b5cf6);
+  background:linear-gradient(135deg,#18a0fb,#8b5cf6);
   color:#fff;
-  box-shadow:0 4px 15px rgba(192,38,211,.3);
+  box-shadow:0 4px 15px rgba(24,160,251,.3);
 }
 .btn-primary:hover{
-  box-shadow:0 6px 25px rgba(192,38,211,.45);
+  box-shadow:0 6px 25px rgba(24,160,251,.45);
   transform:translateY(-1px);
 }
 
@@ -213,7 +214,7 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 .btn-outline:hover{
   border-color:var(--accent);
   color:var(--accent-hover);
-  background:rgba(192,38,211,.06);
+  background:rgba(24,160,251,.06);
 }
 
 .btn-ghost{
@@ -308,7 +309,7 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 
 /* ---------- Glow text ---------- */
 .glow-text{
-  background:linear-gradient(135deg,#e8ecf4,#e056d4,#a78bfa);
+  background:linear-gradient(135deg,#e8ecf4,#5cbcff,#a78bfa);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
@@ -336,8 +337,8 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
   50%{transform:translateY(-10px)}
 }
 @keyframes pulse-glow{
-  0%,100%{box-shadow:0 0 15px var(--glow-color,rgba(192,38,211,.3))}
-  50%{box-shadow:0 0 30px var(--glow-color,rgba(192,38,211,.5))}
+  0%,100%{box-shadow:0 0 15px var(--glow-color,rgba(24,160,251,.3))}
+  50%{box-shadow:0 0 30px var(--glow-color,rgba(24,160,251,.5))}
 }
 @keyframes fade-in{
   from{opacity:0;transform:translateY(20px)}
@@ -375,7 +376,7 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 ::-webkit-scrollbar-thumb:hover{background:var(--bg-hover)}
 
 /* ---------- Selection ---------- */
-::selection{background:rgba(192,38,211,.3);color:#fff}
+::selection{background:rgba(24,160,251,.3);color:#fff}
 
 /* ---------- Responsive ---------- */
 @media(max-width:768px){

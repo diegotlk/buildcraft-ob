@@ -99,7 +99,7 @@ main {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #c026d3, #ec4899);
+  background: linear-gradient(135deg, #18a0fb, #22d3ee);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -253,7 +253,7 @@ main {
   width: 96px;
   height: 96px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #c026d3, #ec4899);
+  background: linear-gradient(135deg, #18a0fb, #22d3ee);
   background-size: cover;
   background-position: center;
   display: flex;
@@ -280,7 +280,7 @@ main {
   transition: all 0.2s ease;
 }
 .navbar-toggle:hover {
-  background: rgba(192, 38, 211, 0.1);
+  background: rgba(24, 160, 251, 0.1);
   color: var(--accent);
 }
 @media (max-width: 968px) {
@@ -361,7 +361,7 @@ main {
   color: var(--text-primary);
 }
 .sidebar-item.active {
-  background: rgba(192,38,211,.1);
+  background: rgba(24,160,251,.1);
   color: var(--accent-hover);
 }
 .sidebar-item .icon {
@@ -374,7 +374,7 @@ main {
   margin-left: auto;
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  background: rgba(192,38,211,.15);
+  background: rgba(24,160,251,.15);
   color: var(--accent-hover);
   font-size: .7rem;
   font-weight: 700;
@@ -776,7 +776,7 @@ main {
   background: var(--bg-base);
 }
 .comparison-bar-left {
-  background: linear-gradient(90deg, #3b82f6, #c026d3);
+  background: linear-gradient(90deg, #3b82f6, #18a0fb);
   transition: width .8s var(--ease-out);
 }
 .comparison-bar-right {

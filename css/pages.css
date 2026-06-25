@@ -28,7 +28,7 @@
   width: 900px;
   height: 900px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(192,38,211,.12) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(24,160,251,.12) 0%, transparent 60%);
   filter: blur(80px);
 }
 .hero-bg::after {
@@ -48,8 +48,8 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(192,38,211,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(192,38,211,.03) 1px, transparent 1px);
+    linear-gradient(rgba(24,160,251,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24,160,251,.03) 1px, transparent 1px);
   background-size: 60px 60px;
   z-index: 1;
   mask-image: radial-gradient(circle at 50% 40%, black 20%, transparent 70%);
@@ -70,8 +70,8 @@
   gap: 8px;
   padding: 6px 18px;
   border-radius: var(--radius-full);
-  background: rgba(192,38,211,.08);
-  border: 1px solid rgba(192,38,211,.15);
+  background: rgba(24,160,251,.08);
+  border: 1px solid rgba(24,160,251,.15);
   font-size: .78rem;
   font-weight: 600;
   color: var(--accent-hover);
@@ -176,14 +176,14 @@
 .step-card:hover {
   border-color: var(--accent);
   transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(192,38,211,.12);
+  box-shadow: 0 8px 30px rgba(24,160,251,.12);
 }
 
 .step-number {
   width: 48px;
   height: 48px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, rgba(192,38,211,.15), rgba(139,92,246,.1));
+  background: linear-gradient(135deg, rgba(24,160,251,.15), rgba(139,92,246,.1));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -275,8 +275,8 @@
 }
 .pricing-card.featured {
   border-color: var(--accent);
-  background: linear-gradient(170deg, var(--bg-card), rgba(192,38,211,.04));
-  box-shadow: 0 8px 40px rgba(192,38,211,.12);
+  background: linear-gradient(170deg, var(--bg-card), rgba(24,160,251,.04));
+  box-shadow: 0 8px 40px rgba(24,160,251,.12);
 }
 .pricing-card.featured::before {
   content: 'MAIS POPULAR';
@@ -285,7 +285,7 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 4px 16px;
-  background: linear-gradient(135deg, #c026d3, #8b5cf6);
+  background: linear-gradient(135deg, #18a0fb, #8b5cf6);
   border-radius: var(--radius-full);
   font-size: .65rem;
   font-weight: 800;
@@ -337,8 +337,8 @@
 
 /* --- CTA banner --- */
 .cta-banner {
-  background: linear-gradient(135deg, rgba(192,38,211,.08), rgba(139,92,246,.06));
-  border: 1px solid rgba(192,38,211,.12);
+  background: linear-gradient(135deg, rgba(24,160,251,.08), rgba(139,92,246,.06));
+  border: 1px solid rgba(24,160,251,.12);
   border-radius: var(--radius-xl);
   padding: 64px 48px;
   text-align: center;
@@ -353,7 +353,7 @@
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(192,38,211,.1) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(24,160,251,.1) 0%, transparent 60%);
   filter: blur(50px);
 }
 
@@ -701,7 +701,7 @@
 .profile-banner {
   position: relative;
   padding: 48px 32px 32px;
-  background: linear-gradient(135deg, var(--bg-elevated), rgba(192,38,211,.06));
+  background: linear-gradient(135deg, var(--bg-elevated), rgba(24,160,251,.06));
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   margin-bottom: 32px;
@@ -715,7 +715,7 @@
   width: 400px;
   height: 400px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(192,38,211,.1) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(24,160,251,.1) 0%, transparent 60%);
   filter: blur(50px);
 }
 
@@ -723,7 +723,7 @@
   width: 80px;
   height: 80px;
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, #c026d3, #ec4899);
+  background: linear-gradient(135deg, #18a0fb, #22d3ee);
   display: flex;
   align-items: center;
   justify-content: center;

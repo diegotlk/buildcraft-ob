@@ -102,7 +102,7 @@
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  background: linear-gradient(135deg, var(--rarity-epic), #ec4899, var(--rarity-epic));
+  background: linear-gradient(135deg, var(--rarity-epic), #22d3ee, var(--rarity-epic));
   background-size: 200% 200%;
   animation: shimmer-bg 3s ease-in-out infinite;
   z-index: -1;
@@ -234,7 +234,7 @@
 
 .card-type-tag-gerenciamento {
   background: rgba(129,140,248,.18);
-  color: #e056d4;
+  color: #5cbcff;
 }
 
 .card-type-tag-build {
