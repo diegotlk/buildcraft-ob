@@ -18,10 +18,11 @@ main {
   display: flex;
   align-items: center;
   padding: 0 24px;
-  background: rgba(10,14,23,.85);
+  background: rgba(6,8,15,.82);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(0,234,255,.18);
+  box-shadow: 0 1px 0 rgba(0,234,255,.1), 0 4px 30px rgba(0,0,0,.55);
 }
 
 .navbar-brand {
@@ -75,6 +76,7 @@ main {
 }
 .navbar-link.active {
   color: var(--accent-hover);
+  text-shadow: 0 0 10px rgba(0,234,255,.55);
 }
 
 /* MVP: abas desativadas temporariamente (sem página/backend real ainda) */
@@ -280,7 +282,7 @@ main {
   transition: all 0.2s ease;
 }
 .navbar-toggle:hover {
-  background: rgba(24, 160, 251, 0.1);
+  background: rgba(0, 234, 255, 0.1);
   color: var(--accent);
 }
 @media (max-width: 968px) {
@@ -361,7 +363,7 @@ main {
   color: var(--text-primary);
 }
 .sidebar-item.active {
-  background: rgba(24,160,251,.1);
+  background: rgba(0,234,255,.1);
   color: var(--accent-hover);
 }
 .sidebar-item .icon {
@@ -374,7 +376,7 @@ main {
   margin-left: auto;
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  background: rgba(24,160,251,.15);
+  background: rgba(0,234,255,.15);
   color: var(--accent-hover);
   font-size: .7rem;
   font-weight: 700;

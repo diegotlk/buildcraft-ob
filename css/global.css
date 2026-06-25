@@ -4,18 +4,18 @@
    ============================================================ */
 
 /* ---------- Google Fonts ---------- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap');
 
 /* ---------- CSS Custom Properties ---------- */
 :root {
   /* Background layers */
-  --bg-deepest:    #050810;
-  --bg-base:       #0a0e17;
-  --bg-surface:    #0f1420;
-  --bg-card:       #141925;
-  --bg-elevated:   #1a2030;
-  --bg-hover:      #1f2738;
-  --bg-input:      #111622;
+  --bg-deepest:    #05070e;
+  --bg-base:       #080b14;
+  --bg-surface:    #0c111c;
+  --bg-card:       #10151f;
+  --bg-elevated:   #161c2a;
+  --bg-hover:      #1c2434;
+  --bg-input:      #0e131e;
 
   /* Text */
   --text-primary:   #e8ecf4;
@@ -23,17 +23,23 @@
   --text-muted:     #556178;
   --text-inverse:   #0a0e17;
 
-  /* Paleta tech — azul elétrico → ciano → violeta (vibe IQ Option / gaming).
-     O magenta/roxo da logo fica como pop de cor pontual, não domina a UI. */
-  --brand-1:        #22d3ee;
-  --brand-2:        #18a0fb;
-  --brand-3:        #7c3aed;
-  --brand-gradient: linear-gradient(135deg, #22d3ee, #18a0fb, #7c3aed);
+  /* Paleta cyberpunk neon — ciano elétrico domina, magenta como acento neon,
+     violeta de apoio. Glow forte; cara de HUD de game / synthwave. */
+  --brand-1:        #00eaff;
+  --brand-2:        #ff2e8a;
+  --brand-3:        #9d4edd;
+  --brand-gradient: linear-gradient(135deg, #00eaff, #18a0fb, #9d4edd);
+
+  /* Neon individuais (glow, bordas, detalhes HUD) */
+  --neon-cyan:      #00eaff;
+  --neon-magenta:   #ff2e8a;
+  --neon-gold:      #ffc24b;
+  --neon-violet:    #9d4edd;
 
   /* Accent */
-  --accent:         #18a0fb;
-  --accent-hover:   #5cbcff;
-  --accent-glow:    rgba(24,160,251,.35);
+  --accent:         #00eaff;
+  --accent-hover:   #6ef5ff;
+  --accent-glow:    rgba(0,234,255,.5);
 
   /* Rarity colours */
   --rarity-common:      #6b7280;
@@ -82,7 +88,8 @@
 
   /* Typography */
   --font-body:    'Inter', system-ui, -apple-system, sans-serif;
-  --font-display: 'Outfit', 'Inter', system-ui, sans-serif;
+  --font-display: 'Orbitron', 'Inter', system-ui, sans-serif;
+  --font-hud:     'Rajdhani', 'Inter', system-ui, sans-serif;
 
   /* Transitions */
   --ease-out:  cubic-bezier(.25,.46,.45,.94);
@@ -185,36 +192,46 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 }
 .btn:hover::after{opacity:1}
 
+/* cantos cortados (chanfro) — assinatura de HUD cyberpunk */
+.btn-primary,.btn-legendary,.btn-lg{
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+  border-radius:0;
+}
+
 .btn-primary{
-  background:linear-gradient(135deg,#18a0fb,#8b5cf6);
-  color:#fff;
-  box-shadow:0 4px 15px rgba(24,160,251,.3);
+  background:linear-gradient(135deg,#00eaff,#18a0fb);
+  color:#04121a;
+  font-weight:700;
+  box-shadow:0 0 18px rgba(0,234,255,.45),inset 0 0 12px rgba(255,255,255,.15);
 }
 .btn-primary:hover{
-  box-shadow:0 6px 25px rgba(24,160,251,.45);
+  box-shadow:0 0 30px rgba(0,234,255,.7),inset 0 0 14px rgba(255,255,255,.22);
   transform:translateY(-1px);
 }
 
 .btn-legendary{
-  background:linear-gradient(135deg,#f59e0b,#eab308,#f59e0b);
+  background:linear-gradient(135deg,#ffc24b,#f59e0b,#ffc24b);
   background-size:200% 200%;
   animation:shimmer-bg 3s ease-in-out infinite;
-  color:#0a0e17;
-  box-shadow:0 4px 20px rgba(245,158,11,.35);
+  color:#1a1205;
+  font-weight:700;
+  box-shadow:0 0 22px rgba(255,194,75,.5);
 }
 .btn-legendary:hover{
-  box-shadow:0 6px 30px rgba(245,158,11,.55);
+  box-shadow:0 0 34px rgba(255,194,75,.75);
   transform:translateY(-1px);
 }
 
 .btn-outline{
-  border:1px solid var(--border-light);
-  color:var(--text-secondary);
+  border:1px solid rgba(0,234,255,.5);
+  color:var(--accent-hover);
+  box-shadow:0 0 10px rgba(0,234,255,.12),inset 0 0 10px rgba(0,234,255,.05);
 }
 .btn-outline:hover{
-  border-color:var(--accent);
-  color:var(--accent-hover);
-  background:rgba(24,160,251,.06);
+  border-color:var(--neon-cyan);
+  color:#6ef5ff;
+  background:rgba(0,234,255,.06);
+  box-shadow:0 0 20px rgba(0,234,255,.4),inset 0 0 12px rgba(0,234,255,.1);
 }
 
 .btn-ghost{
@@ -297,9 +314,11 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 }
 .section-title{
   font-family:var(--font-display);
-  font-size:2.25rem;
+  font-size:2rem;
   font-weight:800;
+  letter-spacing:.5px;
   margin-bottom:12px;
+  text-shadow:0 0 24px rgba(0,234,255,.28);
 }
 .section-subtitle{
   color:var(--text-secondary);
@@ -309,19 +328,34 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 
 /* ---------- Glow text ---------- */
 .glow-text{
-  background:linear-gradient(135deg,#e8ecf4,#5cbcff,#a78bfa);
+  background:linear-gradient(135deg,#eafdff,#00eaff,#9d4edd);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
 }
 .glow-legendary{
-  background:linear-gradient(135deg,#f59e0b,#fbbf24,#f59e0b);
+  background:linear-gradient(135deg,#ffc24b,#fff0c8,#ffc24b);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
   animation:shimmer-text 3s ease-in-out infinite;
   background-size:200% auto;
+  filter:drop-shadow(0 0 18px rgba(255,194,75,.5));
 }
+
+/* ---------- Cyberpunk FX (scanlines CRT + glow utilities) ---------- */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9000;
+  background:repeating-linear-gradient(rgba(0,0,0,0) 0 2px,rgba(0,0,0,.09) 2px 3px);
+}
+.text-neon{color:var(--neon-cyan);text-shadow:0 0 12px rgba(0,234,255,.6)}
+.text-neon-mag{color:var(--neon-magenta);text-shadow:0 0 12px rgba(255,46,138,.6)}
+/* HUD eyebrow/label — fonte condensada estilo terminal */
+.hud{font-family:var(--font-hud);letter-spacing:2px;text-transform:uppercase}
 
 /* ---------- Keyframes ---------- */
 @keyframes shimmer-bg{
@@ -337,8 +371,8 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
   50%{transform:translateY(-10px)}
 }
 @keyframes pulse-glow{
-  0%,100%{box-shadow:0 0 15px var(--glow-color,rgba(24,160,251,.3))}
-  50%{box-shadow:0 0 30px var(--glow-color,rgba(24,160,251,.5))}
+  0%,100%{box-shadow:0 0 15px var(--glow-color,rgba(0,234,255,.3))}
+  50%{box-shadow:0 0 30px var(--glow-color,rgba(0,234,255,.5))}
 }
 @keyframes fade-in{
   from{opacity:0;transform:translateY(20px)}
@@ -376,7 +410,7 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 ::-webkit-scrollbar-thumb:hover{background:var(--bg-hover)}
 
 /* ---------- Selection ---------- */
-::selection{background:rgba(24,160,251,.3);color:#fff}
+::selection{background:rgba(0,234,255,.3);color:#fff}
 
 /* ---------- Responsive ---------- */
 @media(max-width:768px){
