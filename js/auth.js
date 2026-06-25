@@ -38,18 +38,14 @@ function ehPremium() {
   return getSessao()?.plano === 'premium';
 }
 
-// URL do checkout da Kiwify. Vazio = ainda não configurado (Fase 2): os botões
-// de compra avisam "em breve" em vez de levar a lugar nenhum. Quando o produto
-// estiver criado na Kiwify, basta colar o link aqui.
-const CHECKOUT_URL = '';
-
 function avisarConta(titulo, msg) {
   if (typeof showToast === 'function') showToast(titulo, msg, 'default');
   else alert(`${titulo}\n\n${msg}`);
 }
 
-// Inicia a compra do Premium. Precisa estar logado (a compra é vinculada ao
-// e-mail da conta). Sem CHECKOUT_URL configurado, só avisa que vem em breve.
+// Inicia a compra do Premium. Precisa estar logado (a compra fica amarrada ao
+// e-mail da conta). Abre um modal pedindo Nome + CPF/CNPJ — o Asaas exige esses
+// dados pra emitir a cobrança — e depois leva pra tela de pagamento do Asaas.
 function comprarPremium() {
   if (ehPremium()) {
     avisarConta('⭐ Você já é Premium', 'Sua conta já tem acesso a tudo. Aproveite!');
@@ -59,12 +55,60 @@ function comprarPremium() {
     window.location.href = 'login.html?redirect=planos.html';
     return;
   }
-  if (CHECKOUT_URL) {
-    window.location.href = CHECKOUT_URL;
+  abrirModalPremium();
+}
+
+function abrirModalPremium() {
+  // O modal genérico de conta só existe quando a navbar logada já renderizou.
+  if (typeof abrirModalConta !== 'function') {
+    avisarConta('💎 Premium', 'Recarregue a página e tente novamente.');
     return;
   }
-  avisarConta('💎 Premium chegando',
-    'O pagamento ainda está sendo configurado. Em breve você poderá assinar o Premium por aqui!');
+  abrirModalConta('💎 Assinar Premium', `
+    ${erroContaHtml()}
+    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px">
+      Premium por R$ 9,90/mês. Precisamos destes dados pra emitir a cobrança.
+      Você escolhe a forma de pagamento (Pix ou cartão) na próxima tela.
+    </p>
+    <div class="form-group">
+      <label class="form-label">Nome completo</label>
+      <input type="text" id="pr-nome" class="form-input" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">CPF ou CNPJ</label>
+      <input type="text" id="pr-cpf" class="form-input" inputmode="numeric" placeholder="Somente números">
+    </div>
+    <button class="btn btn-primary" style="width:100%" id="pr-btn" onclick="enviarAssinatura()">Ir para o pagamento</button>
+  `);
+}
+
+async function enviarAssinatura() {
+  const nome = (document.getElementById('pr-nome')?.value || '').trim();
+  const cpf = (document.getElementById('pr-cpf')?.value || '').replace(/\D/g, '');
+  if (nome.length < 3) { mostrarErroConta('Informe seu nome completo.'); return; }
+  if (cpf.length !== 11 && cpf.length !== 14) {
+    mostrarErroConta('Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.');
+    return;
+  }
+  const btn = document.getElementById('pr-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Gerando cobrança...'; }
+  try {
+    const resp = await fetch(`${AUTH_API_BASE}/api/assinatura/criar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
+      body: JSON.stringify({ nome, cpf }),
+    });
+    const dados = await resp.json();
+    if (!resp.ok || !dados.success || !dados.url) {
+      mostrarErroConta(dados.message || 'Não foi possível iniciar o pagamento.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Ir para o pagamento'; }
+      return;
+    }
+    window.location.href = dados.url;  // tela de pagamento do Asaas
+  } catch (e) {
+    mostrarErroConta('Não foi possível conectar à API.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Ir para o pagamento'; }
+  }
 }
 
 function irParaPlanos() {
@@ -153,6 +197,8 @@ function montarMenuConta(avatar) {
     <div class="account-menu-item" onclick="abrirModalSenha()">🔒 Mudar senha</div>
     <div class="account-menu-item" onclick="abrirModalEmail()">📧 Mudar e-mail</div>
     <div class="account-menu-item" onclick="abrirModalFoto()">🖼️ Mudar foto de perfil</div>
+    <div class="account-menu-item" id="conta-menu-cancelar" onclick="abrirModalCancelar()">🚫 Cancelar assinatura</div>
+    <div class="account-menu-item" onclick="abrirModalExcluir()">🗑️ Excluir minha conta</div>
   `;
   wrap.appendChild(menu);
 
@@ -366,6 +412,79 @@ function aplicarFotoNoAvatar(fotoUrl) {
   avatar.textContent = '';
 }
 
+/* ============================================================
+   Cancelar assinatura e excluir conta (reusam o modal genérico).
+   ============================================================ */
+function abrirModalCancelar() {
+  abrirModalConta('🚫 Cancelar assinatura', `
+    ${erroContaHtml()}
+    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px">
+      Você deixa de ser cobrado nos próximos meses. Seu acesso Premium continua
+      <strong>até o fim do período já pago</strong> — depois disso a conta volta a ser Free.
+    </p>
+    <button class="btn btn-primary" style="width:100%" id="cc-btn" onclick="enviarCancelamento()">Confirmar cancelamento</button>
+  `);
+}
+
+async function enviarCancelamento() {
+  const btn = document.getElementById('cc-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Cancelando...'; }
+  try {
+    const resp = await fetch(`${AUTH_API_BASE}/api/assinatura/cancelar`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + getSessao()?.token },
+    });
+    const dados = await resp.json();
+    if (!resp.ok || !dados.success) {
+      mostrarErroConta(dados.message || 'Não foi possível cancelar.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Confirmar cancelamento'; }
+      return;
+    }
+    fecharModalConta();
+    const ate = dados.acesso_ate ? ` Seu Premium continua até ${dados.acesso_ate}.` : '';
+    avisarConta('Assinatura cancelada', 'Você não será mais cobrado.' + ate);
+  } catch (e) {
+    mostrarErroConta('Não foi possível conectar à API.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar cancelamento'; }
+  }
+}
+
+function abrirModalExcluir() {
+  abrirModalConta('🗑️ Excluir minha conta', `
+    ${erroContaHtml()}
+    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px">
+      Essa ação é <strong>permanente</strong>: sua conta, estratégias e cartas serão apagadas
+      e a assinatura (se houver) é cancelada. Confirme sua senha para continuar.
+    </p>
+    <div class="form-group">
+      <label class="form-label">Senha</label>
+      <input type="password" id="ex-senha" class="form-input" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" style="width:100%;background:var(--danger,#e04e4a);border-color:var(--danger,#e04e4a)" onclick="enviarExclusao()">Excluir para sempre</button>
+  `);
+}
+
+async function enviarExclusao() {
+  const senha = document.getElementById('ex-senha')?.value || '';
+  if (!senha) { mostrarErroConta('Digite sua senha para confirmar.'); return; }
+  try {
+    const resp = await fetch(`${AUTH_API_BASE}/api/auth/excluir`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
+      body: JSON.stringify({ senha_atual: senha }),
+    });
+    const dados = await resp.json();
+    if (!resp.ok || !dados.success) {
+      mostrarErroConta(dados.message || 'Não foi possível excluir a conta.');
+      return;
+    }
+    limparSessao();
+    window.location.href = 'index.html';
+  } catch (e) {
+    mostrarErroConta('Não foi possível conectar à API.');
+  }
+}
+
 // Atualiza o selo de plano no menu da conta conforme a sessão atual e mostra/
 // esconde o "Comprar Premium" (quem já é premium não precisa dele).
 function atualizarMenuPlano() {
@@ -381,6 +500,9 @@ function atualizarMenuPlano() {
   }
   const comprar = document.getElementById('conta-menu-comprar');
   if (comprar) comprar.style.display = ehPremium() ? 'none' : 'flex';
+  // Cancelar assinatura só faz sentido pra quem é premium.
+  const cancelar = document.getElementById('conta-menu-cancelar');
+  if (cancelar) cancelar.style.display = ehPremium() ? 'flex' : 'none';
 }
 
 // Ajusta a navbar conforme a sessão: troca "Começar Grátis" -> "Sair", troca

@@ -150,6 +150,20 @@
         </button>
       </form>
 
+      <!-- Esqueci minha senha (só faz sentido na aba "Entrar") -->
+      <div class="auth-switch" id="auth-forgot" style="margin-top:14px">
+        <a onclick="abrirEsqueci()">Esqueci minha senha</a>
+      </div>
+
+      <div id="esqueci-box" style="display:none; margin-top:8px;">
+        <div class="form-group">
+          <label class="form-label" for="esqueci-email">Seu e-mail</label>
+          <input type="email" id="esqueci-email" class="form-input" placeholder="seu@email.com" autocomplete="username">
+        </div>
+        <button type="button" class="btn btn-outline" style="width:100%" id="esqueci-btn" onclick="enviarEsqueci()">Enviar link de redefinição</button>
+        <div id="esqueci-msg" style="font-size:.82rem;color:var(--text-secondary);margin-top:10px;text-align:center;"></div>
+      </div>
+
       <div class="auth-switch">
         <span id="auth-switch-texto">Não tem conta?</span>
         <a id="auth-switch-link" onclick="trocarAbaAuth('cadastro')">Criar uma agora</a>
@@ -161,7 +175,7 @@
     </div>
   </div>
 
-  <script src="js/auth.js?v=3"></script>
+  <script src="js/auth.js?v=5"></script>
   <script>
     let abaAuthAtual = 'entrar';
 
@@ -254,6 +268,47 @@
         mostrarErroAuth('Não foi possível conectar à API. Verifique se o backend (backtest_api.py) está rodando.');
         btn.disabled = false;
         btn.textContent = textoOriginal;
+      }
+    }
+
+    function abrirEsqueci() {
+      const box = document.getElementById('esqueci-box');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+      if (box.style.display === 'block') {
+        // Aproveita o e-mail já digitado no formulário, se houver.
+        const emailDigitado = document.getElementById('auth-email').value.trim();
+        if (emailDigitado) document.getElementById('esqueci-email').value = emailDigitado;
+        document.getElementById('esqueci-email').focus();
+      }
+    }
+
+    async function enviarEsqueci() {
+      const email = document.getElementById('esqueci-email').value.trim();
+      const msg = document.getElementById('esqueci-msg');
+      const btn = document.getElementById('esqueci-btn');
+      if (!email || !email.includes('@')) {
+        msg.style.color = 'var(--danger)';
+        msg.textContent = 'Digite um e-mail válido.';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      try {
+        const resp = await fetch(AUTH_API_BASE + '/api/auth/esqueci', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const dados = await resp.json();
+        msg.style.color = 'var(--text-secondary)';
+        // Resposta neutra de propósito (não revela se o e-mail existe).
+        msg.textContent = dados.message || 'Se este e-mail estiver cadastrado, enviamos um link.';
+      } catch (e) {
+        msg.style.color = 'var(--danger)';
+        msg.textContent = 'Não foi possível conectar à API.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar link de redefinição';
       }
     }
 

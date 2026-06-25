@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Política de Privacidade do Binaryzando — como tratamos seus dados (LGPD).">
+  <title>Política de Privacidade | Binaryzando</title>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+
+  <style>
+    /* Layout de leitura para páginas legais (Termos, Privacidade, Aviso de Risco) */
+    .legal-wrap { max-width: 820px; margin: 0 auto; padding: 40px 0 64px; }
+    .legal-head { text-align: center; margin-bottom: 12px; }
+    .legal-updated { text-align: center; color: var(--text-muted); font-size: .82rem; margin-bottom: 28px; }
+
+    /* Aviso de rascunho — REMOVA este bloco quando o conteúdo for revisado/publicado. */
+    .legal-draft {
+      background: rgba(245, 158, 11, .08);
+      border: 1px solid rgba(245, 158, 11, .35);
+      border-radius: var(--radius-md, 12px);
+      padding: 14px 18px; margin-bottom: 32px;
+      font-size: .85rem; color: var(--text-secondary); line-height: 1.6;
+    }
+    .legal-draft strong { color: #f59e0b; }
+
+    .legal-content { color: var(--text-secondary); line-height: 1.75; font-size: .95rem; }
+    .legal-content h2 {
+      font-family: var(--font-display); color: var(--text-primary);
+      font-size: 1.2rem; margin: 36px 0 12px; padding-top: 8px;
+    }
+    .legal-content h2:first-of-type { margin-top: 8px; }
+    .legal-content p { margin-bottom: 14px; }
+    .legal-content ul { margin: 0 0 14px 22px; }
+    .legal-content li { margin-bottom: 8px; }
+    .legal-content a { color: var(--accent-hover); }
+    .legal-content strong { color: var(--text-primary); }
+
+    /* Tabela de dados tratados */
+    .legal-table { width: 100%; border-collapse: collapse; margin: 8px 0 18px; font-size: .88rem; }
+    .legal-table th, .legal-table td {
+      border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top;
+    }
+    .legal-table th { background: var(--bg-surface); color: var(--text-primary); font-weight: 700; }
+
+    .legal-nav { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span class="brand-icon">⚗️</span>
+      <span class="brand-text-craft">Binaryzando</span>
+    </a>
+
+    <div class="navbar-links">
+      <a href="index.html" class="navbar-link">Início</a>
+      <a href="criar_estrategia.html" class="navbar-link">Laboratório</a>
+      <a href="inventario.html" class="navbar-link">Inventário</a>
+      <a href="planos.html" class="navbar-link">Planos</a>
+    </div>
+
+    <div class="navbar-actions">
+      <a href="login.html" class="btn btn-sm btn-primary">Começar Grátis</a>
+      <a href="login.html" class="navbar-avatar">?</a>
+    </div>
+
+    <button class="navbar-toggle" aria-label="Menu">☰</button>
+  </nav>
+
+  <!-- ==================== CONTEÚDO ==================== -->
+  <section class="section" style="background:var(--bg-base); min-height:80vh">
+    <div class="container">
+      <div class="legal-wrap">
+        <div class="legal-head">
+          <h1 class="section-title">Política de Privacidade</h1>
+        </div>
+        <div class="legal-updated">Última atualização: 24 de junho de 2026</div>
+
+        <!-- ⚠️ Remova este bloco ao publicar a versão final revisada. -->
+        <div class="legal-draft">
+          <strong>⚠️ Modelo inicial.</strong> Rascunho de boa-fé para o MVP, alinhado à LGPD
+          (Lei 13.709/2018). Revise e preencha os campos [entre colchetes] antes de cobrar de
+          clientes reais.
+        </div>
+
+        <div class="legal-content">
+
+          <p>
+            Esta Política explica como o <strong>Binaryzando</strong> coleta, usa, armazena e protege
+            seus dados pessoais, em conformidade com a <strong>Lei Geral de Proteção de Dados (LGPD,
+            Lei nº 13.709/2018)</strong>.
+          </p>
+
+          <h2>1. Quem é o controlador dos dados</h2>
+          <p>
+            O responsável pelo tratamento dos seus dados (“Controlador”) é
+            <strong>Diego Simplicio Figueredo Silva</strong>, CPF nº <strong>046.397.291-03</strong>, que pode
+            ser contatado em <a href="mailto:contato@binaryzando.com">contato@binaryzando.com</a>.
+          </p>
+
+          <h2>2. Quais dados coletamos e por quê</h2>
+          <table class="legal-table">
+            <thead>
+              <tr><th>Dado</th><th>Para quê</th><th>Base legal (LGPD)</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>E-mail</td>
+                <td>Criar e identificar sua conta, login, comunicação e suporte</td>
+                <td>Execução de contrato (art. 7º, V)</td>
+              </tr>
+              <tr>
+                <td>Senha (armazenada com <em>hash</em>, nunca em texto puro)</td>
+                <td>Proteger o acesso à sua conta</td>
+                <td>Execução de contrato</td>
+              </tr>
+              <tr>
+                <td>Nome e CPF/CNPJ</td>
+                <td>Emissão da cobrança e identificação do pagamento (apenas no Premium)</td>
+                <td>Obrigação legal / execução de contrato</td>
+              </tr>
+              <tr>
+                <td>Foto de perfil (opcional)</td>
+                <td>Personalizar sua conta</td>
+                <td>Consentimento (art. 7º, I)</td>
+              </tr>
+              <tr>
+                <td>Estratégias, testes e preferências de uso</td>
+                <td>Salvar seu inventário e fazer a Plataforma funcionar</td>
+                <td>Execução de contrato</td>
+              </tr>
+              <tr>
+                <td>Dados técnicos (registros de acesso, token de sessão)</td>
+                <td>Segurança e funcionamento do login</td>
+                <td>Legítimo interesse / obrigação legal (Marco Civil)</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            <strong>Não coletamos dados de cartão.</strong> O pagamento é feito diretamente no
+            ambiente do provedor Asaas.
+          </p>
+
+          <h2>3. Com quem compartilhamos</h2>
+          <p>Seus dados não são vendidos. Compartilhamos apenas o necessário com:</p>
+          <ul>
+            <li><strong>Asaas</strong> (processamento de pagamentos): nome, CPF/CNPJ e e-mail, para
+                gerar e confirmar a cobrança.</li>
+            <li><strong>Provedor de hospedagem</strong> onde o sistema roda, para armazenar os dados
+                com segurança.</li>
+            <li><strong>Autoridades</strong>, quando houver obrigação legal ou ordem judicial.</li>
+          </ul>
+
+          <h2>4. Cookies e armazenamento local</h2>
+          <p>
+            Usamos o <strong>armazenamento local do navegador</strong> (localStorage) para manter você
+            logado (token de sessão) e guardar preferências e o seu inventário. Não usamos cookies de
+            rastreamento publicitário de terceiros.
+          </p>
+
+          <h2>5. Por quanto tempo guardamos</h2>
+          <p>
+            Mantemos seus dados enquanto sua conta existir. Após a exclusão da conta, removemos os
+            dados pessoais em prazo razoável, salvo o que a lei exigir manter (por exemplo, registros
+            fiscais e de acesso).
+          </p>
+
+          <h2>6. Seus direitos como titular</h2>
+          <p>A LGPD garante a você, a qualquer momento, o direito de:</p>
+          <ul>
+            <li>confirmar a existência de tratamento e acessar seus dados;</li>
+            <li>corrigir dados incompletos ou desatualizados;</li>
+            <li>solicitar a exclusão (anonimização ou eliminação) dos seus dados;</li>
+            <li>revogar o consentimento;</li>
+            <li>solicitar a portabilidade, nos termos da lei.</li>
+          </ul>
+          <p>
+            Para exercer qualquer um desses direitos, escreva para
+            <a href="mailto:contato@binaryzando.com">contato@binaryzando.com</a>. Responderemos no
+            menor prazo possível.
+          </p>
+
+          <h2>7. Segurança</h2>
+          <p>
+            Adotamos medidas técnicas para proteger seus dados: senhas com <em>hash</em>, conexão
+            criptografada (HTTPS) e controle de acesso ao servidor. Nenhum sistema é 100% imune, mas
+            trabalhamos para reduzir riscos. Em caso de incidente relevante de segurança, agiremos
+            conforme a LGPD.
+          </p>
+
+          <h2>8. Crianças e adolescentes</h2>
+          <p>
+            A Plataforma é destinada a maiores de 18 anos e não é direcionada a menores.
+          </p>
+
+          <h2>9. Alterações nesta Política</h2>
+          <p>
+            Podemos atualizar esta Política. A data de “última atualização” no topo indica a versão
+            vigente; mudanças relevantes serão comunicadas no site ou por e-mail.
+          </p>
+
+          <h2>10. Contato / Encarregado (DPO)</h2>
+          <p>
+            Para assuntos de privacidade e proteção de dados, fale com o nosso encarregado pelo e-mail
+            <a href="mailto:contato@binaryzando.com">contato@binaryzando.com</a>.
+          </p>
+
+        </div>
+
+        <div class="legal-nav">
+          <a href="termos.html" class="btn btn-sm btn-outline">Termos de Uso</a>
+          <a href="aviso-risco.html" class="btn btn-sm btn-outline">Aviso de Risco</a>
+          <a href="index.html" class="btn btn-sm btn-outline">⬅ Início</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/app.js?v=11"></script>
+</body>
+</html>

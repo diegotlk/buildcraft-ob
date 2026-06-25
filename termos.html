@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Termos de Uso do Binaryzando.">
+  <title>Termos de Uso | Binaryzando</title>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+
+  <style>
+    /* Layout de leitura para páginas legais (Termos, Privacidade, Aviso de Risco) */
+    .legal-wrap { max-width: 820px; margin: 0 auto; padding: 40px 0 64px; }
+    .legal-head { text-align: center; margin-bottom: 12px; }
+    .legal-updated { text-align: center; color: var(--text-muted); font-size: .82rem; margin-bottom: 28px; }
+
+    /* Aviso de rascunho — REMOVA este bloco quando o conteúdo for revisado/publicado. */
+    .legal-draft {
+      background: rgba(245, 158, 11, .08);
+      border: 1px solid rgba(245, 158, 11, .35);
+      border-radius: var(--radius-md, 12px);
+      padding: 14px 18px; margin-bottom: 32px;
+      font-size: .85rem; color: var(--text-secondary); line-height: 1.6;
+    }
+    .legal-draft strong { color: #f59e0b; }
+
+    .legal-content { color: var(--text-secondary); line-height: 1.75; font-size: .95rem; }
+    .legal-content h2 {
+      font-family: var(--font-display); color: var(--text-primary);
+      font-size: 1.2rem; margin: 36px 0 12px; padding-top: 8px;
+    }
+    .legal-content h2:first-of-type { margin-top: 8px; }
+    .legal-content p { margin-bottom: 14px; }
+    .legal-content ul { margin: 0 0 14px 22px; }
+    .legal-content li { margin-bottom: 8px; }
+    .legal-content a { color: var(--accent-hover); }
+    .legal-content strong { color: var(--text-primary); }
+
+    .legal-nav { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span class="brand-icon">⚗️</span>
+      <span class="brand-text-craft">Binaryzando</span>
+    </a>
+
+    <div class="navbar-links">
+      <a href="index.html" class="navbar-link">Início</a>
+      <a href="criar_estrategia.html" class="navbar-link">Laboratório</a>
+      <a href="inventario.html" class="navbar-link">Inventário</a>
+      <a href="planos.html" class="navbar-link">Planos</a>
+    </div>
+
+    <div class="navbar-actions">
+      <a href="login.html" class="btn btn-sm btn-primary">Começar Grátis</a>
+      <a href="login.html" class="navbar-avatar">?</a>
+    </div>
+
+    <button class="navbar-toggle" aria-label="Menu">☰</button>
+  </nav>
+
+  <!-- ==================== CONTEÚDO ==================== -->
+  <section class="section" style="background:var(--bg-base); min-height:80vh">
+    <div class="container">
+      <div class="legal-wrap">
+        <div class="legal-head">
+          <h1 class="section-title">Termos de Uso</h1>
+        </div>
+        <div class="legal-updated">Última atualização: 24 de junho de 2026</div>
+
+        <!-- ⚠️ Remova este bloco ao publicar a versão final revisada. -->
+        <div class="legal-draft">
+          <strong>⚠️ Modelo inicial.</strong> Este texto é um rascunho de boa-fé para o MVP.
+          Revise (idealmente com um advogado) e preencha os campos marcados com [colchetes]
+          antes de cobrar de clientes reais.
+        </div>
+
+        <div class="legal-content">
+
+          <p>
+            Bem-vindo ao <strong>Binaryzando</strong> (“Plataforma”, “nós”). Estes Termos de Uso
+            regulam o acesso e o uso do site e dos serviços oferecidos por
+            <strong>Diego Simplicio Figueredo Silva</strong>, inscrito no CPF nº <strong>046.397.291-03</strong>
+            (“Responsável”). Ao criar uma conta ou usar a Plataforma, você declara que leu,
+            entendeu e concorda com estes Termos. Se não concordar, não utilize o serviço.
+          </p>
+
+          <h2>1. O que é o Binaryzando</h2>
+          <p>
+            O Binaryzando é uma <strong>ferramenta educacional de simulação e backtesting</strong>.
+            Ela permite montar estratégias e gerenciamentos e testá-los contra um histórico de
+            cotações já ocorridas, exibindo estatísticas (taxa de acerto, número de entradas etc.)
+            de forma gamificada.
+          </p>
+          <p>
+            O Binaryzando <strong>não executa operações</strong>, <strong>não é uma corretora</strong>,
+            <strong>não movimenta dinheiro do usuário</strong> e <strong>não oferece recomendação de
+            investimento</strong>. Os resultados exibidos são simulações sobre dados passados. Leia o
+            nosso <a href="aviso-risco.html">Aviso de Risco</a>, que é parte integrante destes Termos.
+          </p>
+
+          <h2>2. Cadastro e conta</h2>
+          <ul>
+            <li>Você precisa ter pelo menos <strong>18 anos</strong> e capacidade civil para usar a Plataforma.</li>
+            <li>Os dados informados no cadastro devem ser verdadeiros e mantidos atualizados.</li>
+            <li>Você é responsável por manter sua senha em sigilo e por toda atividade feita na sua conta.</li>
+            <li>É proibido compartilhar, vender ou ceder o acesso da sua conta a terceiros.</li>
+          </ul>
+
+          <h2>3. Planos, pagamento e renovação</h2>
+          <ul>
+            <li>A Plataforma oferece um plano <strong>Free</strong> (gratuito) e um plano
+                <strong>Premium</strong>, com mensalidade informada na página de
+                <a href="planos.html">Planos</a> (atualmente R$ 9,90/mês).</li>
+            <li>O pagamento é processado pelo provedor <strong>Asaas</strong> (instituição autorizada
+                pelo Banco Central). Não armazenamos dados de cartão.</li>
+            <li>A assinatura Premium é <strong>mensal e renovada automaticamente</strong> até que você
+                cancele.</li>
+            <li>Valores podem ser reajustados mediante aviso prévio; o novo valor só vale para os
+                ciclos seguintes.</li>
+          </ul>
+
+          <h2>4. Cancelamento</h2>
+          <p>
+            Você pode <strong>cancelar a assinatura a qualquer momento</strong>, sem multa, pela área
+            da sua conta ou solicitando por e-mail a <a href="mailto:contato@binaryzando.com">contato@binaryzando.com</a>.
+            Após o cancelamento, você mantém o acesso Premium até o fim do período já pago e não há
+            novas cobranças.
+          </p>
+
+          <h2>5. Reembolso e direito de arrependimento</h2>
+          <p>
+            Conforme o <strong>art. 49 do Código de Defesa do Consumidor</strong>, você pode desistir
+            da contratação em até <strong>7 (sete) dias corridos</strong> a partir da compra e receber
+            o <strong>reembolso integral</strong> do valor pago. Basta solicitar por
+            <a href="mailto:contato@binaryzando.com">contato@binaryzando.com</a>. Após esse prazo, a
+            mensalidade do período já em curso não é reembolsável, mas você pode cancelar para evitar
+            cobranças futuras.
+          </p>
+
+          <h2>6. Uso aceitável</h2>
+          <p>Ao usar a Plataforma, você concorda em <strong>não</strong>:</p>
+          <ul>
+            <li>tentar burlar, sobrecarregar, copiar ou fazer engenharia reversa do sistema;</li>
+            <li>usar robôs, scrapers ou acessos automatizados não autorizados;</li>
+            <li>revender o acesso ou redistribuir o conteúdo sem autorização;</li>
+            <li>usar a Plataforma para qualquer finalidade ilícita.</li>
+          </ul>
+
+          <h2>7. Propriedade intelectual</h2>
+          <p>
+            A marca, o código, o layout, os textos e os demais elementos do Binaryzando pertencem ao
+            Responsável e são protegidos por lei. As estratégias e cartas que você cria ficam
+            associadas à sua conta para seu uso pessoal dentro da Plataforma.
+          </p>
+
+          <h2>8. Disponibilidade do serviço</h2>
+          <p>
+            Faremos o possível para manter a Plataforma no ar, mas ela é fornecida “no estado em que
+            se encontra”. Pode haver interrupções para manutenção, falhas técnicas ou indisponibilidade
+            do provedor de dados. Não garantimos operação ininterrupta nem ausência de erros.
+          </p>
+
+          <h2>9. Limitação de responsabilidade</h2>
+          <p>
+            O Binaryzando é uma ferramenta de estudo. <strong>Qualquer decisão de operar com dinheiro
+            real é exclusivamente sua e por sua conta e risco.</strong> Na máxima extensão permitida em
+            lei, o Responsável não se responsabiliza por perdas financeiras, lucros cessantes ou danos
+            decorrentes do uso das informações da Plataforma. Eventual responsabilidade fica limitada
+            ao valor pago pelo usuário nos últimos 12 meses.
+          </p>
+
+          <h2>10. Encerramento</h2>
+          <p>
+            Podemos suspender ou encerrar contas que violem estes Termos. Você pode encerrar sua conta
+            quando quiser, solicitando a exclusão por e-mail.
+          </p>
+
+          <h2>11. Alterações nos Termos</h2>
+          <p>
+            Podemos atualizar estes Termos. Mudanças relevantes serão comunicadas no site ou por
+            e-mail. O uso continuado após a atualização significa concordância com a nova versão.
+          </p>
+
+          <h2>12. Lei aplicável e foro</h2>
+          <p>
+            Estes Termos são regidos pelas leis do Brasil. Fica eleito o foro da comarca de
+            <strong>Rondonópolis/MT</strong> para dirimir questões, sem prejuízo do foro de domicílio
+            do consumidor, quando aplicável.
+          </p>
+
+          <h2>13. Contato</h2>
+          <p>
+            Dúvidas sobre estes Termos: <a href="mailto:contato@binaryzando.com">contato@binaryzando.com</a>.
+          </p>
+
+        </div>
+
+        <div class="legal-nav">
+          <a href="privacidade.html" class="btn btn-sm btn-outline">Política de Privacidade</a>
+          <a href="aviso-risco.html" class="btn btn-sm btn-outline">Aviso de Risco</a>
+          <a href="index.html" class="btn btn-sm btn-outline">⬅ Início</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/app.js?v=11"></script>
+</body>
+</html>

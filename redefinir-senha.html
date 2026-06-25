@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Criar uma nova senha no Binaryzando.">
+  <title>Redefinir senha | Binaryzando</title>
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+
+  <style>
+    .auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 100px 24px 40px; }
+    .auth-card { width: 100%; max-width: 420px; padding: 36px 32px; }
+    .auth-logo { text-align: center; margin-bottom: 24px; }
+    .auth-logo .brand-icon {
+      width: 48px; height: 48px; border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 10px;
+    }
+    .auth-logo .brand-text-craft {
+      display: block; font-family: var(--font-display); font-weight: 800; font-size: 1.3rem;
+      background: linear-gradient(90deg, #6366f1, #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .auth-back { text-align: center; margin-top: 14px; }
+    .auth-back a { font-size: .8rem; color: var(--text-muted); }
+    .auth-back a:hover { color: var(--text-secondary); }
+    .rs-titulo { text-align: center; font-weight: 700; margin-bottom: 8px; }
+    .rs-sub { text-align: center; color: var(--text-secondary); font-size: .85rem; margin-bottom: 22px; }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <span class="brand-icon">⚗️</span>
+      <span class="brand-text-craft">Binaryzando</span>
+    </a>
+  </nav>
+
+  <!-- ==================== REDEFINIR ==================== -->
+  <div class="auth-wrap">
+    <div class="glass-card auth-card">
+      <div class="auth-logo">
+        <div class="brand-icon">⚗️</div>
+        <span class="brand-text-craft">Binaryzando</span>
+      </div>
+
+      <div class="rs-titulo">Criar uma nova senha</div>
+      <div class="rs-sub">Escolha uma senha forte para a sua conta.</div>
+
+      <div class="auth-error" id="rs-error"></div>
+
+      <!-- Mostrado quando o link é válido -->
+      <form id="rs-form" onsubmit="enviarRedefinir(event)">
+        <div class="form-group">
+          <label class="form-label" for="rs-senha">Nova senha</label>
+          <input type="password" id="rs-senha" class="form-input" placeholder="••••••••"
+                 autocomplete="new-password" minlength="8" required oninput="atualizarReqsRS()">
+        </div>
+
+        <div class="auth-reqs show" id="rs-reqs">
+          <div class="auth-reqs-titulo">Sua senha precisa ter:</div>
+          <div class="auth-req" id="rs-req-tamanho"><span class="icone">○</span> Pelo menos 8 caracteres</div>
+          <div class="auth-req" id="rs-req-maiuscula"><span class="icone">○</span> Uma letra maiúscula (A-Z)</div>
+          <div class="auth-req" id="rs-req-minuscula"><span class="icone">○</span> Uma letra minúscula (a-z)</div>
+          <div class="auth-req" id="rs-req-numero"><span class="icone">○</span> Um número (0-9)</div>
+          <div class="auth-req" id="rs-req-especial"><span class="icone">○</span> Um caractere especial (!@#$%...)</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" id="rs-submit" style="width:100%; margin-top:8px;">
+          Salvar nova senha
+        </button>
+      </form>
+
+      <!-- Mostrado quando deu certo -->
+      <div id="rs-ok" style="display:none; text-align:center;">
+        <div style="font-size:48px; margin-bottom:12px;">✅</div>
+        <p style="color:var(--text-secondary); margin-bottom:20px;">Senha alterada com sucesso! Já pode entrar com a nova senha.</p>
+        <a href="login.html" class="btn btn-primary" style="width:100%">Ir para o login</a>
+      </div>
+
+      <div class="auth-back">
+        <a href="login.html">⬅ Voltar para o login</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js?v=5"></script>
+  <script>
+    // O token vem na URL: redefinir-senha.html?token=XYZ
+    const tokenRS = new URLSearchParams(location.search).get('token') || '';
+
+    function mostrarErroRS(msg) {
+      const el = document.getElementById('rs-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+    function esconderErroRS() {
+      document.getElementById('rs-error').style.display = 'none';
+    }
+
+    // Sem token na URL, nem adianta mostrar o formulário.
+    if (!tokenRS) {
+      document.getElementById('rs-form').style.display = 'none';
+      mostrarErroRS('Link inválido. Peça uma nova redefinição de senha na tela de login.');
+    }
+
+    function atualizarReqsRS() {
+      aplicarChecklistSenha(document.getElementById('rs-senha').value, (c) => 'rs-req-' + c);
+    }
+
+    async function enviarRedefinir(event) {
+      event.preventDefault();
+      esconderErroRS();
+      const senha = document.getElementById('rs-senha').value;
+
+      if (!senhaForte(senha)) {
+        mostrarErroRS('Sua senha ainda não cumpre todos os requisitos abaixo.');
+        return;
+      }
+
+      const btn = document.getElementById('rs-submit');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+
+      try {
+        const resp = await fetch(AUTH_API_BASE + '/api/auth/redefinir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: tokenRS, senha_nova: senha }),
+        });
+        const dados = await resp.json();
+        if (!resp.ok || !dados.success) {
+          mostrarErroRS(dados.message || 'Não foi possível redefinir a senha.');
+          btn.disabled = false;
+          btn.textContent = 'Salvar nova senha';
+          return;
+        }
+        // Sucesso: troca o formulário pela mensagem de confirmação.
+        document.getElementById('rs-form').style.display = 'none';
+        document.getElementById('rs-ok').style.display = 'block';
+      } catch (e) {
+        mostrarErroRS('Não foi possível conectar à API.');
+        btn.disabled = false;
+        btn.textContent = 'Salvar nova senha';
+      }
+    }
+  </script>
+</body>
+</html>
