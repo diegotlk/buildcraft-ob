@@ -3,25 +3,39 @@
 # Objetivo: o usuário SEMPRE ver a versão mais nova logo que a
 # gente publica, sem precisar limpar cache no navegador.
 #
+# IMPORTANTE: o Cloudflare Pages JUNTA as regras de todos os caminhos
+# que casam (não é "a mais específica ganha"). Por isso as regras aqui
+# NÃO podem se sobrepor — senão o Cache-Control sai contraditório.
+# Por isso a gente lista HTML e imagens separados do JS/CSS, sem usar
+# um "/*" geral que pegaria tudo junto.
+#
 # Como o navegador trata cada coisa:
 #  - no-cache  = pode guardar, mas ANTES de mostrar tem que perguntar
-#                pro servidor "mudou?". Se não mudou, o servidor responde
-#                "igual" (rápido); se mudou, baixa a versão nova. Ou seja:
-#                nunca mostra conteúdo velho.
+#                pro servidor "mudou?". Se não mudou, responde "igual"
+#                (rápido); se mudou, baixa o novo. Nunca mostra velho.
 #  - immutable = pode usar a cópia guardada SEM perguntar (mais rápido).
-#                Só é seguro pra arquivos cujo nome muda quando o conteúdo
-#                muda — que é o caso do nosso JS/CSS (todos têm ?v=N).
+#                Só é seguro pra arquivo cujo nome muda quando o conteúdo
+#                muda — o caso do nosso JS/CSS (todos têm ?v=N na URL).
 # ============================================================
 
-# Regra geral: tudo é revalidado (HTML, imagens, qualquer coisa).
-# É isto que garante que toda atualização aparece na hora.
-/*
+# Páginas (a raiz "/" serve o index.html) — sempre revalidadas, então
+# toda atualização de HTML aparece na hora.
+/
+  Cache-Control: no-cache
+/*.html
+  Cache-Control: no-cache
+
+# Imagens (logo, favicon...) não têm versão na URL, então também são
+# revalidadas — assim trocar a logo aparece na hora pra todo mundo.
+/img/*
   Cache-Control: no-cache
 
 # JS e CSS são versionados na URL (ex.: app.js?v=11, components.css?v=6).
-# Quando a gente muda o arquivo, sobe o número da versão e o navegador
-# baixa o novo sozinho. Por isso aqui podem ficar guardados por 1 ano,
-# deixando o site mais rápido sem risco de ficar desatualizado.
+# Quando a gente muda o arquivo, sobe o número e o navegador baixa o novo
+# sozinho. Por isso podem ficar guardados por 1 ano (site mais rápido)
+# sem risco de ficar desatualizado.
+# LEMBRETE: ao mudar QUALQUER arquivo em js/ ou css/, suba o ?v=N nas
+# páginas que o usam — é isso que força o navegador a pegar a versão nova.
 /js/*
   Cache-Control: public, max-age=31536000, immutable
 /css/*
