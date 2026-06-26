@@ -542,18 +542,21 @@
           <button class="lab-tab" id="lab-grupo-testar" onclick="trocarGrupoLab('testar')">♻️ Testar</button>
         </div>
 
-        <!-- ── SUB-ABAS DO GRUPO "CRIAR" ── -->
+        <!-- ── SUB-ABAS DO GRUPO "CRIAR" ──
+             MVP/Camada 1: só Estratégia por enquanto. Gerenciamento e Build
+             temporariamente DESATIVADOS (não remover — só tirar o
+             display:none quando forem liberados de novo). -->
         <div class="lab-tabs lab-subtabs" id="lab-subtabs-criar">
           <button class="lab-tab active" id="lab-tab-criar-estrategia" onclick="trocarAbaLab('criar-estrategia')">📐 Criar Estratégia</button>
-          <button class="lab-tab" id="lab-tab-criar-gerenciamento" onclick="trocarAbaLab('criar-gerenciamento')">📊 Criar Gerenciamento</button>
-          <button class="lab-tab" id="lab-tab-criar-build" onclick="trocarAbaLab('criar-build')">🧬 Criar Build</button>
+          <button class="lab-tab" id="lab-tab-criar-gerenciamento" onclick="trocarAbaLab('criar-gerenciamento')" style="display:none">📊 Criar Gerenciamento</button>
+          <button class="lab-tab" id="lab-tab-criar-build" onclick="trocarAbaLab('criar-build')" style="display:none">🧬 Criar Build</button>
         </div>
 
         <!-- ── SUB-ABAS DO GRUPO "TESTAR" ── -->
         <div class="lab-tabs lab-subtabs" id="lab-subtabs-testar" style="display:none">
           <button class="lab-tab active" id="lab-tab-testar-estrategia" onclick="trocarAbaLab('testar-estrategia')">📐 Testar Estratégia</button>
-          <button class="lab-tab" id="lab-tab-testar-gerenciamento" onclick="trocarAbaLab('testar-gerenciamento')">📊 Testar Gerenciamento</button>
-          <button class="lab-tab" id="lab-tab-testar-build" onclick="trocarAbaLab('testar-build')">🧬 Testar Build</button>
+          <button class="lab-tab" id="lab-tab-testar-gerenciamento" onclick="trocarAbaLab('testar-gerenciamento')" style="display:none">📊 Testar Gerenciamento</button>
+          <button class="lab-tab" id="lab-tab-testar-build" onclick="trocarAbaLab('testar-build')" style="display:none">🧬 Testar Build</button>
         </div>
 
         <!-- ── FASE -1: TIMEFRAME (primeira pergunta, sempre) ── -->
@@ -583,9 +586,7 @@
           <h2 class="card-box-title">🧩 Escolha o tipo de estratégia</h2>
 
           <div class="anchoring-grid" style="margin-top: 28px;">
-            <!-- MVP: criação livre por pintura de velas temporariamente DESATIVADA
-                 (não remover — só tirar o display:none quando for reabilitar). -->
-            <div class="anchoring-card" onclick="setMode('pintar')" style="display:none">
+            <div class="anchoring-card" onclick="setMode('pintar')">
               <div class="anchoring-title">🎨 Pintar velas</div>
               <div class="anchoring-desc">
                 Você desenha um padrão de velas (ex: 🟩🟩🟥) e aposta na próxima vela.
