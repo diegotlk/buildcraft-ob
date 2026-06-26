@@ -1476,7 +1476,7 @@
           </div>
 
           <div class="pattern-controls">
-            <button class="btn btn-sm btn-outline" onclick="goToPhase('schedule')">⬅ Voltar</button>
+            <button class="btn btn-sm btn-outline" id="btn-review-voltar" onclick="goToPhase('schedule')">⬅ Voltar</button>
             <button class="btn btn-lg btn-accent" id="btn-test-strategy" onclick="testStrategy()">⚡ Testar Estratégia</button>
             <button class="btn btn-lg btn-primary" id="btn-salvar-estrategia" onclick="showSaveForm()" style="display: none;">💾 Salvar Estratégia</button>
             <button class="btn btn-lg btn-outline" id="btn-salvar-historico" onclick="salvarHistoricoDoTeste()" style="display: none;">📊 Salvar Histórico</button>
@@ -1494,11 +1494,11 @@
 
   <script src="js/pares.js?v=10"></script>
   <script src="js/data.js?v=9"></script>
-  <script src="js/inventario.js?v=12"></script>
+  <script src="js/inventario.js?v=13"></script>
   <script src="js/historico.js?v=9"></script>
   <script src="js/gerenciamento.js?v=10"></script>
   <script src="js/build.js?v=9"></script>
-  <script src="js/strategy-builder.js?v=13"></script>
+  <script src="js/strategy-builder.js?v=14"></script>
   <script>
     // Esta página não carrega js/app.js (ela já define seu próprio showToast,
     // entre outras coisas) — só o pedacinho do menu mobile (☰) é replicado aqui.

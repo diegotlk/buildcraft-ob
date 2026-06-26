@@ -505,6 +505,7 @@ function goToPhase(phase) {
       return;
     }
     updateReviewContent();
+    resetPostTestButtons();
   }
 
   // Inicializar pares na fase 5 — se já tem um par definido (testando
@@ -973,6 +974,25 @@ function callBacktestAPI(payload, btn, textoOriginal) {
 // renderConfidenceBar() agora vive em inventario.js (carregado antes deste
 // arquivo) — a carta também precisa dela, não só este painel de resultado.
 
+// Devolve a tela de revisão ao estado "ainda não testei": mostra o botão
+// Testar e o Voltar-de-passo, esconde os botões pós-teste e limpa o resultado
+// anterior. Chamado toda vez que se entra na revisão (goToPhase('review')).
+function resetPostTestButtons() {
+  const mostra = (id, on) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = on ? 'inline-flex' : 'none';
+  };
+  mostra('btn-test-strategy', true);
+  mostra('btn-review-voltar', true);
+  mostra('btn-salvar-estrategia', false);
+  mostra('btn-salvar-historico', false);
+  mostra('btn-nova-estrategia', false);
+  const tr = document.getElementById('test-result');
+  if (tr) { tr.style.display = 'none'; tr.innerHTML = ''; }
+  const sf = document.getElementById('save-form');
+  if (sf) sf.style.display = 'none';
+}
+
 // ── RENDERIZAR RESULTADO DO BACKTEST ──
 function renderResult(r) {
   const rarityLabel = {
@@ -991,7 +1011,40 @@ function renderResult(r) {
   const insightsHTML = (r.insights || [])
     .map(i => `<li style="margin-bottom:6px;">${i}</li>`).join('');
 
+  // Comparação "antes × agora": só aparece quando o usuário está TESTANDO uma
+  // estratégia que já existe no inventário (aba Testar). Mostra se o desempenho
+  // melhorou ou piorou em relação ao teste original da carta.
+  let comparacaoHTML = '';
+  if (strategyState.testandoExistente) {
+    const origem = getInventario().find(e => e.id === strategyState.testandoExistente.origemId);
+    if (origem && origem.teste) {
+      const ot = origem.teste;
+      const dW = Math.round((r.winrate - ot.winrate) * 100) / 100;
+      const c = dW > 0 ? 'var(--success)' : dW < 0 ? 'var(--danger)' : 'var(--text-secondary)';
+      const txt = dW > 0 ? `▲ Melhorou +${dW}%` : dW < 0 ? `▼ Piorou ${dW}%` : '= Igual';
+      comparacaoHTML = `
+        <div style="border:1px solid ${c}; border-radius:12px; padding:18px; margin-bottom:18px; background:rgba(99,102,241,0.04);">
+          <div style="font-weight:700; margin-bottom:12px;">📊 Comparação com a original "${origem.nome}"</div>
+          <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:center; text-align:center;">
+            <div>
+              <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase;">Antes</div>
+              <div style="font-size:24px; font-weight:800;">${ot.winrate}%</div>
+              <div style="font-size:11px; color:var(--text-secondary);">${(ot.entries || 0).toLocaleString('pt-BR')} ops</div>
+            </div>
+            <div style="font-size:22px; color:var(--text-secondary);">➜</div>
+            <div>
+              <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase;">Agora</div>
+              <div style="font-size:24px; font-weight:800; color:${c};">${r.winrate}%</div>
+              <div style="font-size:11px; color:var(--text-secondary);">${r.entries.toLocaleString('pt-BR')} ops</div>
+            </div>
+          </div>
+          <div style="text-align:center; margin-top:12px; font-weight:800; color:${c};">${txt}</div>
+        </div>`;
+    }
+  }
+
   const html = `
+    ${comparacaoHTML}
     <div style="border:2px solid ${cor}; border-radius:12px; padding:24px; background:rgba(99,102,241,0.04);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
         <div>
@@ -1046,11 +1099,31 @@ function renderResult(r) {
   container.innerHTML = html;
   container.style.display = 'block';
 
-  // Mostra os botões de salvar e criar nova estratégia agora que há um resultado real
+  // Já testou: o botão "Testar" e o "Voltar" de passo não fazem mais sentido aqui.
+  const btnTestar = document.getElementById('btn-test-strategy');
+  if (btnTestar) btnTestar.style.display = 'none';
+  const btnVoltarPasso = document.getElementById('btn-review-voltar');
+  if (btnVoltarPasso) btnVoltarPasso.style.display = 'none';
+
+  // Mostra o botão de salvar agora que há um resultado real
   const btnSalvar = document.getElementById('btn-salvar-estrategia');
   if (btnSalvar) btnSalvar.style.display = 'inline-flex';
+
+  // O 3º botão muda conforme o contexto:
+  //  - Testando uma estratégia existente  -> "Voltar" pra lista de Testar
+  //    (NUNCA "Criar nova do zero" — isso é coisa da aba Criar).
+  //  - Criando do zero                     -> "Criar Nova Estratégia".
   const btnNova = document.getElementById('btn-nova-estrategia');
-  if (btnNova) btnNova.style.display = 'inline-flex';
+  if (btnNova) {
+    btnNova.style.display = 'inline-flex';
+    if (strategyState.testandoExistente) {
+      btnNova.innerHTML = '↩ Voltar';
+      btnNova.onclick = () => trocarAbaLab('testar-estrategia');
+    } else {
+      btnNova.innerHTML = '🔄 Criar Nova Estratégia';
+      btnNova.onclick = () => resetStrategy();
+    }
+  }
 
   // Histórico (sequência real W/L) só existe quando o backtest devolveu uma —
   // não acontece com o espelho ativado, por exemplo (mistura duas ordens cronológicas).
@@ -1180,10 +1253,27 @@ function resetStrategy() {
 // Armazenamento, cálculo de período/entradas-por-dia e renderização de
 // carta moram em js/inventario.js (compartilhado com a página Inventário).
 
+// Quando o usuário escolheu "OS DOIS (CALL + PUT)", o backend testou os dois
+// lados e devolveu o vencedor. Aqui descobrimos qual foi pra salvar SÓ ele —
+// nunca 'both' (carta não é "tanto faz"). Usa direcao_final do backend novo e,
+// como reforço (se o backend ainda for o antigo), lê dos insights.
+function direcaoVencedoraDoResultado(r) {
+  if (!r) return null;
+  if (r.direcao_final === 'call' || r.direcao_final === 'put') return r.direcao_final;
+  const txt = (r.insights || []).join(' ').toUpperCase();
+  if (txt.includes('MELHOR COMO CALL')) return 'call';
+  if (txt.includes('MELHOR COMO PUT')) return 'put';
+  return null;
+}
+
 function snapshotDefinicao() {
   const s = strategyState;
   if (s.mode === 'pintar') {
-    return { pattern: [...s.pattern], direction: s.direction, anchoring: s.anchoring, mirror: s.mirror, mirrorDirection: s.mirrorDirection };
+    let direction = s.direction;
+    if (direction === 'both') {
+      direction = direcaoVencedoraDoResultado(s.lastResult) || 'call';
+    }
+    return { pattern: [...s.pattern], direction, anchoring: s.anchoring, mirror: s.mirror, mirrorDirection: s.mirrorDirection };
   }
   if (s.mode === 'quadrante') {
     return { q: JSON.parse(JSON.stringify(s.q)) };

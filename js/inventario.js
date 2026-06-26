@@ -607,7 +607,6 @@ function renderCartaBack(item) {
         ${metaHTML}
       </div>
       <div style="margin-top:10px;display:flex;gap:8px">
-        ${item.mode !== 'build' && item.mode !== 'gerenciamento' ? `<button class="btn btn-sm btn-outline" style="flex:1" onclick="event.stopPropagation(); reproduzirItem('${item.id}')">🔁 Reproduzir</button>` : ''}
         <button class="btn btn-sm btn-outline" style="flex:1" onclick="event.stopPropagation(); excluirDoInventario('${item.id}')">🗑️ Remover</button>
       </div>
       <div class="carta-footer" style="margin:8px -16px -14px;padding:9px 16px">
