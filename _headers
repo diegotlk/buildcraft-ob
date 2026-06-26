@@ -1,0 +1,28 @@
+# ============================================================
+# Controle de cache do Binaryzando (lido pelo Cloudflare Pages).
+# Objetivo: o usuário SEMPRE ver a versão mais nova logo que a
+# gente publica, sem precisar limpar cache no navegador.
+#
+# Como o navegador trata cada coisa:
+#  - no-cache  = pode guardar, mas ANTES de mostrar tem que perguntar
+#                pro servidor "mudou?". Se não mudou, o servidor responde
+#                "igual" (rápido); se mudou, baixa a versão nova. Ou seja:
+#                nunca mostra conteúdo velho.
+#  - immutable = pode usar a cópia guardada SEM perguntar (mais rápido).
+#                Só é seguro pra arquivos cujo nome muda quando o conteúdo
+#                muda — que é o caso do nosso JS/CSS (todos têm ?v=N).
+# ============================================================
+
+# Regra geral: tudo é revalidado (HTML, imagens, qualquer coisa).
+# É isto que garante que toda atualização aparece na hora.
+/*
+  Cache-Control: no-cache
+
+# JS e CSS são versionados na URL (ex.: app.js?v=11, components.css?v=6).
+# Quando a gente muda o arquivo, sobe o número da versão e o navegador
+# baixa o novo sozinho. Por isso aqui podem ficar guardados por 1 ano,
+# deixando o site mais rápido sem risco de ficar desatualizado.
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
