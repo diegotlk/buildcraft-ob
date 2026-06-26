@@ -117,13 +117,11 @@ function presetBloqueado(nome) {
 
 // Aviso amigável quando um free toca em algo Premium (preset trancado ou o
 // modo "montar do zero"). O servidor controla quem é premium; isto é só a UX.
-function upsellPremium(oQue) {
-  showToast(
-    '🔒 Recurso Premium',
-    `"${oQue}" é do plano Premium. No Free você tem as estratégias MHI 1 e Milhão. ` +
-    'Assine o Premium pra liberar todas.',
-    'default'
-  );
+function upsellPremium(oQue, contexto) {
+  const base = contexto === 'par'
+    ? `"${oQue}" é um par Premium. No Free você testa em EURUSD, GBPUSD e USDJPY. `
+    : `"${oQue}" é do plano Premium. No Free você tem as estratégias MHI 1 e Milhão. `;
+  showToast('🔒 Recurso Premium', base + 'Assine o Premium pra liberar tudo.', 'default');
 }
 
 // Presets de Repetição de posição (Família 2) e Reversão/Flip (Família 3).
@@ -349,11 +347,12 @@ function renderPairs(pairs) {
   }
 
   pairs.slice(0, 20).forEach(pair => {
+    const locked = parBloqueado(pair);
     const btn = document.createElement('button');
-    btn.className = 'direction-btn';
-    btn.textContent = pair;
-    btn.onclick = () => setPair(pair);
-    if (strategyState.pair === pair) {
+    btn.className = 'direction-btn' + (locked ? ' preset-locked' : '');
+    btn.textContent = locked ? `🔒 ${pair}` : pair;
+    btn.onclick = locked ? () => upsellPremium(pair, 'par') : () => setPair(pair);
+    if (!locked && strategyState.pair === pair) {
       btn.classList.add('selected');
     }
     container.appendChild(btn);

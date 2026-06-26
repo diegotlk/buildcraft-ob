@@ -164,6 +164,16 @@ main {
 .anchoring-card.preset-locked:hover {
   opacity: .78;
 }
+
+/* Pares trancados no plano Free (mesmo tratamento, em botão em vez de card). */
+.direction-btn.preset-locked {
+  opacity: .5;
+  filter: grayscale(.5);
+  cursor: pointer;
+}
+.direction-btn.preset-locked:hover {
+  opacity: .75;
+}
 .preset-lock-badge {
   position: absolute;
   top: 8px;
