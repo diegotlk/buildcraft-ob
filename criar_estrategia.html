@@ -1494,7 +1494,7 @@
 
   <script src="js/pares.js?v=10"></script>
   <script src="js/data.js?v=9"></script>
-  <script src="js/inventario.js?v=10"></script>
+  <script src="js/inventario.js?v=12"></script>
   <script src="js/historico.js?v=9"></script>
   <script src="js/gerenciamento.js?v=10"></script>
   <script src="js/build.js?v=9"></script>
@@ -1516,6 +1516,15 @@
       links.addEventListener('click', (e) => {
         if (e.target.closest('a')) links.classList.remove('mobile-open');
       });
+    });
+
+    // Se a sincronização com o servidor trouxer estratégias novas (criadas em
+    // outro aparelho) enquanto a aba "Testar Estratégia" já está aberta,
+    // atualiza a lista na tela.
+    document.addEventListener('inventarioSincronizado', () => {
+      if (document.getElementById('phase-existente')?.classList.contains('active')) {
+        renderListaExistente();
+      }
     });
   </script>
 </body>

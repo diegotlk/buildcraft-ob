@@ -34,7 +34,75 @@ function getInventario() {
 
 function salvarInventario(lista) {
   localStorage.setItem(INVENTARIO_KEY, JSON.stringify(lista));
+  enviarInventarioServidor(lista);
 }
+
+// ── SINCRONIZAÇÃO ENTRE APARELHOS ──
+// Antes disto, o inventário vivia só no localStorage: cada navegador/aparelho
+// tinha o seu, então criar uma carta no celular não aparecia no computador
+// (e vice-versa), mesmo sendo a mesma conta. Agora a conta também guarda uma
+// cópia no servidor (/api/inventario) e cada aparelho mescla com ela.
+async function enviarInventarioServidor(lista) {
+  if (typeof estaLogado !== 'function' || !estaLogado()) return;
+  try {
+    await fetch(`${AUTH_API_BASE}/api/inventario`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao().token },
+      body: JSON.stringify({ lista }),
+    });
+  } catch (e) {
+    // Offline ou API fora do ar: fica só no localStorage por enquanto e tenta
+    // de novo no próximo salvarInventario().
+  }
+}
+
+// Une o inventário local com o que está salvo no servidor (ex.: cartas
+// criadas em outro aparelho). Mesclagem por id: se um item foi apagado
+// (deletadoEm) em QUALQUER um dos dois lados, o apagado vence — assim uma
+// exclusão feita no celular não "ressuscita" ao sincronizar com o
+// computador. Fora isso, mantém a versão já existente.
+function mesclarInventarios(local, servidor) {
+  const porId = new Map();
+  [...local, ...(servidor || [])].forEach(item => {
+    const existente = porId.get(item.id);
+    if (!existente) { porId.set(item.id, item); return; }
+    if (item.deletadoEm && !existente.deletadoEm) porId.set(item.id, item);
+  });
+  return [...porId.values()];
+}
+
+// Roda uma vez por carregamento de página (ver DOMContentLoaded no fim do
+// arquivo): busca o que está salvo no servidor, mescla com o local e
+// devolve pro servidor a versão já mesclada (cobre tanto "servidor estava
+// vazio" quanto "outro aparelho tinha cartas novas").
+async function sincronizarInventarioServidor() {
+  if (typeof estaLogado !== 'function' || !estaLogado()) return;
+  try {
+    const resp = await fetch(`${AUTH_API_BASE}/api/inventario`, {
+      headers: { 'Authorization': 'Bearer ' + getSessao().token },
+    });
+    const dados = await resp.json();
+    if (!dados.success) return;
+
+    const local = getInventario();
+    const mesclada = mesclarInventarios(local, dados.lista || []);
+
+    const mudou = mesclada.length !== local.length
+      || mesclada.some(item => !local.find(l => l.id === item.id && l.deletadoEm === item.deletadoEm));
+
+    if (mudou) {
+      localStorage.setItem(INVENTARIO_KEY, JSON.stringify(mesclada));
+      // Avisa as telas que já tinham renderizado a lista antes da sincronização
+      // terminar (ex.: Inventário, "Testar Estratégia") pra atualizar a tela.
+      document.dispatchEvent(new CustomEvent('inventarioSincronizado'));
+    }
+    await enviarInventarioServidor(mesclada);
+  } catch (e) {
+    // Sem internet/API fora do ar: segue só com o que já tinha local.
+  }
+}
+
+document.addEventListener('DOMContentLoaded', sincronizarInventarioServidor);
 
 // Manda o usuário pro Laboratório e pede pra reproduzir essa carta exata
 // (mesma definição, mesmo par/horário, mesmo período travado nas datas
