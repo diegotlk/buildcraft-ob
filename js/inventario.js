@@ -187,9 +187,9 @@ const INDICADOR_INFO = {
 // Rainha (♕) e Rei (♔) reservados para um tier futuro, ainda acima de Lendária.
 const PECA_POR_RARIDADE = {
   common: '♙',    // Peão
-  rare: '♘',      // Cavalo
+  rare: '♗',      // Bispo
   epic: '♖',      // Torre
-  legendary: '♗', // Bispo
+  legendary: '♛', // Rainha
 };
 
 const GERENCIAMENTO_RESULTADO_LABEL_INV = { vitoria: 'Soros', derrota: 'Martingale', fixo: 'Mão Fixa', custom: 'Personalizado' };
@@ -403,6 +403,9 @@ function renderConfidenceBar(n) {
 function renderCartaFront(item) {
   const categoria = categoriaDaEstrategia(item);
   const glifo = PECA_POR_RARIDADE[item.teste.rarity] || '♙';
+  const pecaArt = (typeof pecaXadrezSVG === 'function')
+    ? `<span class="carta-art-peca">${pecaXadrezSVG(item.teste.rarity)}</span>`
+    : `<span class="carta-art-glyph">${glifo}</span>`;
   const t = item.teste;
   const numero = item.carta ? '#' + String(item.carta.numero).padStart(3, '0') : '—';
 
@@ -454,7 +457,7 @@ function renderCartaFront(item) {
       </div>
       <div class="carta-art">
         <span class="carta-art-numero">${numero}</span>
-        <span class="carta-art-glyph">${glifo}</span>
+        ${pecaArt}
         <span class="carta-art-categoria">${categoria}</span>
       </div>
       <div style="padding:10px 14px 0">
