@@ -278,6 +278,7 @@ const I18N_DICT = {
     'rev.deenome': '💾 Dê um nome para esta estratégia', 'rev.nomeplaceholder': 'Ex: Reversão 3 velas',
     'rev.testarestrategia': '⚡ Testar Estratégia', 'rev.salvarestrategia': '💾 Salvar Estratégia',
     'rev.salvarhistorico': '📊 Salvar Histórico', 'rev.novaestrategia': '🔄 Criar Nova Estratégia',
+    'rev.verinventario': '🎒 Ver no Inventário',
   },
   en: {
     'lang.toggle.label': 'PT',
@@ -543,6 +544,7 @@ const I18N_DICT = {
     'rev.deenome': '💾 Give this strategy a name', 'rev.nomeplaceholder': 'E.g.: 3-candle reversal',
     'rev.testarestrategia': '⚡ Test Strategy', 'rev.salvarestrategia': '💾 Save Strategy',
     'rev.salvarhistorico': '📊 Save History', 'rev.novaestrategia': '🔄 Create New Strategy',
+    'rev.verinventario': '🎒 View Inventory',
   },
 };
 

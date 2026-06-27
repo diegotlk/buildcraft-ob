@@ -489,6 +489,21 @@ function resetDiasSemanaUI() {
     .forEach(c => c.classList.add('selected'));
 }
 
+// Aplica um recorte específico de dias da semana na UI (array de ints 0-6,
+// ou null/undefined = todos). Usado ao carregar uma estratégia salva (com
+// o recorte que ela tinha) e depois do botão "Otimizar" (reflete o corte
+// achado, pra "Salvar" e qualquer novo teste já saírem com ele aplicado).
+function aplicarDiasSemanaUI(dias) {
+  const chips = document.querySelectorAll('#schedule-dias-grid .dia-chip');
+  if (!chips.length) return;
+  if (!Array.isArray(dias) || dias.length === 0 || dias.length === 7) {
+    chips.forEach(c => c.classList.add('selected'));
+    return;
+  }
+  const set = new Set(dias);
+  chips.forEach(c => c.classList.toggle('selected', set.has(parseInt(c.dataset.dia, 10))));
+}
+
 // Melhorar a interatividade dos inputs de horário
 document.addEventListener('DOMContentLoaded', () => {
   const startInput = document.getElementById('schedule-start');
@@ -1001,6 +1016,11 @@ function testStrategy() {
     };
   }
 
+  // Guarda o payload exato desse teste — é o que o botão "Otimizar" reenvia
+  // (com um recorte de dias da semana) quando o resultado fica perto de subir.
+  strategyState.lastPayload = payload;
+  strategyState.jaOtimizado = false;
+
   callBacktestAPI(payload, btn, textoOriginal);
 }
 
@@ -1031,6 +1051,68 @@ function callBacktestAPI(payload, btn, textoOriginal) {
     });
 }
 
+// ── BOTÃO "OTIMIZAR" (quase-lendária) ──
+// Reenvia o payload do último teste pro back-end achar um recorte de dias da
+// semana que melhora o resultado, removendo os mais fracos. Não sorteia nada
+// novo: só reagrupa as operações que já aconteceram no teste original.
+function otimizarBuild() {
+  if (!strategyState.lastPayload) return;
+  const btn = document.getElementById('btn-otimizar-build');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;"></span> Otimizando...';
+  }
+
+  fetch(`${API_URL}/api/otimizar-build`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(strategyState.lastPayload),
+  })
+    .then(response => response.json().then(data => ({ ok: response.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok || !data.success) {
+        showToast('⚠️ Não foi possível otimizar', (data && data.message) || 'Tente novamente.', 'default');
+        return;
+      }
+      if (!data.otimizado) {
+        showToast('🔍 Sem recorte melhor', data.message || 'Não achamos uma combinação de dias que melhore esse resultado.', 'default');
+        return;
+      }
+      aplicarResultadoOtimizado(data.resultado, data.antes, data.dias_removidos_texto || []);
+    })
+    .catch(() => showToast('❌ API offline', 'Não consegui falar com o servidor agora.', 'default'))
+    .finally(() => {
+      const b = document.getElementById('btn-otimizar-build');
+      if (b) { b.disabled = false; b.innerHTML = '⚙️ Otimizar'; }
+    });
+}
+
+// Aplica o resultado otimizado na tela: atualiza o filtro de dias da semana
+// (pra "Salvar" e qualquer novo teste já saírem com o recorte achado),
+// re-renderiza a carta com os novos números e mostra o "antes × depois".
+function aplicarResultadoOtimizado(r, antes, diasRemovidosTexto) {
+  strategyState.jaOtimizado = true;
+  aplicarDiasSemanaUI(r.dias_semana_otimizados);
+
+  renderResult(r); // já guarda lastResult, dispara confete proporcional à raridade, etc.
+
+  const melhorou = r.rarity !== antes.rarity || r.grade !== antes.grade;
+  const cor = melhorou ? 'var(--rarity-legendary)' : 'var(--success)';
+  const banner = document.createElement('div');
+  banner.style.cssText = `max-width:620px;margin:0 auto 16px;padding:14px 18px;border-radius:10px;` +
+    `background:rgba(34,197,94,.08);border:1px solid ${cor};font-size:13px;line-height:1.6;`;
+  banner.innerHTML = `
+    <div style="font-weight:700;margin-bottom:6px;">
+      ⚙️ Otimizado: ${antes.winrate}% (${antes.grade}) → <span style="color:${cor};">${r.winrate}% (${r.grade})</span>
+    </div>
+    <div style="color:var(--text-secondary);">Removemos: ${diasRemovidosTexto.join(' · ')}</div>
+  `;
+  const container = document.getElementById('test-result');
+  if (container) container.insertBefore(banner, container.firstChild);
+
+  showToast('⚙️ Otimizado!', `Sua build melhorou pra ${r.winrate}% (${r.grade}) removendo os dias mais fracos da semana.`, 'discovery');
+}
+
 // renderConfidenceBar() agora vive em inventario.js (carregado antes deste
 // arquivo) — a carta também precisa dela, não só este painel de resultado.
 
@@ -1050,6 +1132,7 @@ function resetPostTestButtons() {
   mostra('btn-salvar-estrategia', false);
   mostra('btn-salvar-historico', false);
   mostra('btn-nova-estrategia', false);
+  mostra('btn-ver-inventario', false);
   const tr = document.getElementById('test-result');
   if (tr) { tr.style.display = 'none'; tr.innerHTML = ''; }
   const sf = document.getElementById('save-form');
@@ -1175,9 +1258,13 @@ function renderResult(r) {
   const btnVoltarPasso = document.getElementById('btn-review-voltar');
   if (btnVoltarPasso) btnVoltarPasso.style.display = 'none';
 
-  // Mostra o botão de salvar agora que há um resultado real
+  // Mostra o botão de salvar agora que há um resultado real (resultado novo
+  // = ainda não foi salvo, então esconde o "Ver no Inventário" de uma
+  // eventual carta salva anterior nesta mesma sessão).
   const btnSalvar = document.getElementById('btn-salvar-estrategia');
   if (btnSalvar) btnSalvar.style.display = 'inline-flex';
+  const btnVerInv = document.getElementById('btn-ver-inventario');
+  if (btnVerInv) btnVerInv.style.display = 'none';
 
   // O 3º botão muda conforme o contexto:
   //  - Testando uma estratégia existente  -> "Voltar" pra lista de Testar
@@ -1347,7 +1434,14 @@ function snapshotDefinicao() {
     if (direction === 'both') {
       direction = direcaoVencedoraDoResultado(s.lastResult) || 'call';
     }
-    return { pattern: [...s.pattern], direction, anchoring: s.anchoring, mirror: s.mirror, mirrorDirection: s.mirrorDirection };
+    return {
+      pattern: [...s.pattern], direction, anchoring: s.anchoring, mirror: s.mirror,
+      mirrorDirection: s.mirrorDirection,
+      // recorte de dias da semana (ex.: o que o botão "Otimizar" achou) — sem
+      // isso, reproduzir/testar de novo essa estratégia ignorava o corte e
+      // sempre voltava a testar todos os dias.
+      diasSemana: getDiasSemanaSelecionados(),
+    };
   }
   if (s.mode === 'quadrante') {
     return { q: JSON.parse(JSON.stringify(s.q)) };
@@ -1487,6 +1581,16 @@ function confirmSaveStrategy() {
 
   document.getElementById('save-form').style.display = 'none';
 
+  // Já salvou — some com os botões que não fazem mais sentido pra ESSE
+  // resultado (salvar de novo criaria carta/histórico duplicado) e dá um
+  // caminho claro de saída em vez de deixar a tela igual a antes de salvar.
+  const btnSalvar = document.getElementById('btn-salvar-estrategia');
+  if (btnSalvar) btnSalvar.style.display = 'none';
+  const btnHistorico = document.getElementById('btn-salvar-historico');
+  if (btnHistorico) btnHistorico.style.display = 'none';
+  const btnVerInv = document.getElementById('btn-ver-inventario');
+  if (btnVerInv) btnVerInv.style.display = 'inline-flex';
+
   if (linhagem.origemId) {
     const sinal = linhagem.deltaWinrate > 0 ? '▲ melhor' : linhagem.deltaWinrate < 0 ? '▼ pior' : '= igual';
     showToast('🃏 Carta criada!', `"${nome}" é a carta #${String(item.carta.numero).padStart(3, '0')}, filha de "${linhagem.origemNome}" (geração ${linhagem.geracao}) — desempenho ${sinal} (${linhagem.deltaWinrate > 0 ? '+' : ''}${linhagem.deltaWinrate}%).`, 'discovery');
@@ -1616,6 +1720,7 @@ function carregarDefinicaoExistente(id) {
     strategyState.mirror = d.mirror;
     strategyState.mirrorChosen = true;
     strategyState.mirrorDirection = d.mirrorDirection;
+    aplicarDiasSemanaUI(d.diasSemana || null);
   } else if (item.mode === 'quadrante') {
     strategyState.q = JSON.parse(JSON.stringify(d.q));
   } else if (item.mode === 'indicador') {
@@ -1651,7 +1756,8 @@ function reproduzirCarta(id) {
   strategyState.periodoModo = 'personalizado';
   strategyState.periodoDataDe = item.teste.periodoDe;
   strategyState.periodoDataAte = item.teste.periodoAte;
-  resetDiasSemanaUI(); // reprodução exata = todos os dias, igual ao original
+  // dias da semana já foram restaurados por carregarDefinicaoExistente() (o
+  // recorte exato que essa carta tinha — inclusive se veio do "Otimizar").
 
   goToPhase('pair');
   showToast('🔁 Reproduzindo', `Rodando "${item.nome}" travado em ${item.teste.periodoDe} – ${item.teste.periodoAte}, igual a quando foi salva.`, 'default');
@@ -2350,6 +2456,22 @@ function calcularQuaseAcerto(r) {
   return null;
 }
 
+// Botão "Otimizar" — só aparece quando faltou MUITO pouco (gap pequeno
+// mesmo, diferente do aviso geral de "quase" acima) e só no modo "pintar"
+// (é o único com filtro de dia da semana hoje, que é o que o otimizador usa).
+// Some depois de uma otimização (não tem o que cortar de novo na hora).
+const OTIMIZAR_GAP_MAX = 0.5; // % de acerto
+
+function gapParaOtimizar(r) {
+  if (strategyState.mode !== 'pintar' || strategyState.mirror) return null;
+  if (strategyState.jaOtimizado) return null;
+  const limites = [51, 53.5, 54, 56, 58];
+  const prox = limites.find(l => l > r.winrate);
+  if (prox == null) return null;
+  const gap = Math.round((prox - r.winrate) * 100) / 100;
+  return (gap > 0 && gap <= OTIMIZAR_GAP_MAX) ? gap : null;
+}
+
 // Marco de coleção — puxa do inventário REAL do usuário. Celebra a 1ª carta de
 // cada raridade e mostra quantas já tem. Some pra Comum (não é alvo de caça).
 function marcoColecao(r) {
@@ -2382,6 +2504,17 @@ function montarHeroReveal(r) {
   const quase = calcularQuaseAcerto(r);
   const quaseHTML = quase ? `<div class="reveal-nearmiss">${quase}</div>` : '';
 
+  const gapOtim = gapParaOtimizar(r);
+  const otimizarHTML = gapOtim != null ? `
+    <div class="reveal-nearmiss">
+      🛠️ Faltam só <b>${gapOtim}%</b> de acerto. A gente pode otimizar tirando os
+      dias da semana mais fracos do recorte — sem sortear de novo, só replicando
+      o que já deu certo no seu teste.
+      <div style="margin-top:10px;">
+        <button class="btn btn-sm btn-accent" id="btn-otimizar-build" onclick="otimizarBuild()">⚙️ Otimizar</button>
+      </div>
+    </div>` : '';
+
   return `
   <div class="reveal-hero" style="--rc:${cor};--rg:${glow};">
     <div class="reveal-hero-eyebrow">⚡ Descoberta no histórico real</div>
@@ -2398,6 +2531,7 @@ function montarHeroReveal(r) {
     </div>
     ${marcoColecao(r)}
     ${quaseHTML}
+    ${otimizarHTML}
   </div>`;
 }
 
