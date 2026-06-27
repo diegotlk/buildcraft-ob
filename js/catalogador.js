@@ -1,9 +1,12 @@
 /* ============================================================
-   Binaryzando — Catalogador (Item 1: Grade de cores por horário)
+   Binaryzando — Catalogador (Item 1: Grade de cores por período)
    ============================================================
-   Busca as últimas N velas reais de um par no backend e pinta cada uma
-   como um "tijolo" verde/vermelho/cinza (doji), igual a parede de velas
-   do Catalogador OB. Sem RNG, sem invenção — é o dado puro de velas.db. */
+   Busca as velas reais de um par num período FECHADO (dia/semana/mês,
+   nunca "todo o histórico") e pinta cada uma como um "tijolo" verde/
+   vermelho/cinza (doji), igual a parede de velas do Catalogador OB.
+   Período longo (semana/mês) vem agregado por hora do dia — o backend
+   decide isso (campo "modo": "velas" ou "horas"). Sem RNG, sem invenção
+   — é o dado puro de velas.db. */
 
 const CATALOGADOR_API_URL = 'https://api.binaryzando.com';
 
@@ -14,6 +17,13 @@ function popularSelectParesCatalogador() {
     const bloqueado = typeof parBloqueado === 'function' && parBloqueado(par);
     return `<option value="${par}" ${bloqueado ? 'disabled' : ''}>${par}${bloqueado ? ' 🔒' : ''}</option>`;
   }).join('');
+}
+
+function aoTrocarPeriodoCatalogador() {
+  const periodo = document.getElementById('cat-periodo')?.value;
+  const aviso = document.getElementById('cat-aviso-premium');
+  const souPremium = typeof ehPremium === 'function' && ehPremium();
+  if (aviso) aviso.style.display = (periodo === 'mes' && !souPremium) ? 'block' : 'none';
 }
 
 function renderTotaisCatalogador(totais) {
@@ -35,7 +45,8 @@ function renderTotaisCatalogador(totais) {
   `;
 }
 
-function renderGradeCatalogador(velas) {
+// Modo "velas": cada vela individual do período, igual a parede de tijolos.
+function renderGradeVelas(velas) {
   const el = document.getElementById('cat-grade');
   if (!el) return;
   el.innerHTML = velas.map((v, i) => `
@@ -45,9 +56,25 @@ function renderGradeCatalogador(velas) {
   `).join('');
 }
 
+// Modo "horas": período longo (semana/mês) agregado em 24 células — uma
+// por hora do dia, mostrando a cor dominante e a % verde/vermelha daquele
+// horário ao longo de todo o período.
+function renderGradeHoras(horas) {
+  const el = document.getElementById('cat-grade');
+  if (!el) return;
+  el.innerHTML = horas.map((h, i) => `
+    <div class="cat-vela cat-vela-hora ${h.cor}" style="animation-delay:${Math.min(i * 20, 600)}ms"
+         title="${h.hora} · ${h.total} velas · ${h.pct_verde}% verde / ${h.pct_vermelha}% vermelha">
+      ${h.hora}
+      <span class="cat-vela-pct">${h.cor === 'verde' ? h.pct_verde : h.pct_vermelha}%</span>
+    </div>
+  `).join('');
+}
+
 async function carregarCatalogador() {
   const par = document.getElementById('cat-par')?.value;
-  const limite = document.getElementById('cat-limite')?.value || 100;
+  const periodo = document.getElementById('cat-periodo')?.value || 'dia';
+  const data = document.getElementById('cat-data')?.value || '';
   const estado = document.getElementById('cat-estado');
   const grade = document.getElementById('cat-grade');
   const totais = document.getElementById('cat-totais');
@@ -64,20 +91,25 @@ async function carregarCatalogador() {
   const plano = (typeof ehPremium === 'function' && ehPremium()) ? 'premium' : 'free';
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Sao_Paulo';
 
+  const params = new URLSearchParams({ par, tf: 'M1', periodo, plano, tz });
+  if (data) params.set('data', data);
+
   try {
-    const resp = await fetch(
-      `${CATALOGADOR_API_URL}/api/catalogador/grade?par=${encodeURIComponent(par)}&tf=M1&limite=${limite}&plano=${plano}&tz=${encodeURIComponent(tz)}`
-    );
+    const resp = await fetch(`${CATALOGADOR_API_URL}/api/catalogador/grade?${params.toString()}`);
     const dados = await resp.json();
 
     if (!resp.ok || !dados.success) {
-      estado.textContent = dados.message || 'Não foi possível carregar a grade desse par.';
+      estado.textContent = dados.message || 'Não foi possível carregar a grade desse par/período.';
       return;
     }
 
     estado.textContent = '';
     renderTotaisCatalogador(dados.totais);
-    renderGradeCatalogador(dados.velas);
+    if (dados.modo === 'horas') {
+      renderGradeHoras(dados.horas);
+    } else {
+      renderGradeVelas(dados.velas);
+    }
   } catch (e) {
     estado.textContent = 'Erro de conexão com o servidor. Tenta de novo em alguns segundos.';
     console.error('[catalogador] falha ao buscar grade:', e);
@@ -86,5 +118,6 @@ async function carregarCatalogador() {
 
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectParesCatalogador();
+  aoTrocarPeriodoCatalogador();
   carregarCatalogador();
 });

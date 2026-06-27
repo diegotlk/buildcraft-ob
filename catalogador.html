@@ -58,13 +58,26 @@
       display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
       justify-content: center; margin-bottom: 8px;
     }
-    .cat-controles select {
+    .cat-controles select, .cat-controles input[type="date"] {
       background: var(--bg-input); color: var(--text-primary);
       border: 1px solid var(--bg-hover); border-radius: var(--radius-md, 8px);
       padding: 8px 12px; font-size: .85rem;
     }
     .cat-estado {
       text-align: center; color: var(--text-secondary); padding: 40px 0;
+    }
+
+    /* Modo "horas" (semana/mês): célula maior, mostra a hora e a % do lado
+       verde/vermelho dominante daquele horário ao longo do período. */
+    .cat-vela.cat-vela-hora {
+      padding: 14px 6px;
+      font-size: .8rem;
+      line-height: 1.3;
+    }
+    .cat-vela-hora .cat-vela-pct { display: block; font-size: .68rem; opacity: .85; font-weight: 600; }
+    .cat-aviso-premium {
+      text-align: center; color: var(--neon-gold, #ffc24b); font-size: .8rem;
+      margin-top: -4px; margin-bottom: 12px;
     }
   </style>
 </head>
@@ -104,19 +117,20 @@
     <div class="container">
       <div class="lab-header" style="margin-top: 40px; margin-bottom: 28px;">
         <h1 class="page-title">🔥 Catalogador</h1>
-        <p class="page-subtitle">As últimas velas reais do par, coloridas por resultado — verde, vermelha ou cinza (doji/sem definição).</p>
+        <p class="page-subtitle">Escolha um par e um período (dia, semana ou mês). Cada vela real do período aparece colorida — verde, vermelha ou cinza (doji/sem definição).</p>
       </div>
 
       <div class="cat-controles">
         <select id="cat-par"></select>
-        <select id="cat-limite">
-          <option value="50">Últimas 50 velas</option>
-          <option value="100" selected>Últimas 100 velas</option>
-          <option value="200">Últimas 200 velas</option>
-          <option value="300">Últimas 300 velas</option>
+        <select id="cat-periodo" onchange="aoTrocarPeriodoCatalogador()">
+          <option value="dia" selected>1 dia</option>
+          <option value="semana">1 semana</option>
+          <option value="mes">1 mês 🔒</option>
         </select>
+        <input type="date" id="cat-data">
         <button class="btn btn-sm btn-accent" onclick="carregarCatalogador()">🔄 Atualizar</button>
       </div>
+      <p id="cat-aviso-premium" class="cat-aviso-premium" style="display:none">🔒 Período de 1 mês é exclusivo Premium.</p>
 
       <div id="cat-totais" class="cat-totais"></div>
       <div id="cat-grade" class="cat-grade"></div>
