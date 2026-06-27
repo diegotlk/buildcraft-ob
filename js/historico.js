@@ -17,8 +17,23 @@ function getHistoricos() {
   }
 }
 
+// Devolve true se salvou de verdade, false se o navegador bloqueou (cota
+// cheia, modo privado) — mesmo cuidado de inventario.js: sem o try/catch,
+// isso quebrava silenciosamente o fluxo de quem chamou (ex.: salvar uma
+// estratégia já guarda o histórico dela em seguida).
 function salvarHistoricos(lista) {
-  localStorage.setItem(HISTORICO_KEY, JSON.stringify(lista));
+  try {
+    localStorage.setItem(HISTORICO_KEY, JSON.stringify(lista));
+  } catch (e) {
+    console.error('[historico] falha ao salvar no localStorage:', e);
+    if (typeof showToast === 'function') {
+      showToast('⚠️ Não consegui salvar o histórico',
+        'O navegador bloqueou o armazenamento local (modo privado/anônimo ou sem espaço livre).',
+        'default');
+    }
+    return false;
+  }
+  return true;
 }
 
 function excluirHistorico(id) {
@@ -67,7 +82,7 @@ function gerarHistoricoPadrao(presetId) {
       };
       const lista = getHistoricos();
       lista.push(item);
-      salvarHistoricos(lista);
+      if (!salvarHistoricos(lista)) return;
       renderHistoricos();
       showToast('✅ Histórico gerado', `"${item.nome}" tem ${item.sequencia.length} entradas reais prontas para testar.`, 'discovery');
     })
@@ -170,7 +185,7 @@ function gerarHistoricoDeEstrategia(itemId) {
       };
       const lista = getHistoricos();
       lista.push(novo);
-      salvarHistoricos(lista);
+      if (!salvarHistoricos(lista)) return;
       fecharGeradorHistoricoDeEstrategia();
       renderHistoricos();
       showToast('✅ Histórico gerado', `"${novo.nome}" tem ${novo.sequencia.length} entradas reais prontas para testar.`, 'discovery');

@@ -287,6 +287,6 @@ function salvarBuildNoInventario() {
 
   const lista = getInventario();
   lista.push(item);
-  salvarInventario(lista);
+  if (!salvarInventario(lista)) return;
   showToast('🃏 Carta criada!', `"${item.nome}" agora é a carta #${String(item.carta.numero).padStart(3, '0')} do seu inventário.`, 'discovery');
 }

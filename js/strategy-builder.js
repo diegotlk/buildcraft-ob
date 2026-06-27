@@ -1319,7 +1319,7 @@ function salvarHistoricoDoTeste() {
     sequencia: r.sequencia,
     criadoEm: new Date().toISOString(),
   });
-  salvarHistoricos(historicos);
+  if (!salvarHistoricos(historicos)) return;
 
   showToast('✅ Histórico salvo', `"${nome}" tem ${r.sequencia.length} entradas reais — já disponível em Criar Gerenciamento e no Inventário.`, 'discovery');
 }
@@ -1554,7 +1554,10 @@ function confirmSaveStrategy() {
   };
 
   lista.push(item);
-  salvarInventario(lista);
+  // Se o navegador bloqueou o armazenamento local (modo privado, sem espaço),
+  // salvarInventario já avisou o motivo — não segue pra mostrar "Carta
+  // criada!" sobre uma carta que na verdade não foi salva em lugar nenhum.
+  if (!salvarInventario(lista)) return;
 
   // Toda estratégia salva já nasce com seu histórico de backtest (a sequência
   // real de W/L do teste que acabou de rodar). É esse histórico que habilita a

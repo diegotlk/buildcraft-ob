@@ -32,9 +32,26 @@ function getInventario() {
   return limpa.lista;
 }
 
+// Devolve true se salvou local de verdade, false se o navegador bloqueou.
+// localStorage.setItem PODE lançar (cota cheia, modo privado do Safari com
+// cota zerada, etc.) — sem o try/catch, esse erro escapava sem aviso nenhum
+// e tudo que vinha depois (sincronizar com o servidor, mostrar "Carta
+// criada!") simplesmente não rodava: parecia que "clicou Salvar e não
+// aconteceu nada".
 function salvarInventario(lista) {
-  localStorage.setItem(INVENTARIO_KEY, JSON.stringify(lista));
+  try {
+    localStorage.setItem(INVENTARIO_KEY, JSON.stringify(lista));
+  } catch (e) {
+    console.error('[inventario] falha ao salvar no localStorage:', e);
+    if (typeof showToast === 'function') {
+      showToast('⚠️ Não consegui salvar',
+        'O navegador bloqueou o armazenamento local (modo privado/anônimo ou sem espaço livre). Saia do modo privado e tente de novo.',
+        'default');
+    }
+    return false;
+  }
   enviarInventarioServidor(lista);
+  return true;
 }
 
 // ── SINCRONIZAÇÃO ENTRE APARELHOS ──
@@ -213,7 +230,14 @@ function formatDataBR(iso) {
 function proximoNumeroDescoberta() {
   const atual = parseInt(localStorage.getItem(CARTA_SEQ_KEY) || '0', 10);
   const proximo = atual + 1;
-  localStorage.setItem(CARTA_SEQ_KEY, String(proximo));
+  try {
+    localStorage.setItem(CARTA_SEQ_KEY, String(proximo));
+  } catch (e) {
+    // Mesmo bloqueio que salvarInventario() pode encontrar daqui a pouco —
+    // não trava o fluxo aqui (sem try/catch, isso quebrava o salvamento da
+    // carta inteira ANTES até de chegar no aviso de erro de verdade).
+    console.error('[inventario] falha ao salvar número de descoberta:', e);
+  }
   return proximo;
 }
 
@@ -325,10 +349,11 @@ function descricaoAutomatica(item) {
 
   if (item.mode === 'pintar') {
     const dirTxt = { call: 'CALL (vela verde)', put: 'PUT (vela vermelha)', both: 'CALL ou PUT, testando os dois lados' }[d.direction] || d.direction;
+    const ancLabel = d.anchoring === 'exato' ? 'Exato' : 'No Mínimo';
     const ancTxt = d.anchoring === 'exato'
       ? 'a vela imediatamente anterior precisa ter cor diferente do início do padrão'
       : 'a vela anterior pode ter qualquer cor';
-    let txt = `Procura o padrão ${d.pattern.join('')} no gráfico e, quando encontra, aposta que a próxima vela será ${dirTxt}. Ancoragem: ${ancTxt}.`;
+    let txt = `Procura o padrão ${d.pattern.join('')} no gráfico e, quando encontra, aposta que a próxima vela será ${dirTxt}. Ancoragem ${ancLabel}: ${ancTxt}.`;
     if (d.mirror) txt += ' Também opera o padrão espelhado, invertendo as cores.';
     return txt;
   }
@@ -605,9 +630,6 @@ function renderCartaBack(item) {
 
       <div class="carta-back-meta">
         ${metaHTML}
-      </div>
-      <div style="margin-top:10px;display:flex;gap:8px">
-        <button class="btn btn-sm btn-outline" style="flex:1" onclick="event.stopPropagation(); excluirDoInventario('${item.id}')">🗑️ Remover</button>
       </div>
       <div class="carta-footer" style="margin:8px -16px -14px;padding:9px 16px">
         <div class="card-footer-stat"><strong>1</strong> usuário</div>

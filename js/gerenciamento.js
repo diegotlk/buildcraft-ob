@@ -670,7 +670,7 @@ function salvarTesteGerenciamentoNoInventario() {
 
   const lista = getInventario();
   lista.push(item);
-  salvarInventario(lista);
+  if (!salvarInventario(lista)) return;
 
   // Limpa os dois possíveis containers de resultado (Criar e Testar)
   ['gerenciamento-criar-resultado', 'gerenciamento-teste-resultado'].forEach(cid => {
