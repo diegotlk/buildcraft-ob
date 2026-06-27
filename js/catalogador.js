@@ -46,8 +46,10 @@ function renderTotaisCatalogador(totais) {
 }
 
 // Modo "velas": cada vela individual do período, igual a parede de tijolos.
-// Período com muitas velas (semana) vira "densa": célula minúscula, sem
-// texto e sem animação por célula — só a cor, com o horário no tooltip.
+// O horário SEMPRE aparece escrito dentro da célula — sem isso vira um monte
+// de pontinho colorido sem significado nenhum. Período com muitas velas
+// (semana) só fica "denso": célula menor e sem animação por célula (custaria
+// caro em milhares de elementos), nunca sem o texto.
 const CAT_LIMITE_DENSA = 300;
 
 function renderGradeVelas(velas) {
@@ -56,7 +58,7 @@ function renderGradeVelas(velas) {
   const densa = velas.length > CAT_LIMITE_DENSA;
   el.classList.toggle('cat-grade-densa', densa);
   el.innerHTML = velas.map((v, i) => densa
-    ? `<div class="cat-vela ${v.cor}" title="${v.hora} · ${v.cor}"></div>`
+    ? `<div class="cat-vela ${v.cor}" title="${v.hora} · ${v.cor}">${v.hora}</div>`
     : `<div class="cat-vela ${v.cor}" style="animation-delay:${Math.min(i * 6, 600)}ms" title="${v.hora} · ${v.cor}">${v.hora}</div>`
   ).join('');
 }
