@@ -132,6 +132,7 @@ function gerarHistoricoDeEstrategia(itemId) {
     periodo_modo: periodoModo,
     data_de: periodoModo === 'personalizado' ? dataDe : null,
     data_ate: periodoModo === 'personalizado' ? dataAte : null,
+    timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
   };
 
   showToast('🔬 Gerando histórico', `Rodando "${item.nome}" contra o histórico real...`, 'default');
@@ -185,7 +186,7 @@ function setHistoricoPeriodo(modo, el) {
   document.getElementById('historico-periodo-datas').style.display = modo === 'personalizado' ? 'flex' : 'none';
 }
 
-function setHistoricoPeriodoRapido(dias) {
+function setHistoricoPeriodoRapido(dias, el) {
   const hoje = new Date();
   const fim = new Date(hoje);
   const inicio = new Date(hoje);
@@ -195,6 +196,7 @@ function setHistoricoPeriodoRapido(dias) {
   document.getElementById('historico-data-de').value = fmt(inicio);
   document.getElementById('historico-data-ate').value = fmt(fim);
   setHistoricoPeriodo('personalizado', document.querySelector('#historico-periodo-grid [data-periodo="personalizado"]'));
+  marcarAtalhoPeriodo(el); // destaca o atalho clicado (definido em strategy-builder.js)
 }
 
 // ── RENDERIZAÇÃO ──

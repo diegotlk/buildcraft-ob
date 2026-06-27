@@ -104,65 +104,66 @@
       </div>
 
       <div class="auth-tabs">
-        <div class="auth-tab active" id="tab-entrar" onclick="trocarAbaAuth('entrar')">Entrar</div>
-        <div class="auth-tab" id="tab-cadastro" onclick="trocarAbaAuth('cadastro')">Criar Conta</div>
+        <div class="auth-tab active" id="tab-entrar" onclick="trocarAbaAuth('entrar')" data-i18n="auth.entrar">Entrar</div>
+        <div class="auth-tab" id="tab-cadastro" onclick="trocarAbaAuth('cadastro')" data-i18n="auth.criarconta">Criar Conta</div>
       </div>
 
       <div class="auth-error" id="auth-error"></div>
 
       <form id="auth-form" onsubmit="enviarAuth(event)">
         <div class="form-group">
-          <label class="form-label" for="auth-email">E-mail</label>
+          <label class="form-label" for="auth-email" data-i18n="auth.email">E-mail</label>
           <input type="email" id="auth-email" class="form-input" placeholder="seu@email.com"
                  autocomplete="username" required>
         </div>
         <div class="form-group">
-          <label class="form-label" for="auth-senha">Senha</label>
+          <label class="form-label" for="auth-senha" data-i18n="auth.senha">Senha</label>
           <input type="password" id="auth-senha" class="form-input" placeholder="••••••••"
                  autocomplete="current-password" minlength="8" required
                  oninput="atualizarRequisitos()">
         </div>
 
         <div class="auth-reqs" id="auth-reqs">
-          <div class="auth-reqs-titulo">Sua senha precisa ter:</div>
-          <div class="auth-req" id="req-tamanho"><span class="icone">○</span> Pelo menos 8 caracteres</div>
-          <div class="auth-req" id="req-maiuscula"><span class="icone">○</span> Uma letra maiúscula (A-Z)</div>
-          <div class="auth-req" id="req-minuscula"><span class="icone">○</span> Uma letra minúscula (a-z)</div>
-          <div class="auth-req" id="req-numero"><span class="icone">○</span> Um número (0-9)</div>
-          <div class="auth-req" id="req-especial"><span class="icone">○</span> Um caractere especial (!@#$%...)</div>
+          <div class="auth-reqs-titulo" data-i18n="auth.senhaprecisa">Sua senha precisa ter:</div>
+          <div class="auth-req" id="req-tamanho"><span class="icone">○</span> <span data-i18n="auth.req.tamanho">Pelo menos 8 caracteres</span></div>
+          <div class="auth-req" id="req-maiuscula"><span class="icone">○</span> <span data-i18n="auth.req.maiuscula">Uma letra maiúscula (A-Z)</span></div>
+          <div class="auth-req" id="req-minuscula"><span class="icone">○</span> <span data-i18n="auth.req.minuscula">Uma letra minúscula (a-z)</span></div>
+          <div class="auth-req" id="req-numero"><span class="icone">○</span> <span data-i18n="auth.req.numero">Um número (0-9)</span></div>
+          <div class="auth-req" id="req-especial"><span class="icone">○</span> <span data-i18n="auth.req.especial">Um caractere especial (!@#$%...)</span></div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-lg" id="auth-submit" style="width:100%; margin-top:8px;">
+        <button type="submit" class="btn btn-primary btn-lg" id="auth-submit" style="width:100%; margin-top:8px;" data-i18n="auth.entrar">
           Entrar
         </button>
       </form>
 
       <!-- Esqueci minha senha (só faz sentido na aba "Entrar") -->
       <div class="auth-switch" id="auth-forgot" style="margin-top:14px">
-        <a onclick="abrirEsqueci()">Esqueci minha senha</a>
+        <a onclick="abrirEsqueci()" data-i18n="auth.esquecisenha">Esqueci minha senha</a>
       </div>
 
       <div id="esqueci-box" style="display:none; margin-top:8px;">
         <div class="form-group">
-          <label class="form-label" for="esqueci-email">Seu e-mail</label>
+          <label class="form-label" for="esqueci-email" data-i18n="auth.seuemail">Seu e-mail</label>
           <input type="email" id="esqueci-email" class="form-input" placeholder="seu@email.com" autocomplete="username">
         </div>
-        <button type="button" class="btn btn-outline" style="width:100%" id="esqueci-btn" onclick="enviarEsqueci()">Enviar link de redefinição</button>
+        <button type="button" class="btn btn-outline" style="width:100%" id="esqueci-btn" onclick="enviarEsqueci()" data-i18n="auth.enviarlink">Enviar link de redefinição</button>
         <div id="esqueci-msg" style="font-size:.82rem;color:var(--text-secondary);margin-top:10px;text-align:center;"></div>
       </div>
 
       <div class="auth-switch">
-        <span id="auth-switch-texto">Não tem conta?</span>
-        <a id="auth-switch-link" onclick="trocarAbaAuth('cadastro')">Criar uma agora</a>
+        <span id="auth-switch-texto" data-i18n="auth.naotemconta">Não tem conta?</span>
+        <a id="auth-switch-link" onclick="trocarAbaAuth('cadastro')" data-i18n="auth.criaruma">Criar uma agora</a>
       </div>
 
       <div class="auth-back">
-        <a href="index.html">⬅ Voltar para o início</a>
+        <a href="index.html" data-i18n="auth.voltarinicio">⬅ Voltar para o início</a>
       </div>
     </div>
   </div>
 
   <script src="js/auth.js?v=5"></script>
+  <script src="js/i18n.js?v=1"></script>
   <script>
     let abaAuthAtual = 'entrar';
 
@@ -170,16 +171,16 @@
       abaAuthAtual = aba;
       document.getElementById('tab-entrar').classList.toggle('active', aba === 'entrar');
       document.getElementById('tab-cadastro').classList.toggle('active', aba === 'cadastro');
-      document.getElementById('auth-submit').textContent = aba === 'entrar' ? 'Entrar' : 'Criar Conta';
+      document.getElementById('auth-submit').textContent = aba === 'entrar' ? t('auth.entrar') : t('auth.criarconta');
       document.getElementById('auth-senha').setAttribute('autocomplete', aba === 'entrar' ? 'current-password' : 'new-password');
 
       if (aba === 'entrar') {
-        document.getElementById('auth-switch-texto').textContent = 'Não tem conta?';
-        document.getElementById('auth-switch-link').textContent = 'Criar uma agora';
+        document.getElementById('auth-switch-texto').textContent = t('auth.naotemconta');
+        document.getElementById('auth-switch-link').textContent = t('auth.criaruma');
         document.getElementById('auth-switch-link').onclick = () => trocarAbaAuth('cadastro');
       } else {
-        document.getElementById('auth-switch-texto').textContent = 'Já tem conta?';
-        document.getElementById('auth-switch-link').textContent = 'Entrar';
+        document.getElementById('auth-switch-texto').textContent = t('auth.jatemconta');
+        document.getElementById('auth-switch-link').textContent = t('auth.entrar');
         document.getElementById('auth-switch-link').onclick = () => trocarAbaAuth('entrar');
       }
 
@@ -225,14 +226,14 @@
       // Ao criar conta, segura aqui antes de chamar a API (o servidor também
       // valida — isto é só pra dar um aviso rápido e claro ao usuário).
       if (abaAuthAtual === 'cadastro' && !senhaForte(senha)) {
-        mostrarErroAuth('Sua senha ainda não cumpre todos os requisitos abaixo.');
+        mostrarErroAuth(t('auth.erro.senhafraca'));
         return;
       }
 
       const btn = document.getElementById('auth-submit');
       const textoOriginal = btn.textContent;
       btn.disabled = true;
-      btn.textContent = abaAuthAtual === 'entrar' ? 'Entrando...' : 'Criando conta...';
+      btn.textContent = abaAuthAtual === 'entrar' ? t('auth.entrando') : t('auth.criandoconta');
 
       try {
         const resp = await fetch(AUTH_API_BASE + endpoint, {
@@ -243,7 +244,7 @@
         const dados = await resp.json();
 
         if (!resp.ok || !dados.success) {
-          mostrarErroAuth(dados.message || 'Não foi possível continuar. Tente de novo.');
+          mostrarErroAuth(dados.message || t('auth.erro.generico'));
           btn.disabled = false;
           btn.textContent = textoOriginal;
           return;
@@ -252,7 +253,7 @@
         salvarSessao(dados.token, dados.email, dados.plano || 'free');
         redirecionarPosLogin();
       } catch (e) {
-        mostrarErroAuth('Não foi possível conectar à API. Verifique se o backend (backtest_api.py) está rodando.');
+        mostrarErroAuth(t('auth.erro.apioffline'));
         btn.disabled = false;
         btn.textContent = textoOriginal;
       }
@@ -275,11 +276,11 @@
       const btn = document.getElementById('esqueci-btn');
       if (!email || !email.includes('@')) {
         msg.style.color = 'var(--danger)';
-        msg.textContent = 'Digite um e-mail válido.';
+        msg.textContent = t('auth.erro.emailinvalido');
         return;
       }
       btn.disabled = true;
-      btn.textContent = 'Enviando...';
+      btn.textContent = t('auth.enviando');
       try {
         const resp = await fetch(AUTH_API_BASE + '/api/auth/esqueci', {
           method: 'POST',
@@ -289,13 +290,13 @@
         const dados = await resp.json();
         msg.style.color = 'var(--text-secondary)';
         // Resposta neutra de propósito (não revela se o e-mail existe).
-        msg.textContent = dados.message || 'Se este e-mail estiver cadastrado, enviamos um link.';
+        msg.textContent = dados.message || t('auth.linkenviado');
       } catch (e) {
         msg.style.color = 'var(--danger)';
-        msg.textContent = 'Não foi possível conectar à API.';
+        msg.textContent = t('auth.erro.apioffline2');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Enviar link de redefinição';
+        btn.textContent = t('auth.enviarlink');
       }
     }
 

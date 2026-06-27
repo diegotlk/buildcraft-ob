@@ -422,7 +422,7 @@ function setSchedulePeriodo(modo, el) {
   document.getElementById('schedule-periodo-datas').style.display = modo === 'personalizado' ? 'block' : 'none';
 }
 
-function setSchedulePeriodoRapido(dias) {
+function setSchedulePeriodoRapido(dias, el) {
   const hoje = new Date();
   const fim = new Date(hoje);
   const inicio = new Date(hoje);
@@ -432,6 +432,61 @@ function setSchedulePeriodoRapido(dias) {
   document.getElementById('schedule-data-de').value = fmt(inicio);
   document.getElementById('schedule-data-ate').value = fmt(fim);
   setSchedulePeriodo('personalizado', document.querySelector('#schedule-periodo-grid [data-periodo="personalizado"]'));
+  marcarAtalhoPeriodo(el);
+}
+
+// Destaca o atalho de período clicado (Ontem/Última semana/Último mês). Antes
+// nenhum ficava marcado — o usuário não via qual período tinha escolhido.
+function marcarAtalhoPeriodo(el) {
+  if (!el || !el.parentElement) return;
+  el.parentElement.querySelectorAll('button').forEach(b => {
+    b.classList.remove('btn-accent');
+    b.classList.add('btn-outline');
+  });
+  el.classList.remove('btn-outline');
+  el.classList.add('btn-accent');
+}
+
+// Quando o usuário edita a data na mão, o atalho marcado deixa de valer: limpa
+// o destaque pra não mostrar "Último mês" aceso com datas diferentes.
+// prefixo: 'schedule' (teste) ou 'historico' (gerador de histórico).
+function limparAtalhosPeriodo(prefixo) {
+  const datas = document.getElementById(prefixo + '-periodo-datas');
+  if (!datas) return;
+  datas.querySelectorAll('.btn-sm').forEach(b => {
+    b.classList.remove('btn-accent');
+    b.classList.add('btn-outline');
+  });
+}
+
+// ── DIAS DA SEMANA (filtro por cima do período) ──
+// Os chips no DOM são a fonte da verdade (Seg=0 .. Dom=6, mesma base do motor).
+function toggleDiaSemana(el) {
+  const ligados = document.querySelectorAll('#schedule-dias-grid .dia-chip.selected');
+  if (el.classList.contains('selected') && ligados.length <= 1) {
+    showToast('⚠️ Pelo menos um dia', 'Deixe ao menos um dia da semana ativo pra testar.', 'default');
+    return;
+  }
+  el.classList.toggle('selected');
+}
+
+// Dias selecionados (array de ints) ou null = sem filtro. Os 7 dias também viram
+// null, pra não mandar filtro à toa pro backend.
+function getDiasSemanaSelecionados() {
+  const chips = document.querySelectorAll('#schedule-dias-grid .dia-chip');
+  if (!chips.length) return null;
+  const sel = [...chips]
+    .filter(c => c.classList.contains('selected'))
+    .map(c => parseInt(c.dataset.dia, 10));
+  if (sel.length === 0 || sel.length === 7) return null;
+  return sel;
+}
+
+// Reacende todos os dias (volta ao padrão "opera todos"). Usado no reset e na
+// reprodução exata de uma carta.
+function resetDiasSemanaUI() {
+  document.querySelectorAll('#schedule-dias-grid .dia-chip')
+    .forEach(c => c.classList.add('selected'));
 }
 
 // Melhorar a interatividade dos inputs de horário
@@ -844,7 +899,10 @@ function testStrategy() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span> Testando contra velas.db...';
 
-  showToast('🔬 Iniciando backtest', 'Testando sua estratégia contra o histórico real...', 'default');
+  // Momento da revelação: abre o suspense (suspense + flip + confete vivem no
+  // bloco "REVELAÇÃO" no fim deste arquivo). O backtest roda por baixo; o
+  // resultado só aparece depois do tempo mínimo de suspense (fecharSuspense).
+  mostrarSuspense();
 
   const emojiParaNum = (c) => (c === '🟩' ? 1 : c === '🟥' ? -1 : null);
   let payload;
@@ -938,6 +996,8 @@ function testStrategy() {
       periodo_modo: strategyState.periodoModo,
       data_de: strategyState.periodoDataDe,
       data_ate: strategyState.periodoDataAte,
+      dias_semana: getDiasSemanaSelecionados(),
+      timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
     };
   }
 
@@ -953,15 +1013,15 @@ function callBacktestAPI(payload, btn, textoOriginal) {
     .then(response => response.json().then(data => ({ ok: response.ok, data })))
     .then(({ ok, data }) => {
       if (ok && data.success) {
-        showToast('✅ Backtest concluído!', 'Veja o resultado abaixo.', 'discovery');
-        renderResult(data.resultado);
+        // Espera o suspense terminar antes de revelar — o momento é o produto.
+        fecharSuspense(() => renderResult(data.resultado));
       } else {
-        showToast('⚠️ Backtest falhou', data.message || 'Tente novamente.', 'default');
+        fecharSuspense(() => showToast('⚠️ Backtest falhou', data.message || 'Tente novamente.', 'default'));
       }
     })
     .catch(error => {
       console.error('Erro na API:', error);
-      showToast('❌ API offline', 'Inicie o backtest_api.py (clique em start_api.bat) e tente de novo.', 'default');
+      fecharSuspense(() => showToast('❌ API offline', 'Inicie o backtest_api.py (clique em start_api.bat) e tente de novo.', 'default'));
     })
     .finally(() => {
       if (btn) {
@@ -984,6 +1044,9 @@ function resetPostTestButtons() {
   };
   mostra('btn-test-strategy', true);
   mostra('btn-review-voltar', true);
+  mostra('btn-sortear-cenario', true);
+  const _bs = document.getElementById('btn-sortear-cenario');
+  if (_bs) _bs.innerHTML = '🎲 Sortear Cenário';
   mostra('btn-salvar-estrategia', false);
   mostra('btn-salvar-historico', false);
   mostra('btn-nova-estrategia', false);
@@ -1096,8 +1159,15 @@ function renderResult(r) {
   strategyState.lastResult = r;
 
   const container = document.getElementById('test-result');
-  container.innerHTML = html;
+  container.innerHTML = montarHeroReveal(r) + html;
   container.style.display = 'block';
+  dispararConfete(r.rarity);
+  strategyState.cenarioSorteado = null; // consumido na revelação
+
+  // Mantém o botão de sorteio visível pós-teste e vira "de novo" — é o que
+  // alimenta o loop "só mais uma" (cada sorteio é um cenário real diferente).
+  const btnSorteia = document.getElementById('btn-sortear-cenario');
+  if (btnSorteia) { btnSorteia.style.display = 'inline-flex'; btnSorteia.innerHTML = '🎲 Sortear de Novo'; }
 
   // Já testou: o botão "Testar" e o "Voltar" de passo não fazem mais sentido aqui.
   const btnTestar = document.getElementById('btn-test-strategy');
@@ -1237,6 +1307,10 @@ function resetStrategy() {
   if (inicio) inicio.value = '00:00';
   const fim = document.getElementById('schedule-end');
   if (fim) fim.value = '23:59';
+
+  // Reseta o filtro de dias da semana (volta a operar todos) e o atalho de período
+  resetDiasSemanaUI();
+  limparAtalhosPeriodo('schedule');
 
   // Atualiza o preview do espelho (vazio) e volta para a aba "Criar Estratégia"
   updateMirrorPreview();
@@ -1577,6 +1651,7 @@ function reproduzirCarta(id) {
   strategyState.periodoModo = 'personalizado';
   strategyState.periodoDataDe = item.teste.periodoDe;
   strategyState.periodoDataAte = item.teste.periodoAte;
+  resetDiasSemanaUI(); // reprodução exata = todos os dias, igual ao original
 
   goToPhase('pair');
   showToast('🔁 Reproduzindo', `Rodando "${item.nome}" travado em ${item.teste.periodoDe} – ${item.teste.periodoAte}, igual a quando foi salva.`, 'default');
@@ -2122,3 +2197,332 @@ document.addEventListener('DOMContentLoaded', () => {
     reproduzirCarta(reproduzirId);
   }
 });
+
+/* ============================================================
+   REVELAÇÃO — o "momento" (suspense → flip da carta → confete)
+   ------------------------------------------------------------
+   Transforma a tela de resultado (antes uma planilha) num momento
+   de descoberta. Tudo é frontend e HONESTO: a raridade/nota vêm do
+   backtest real, e o "quase-acerto" usa os MESMOS limites do backend
+   (função classificar() em backtest_api.py). Estilos e markup são
+   injetados por JS pra manter o protótipo num arquivo só.
+   ============================================================ */
+
+const SUSPENSE_MIN_MS = 2300; // tempo mínimo de suspense, mesmo se a API for rápida
+let _suspStart = 0, _suspInt = null, _suspTxtInt = null;
+
+const _SUSP_STATUS = [
+  'varrendo milhões de velas reais…',
+  'procurando o seu padrão no histórico…',
+  'contando acertos e erros…',
+  'medindo a raridade da descoberta…',
+  'quase lá…',
+];
+
+// Injeta os estilos da revelação uma única vez.
+function garantirRevealStyles() {
+  if (document.getElementById('reveal-fx-styles')) return;
+  const s = document.createElement('style');
+  s.id = 'reveal-fx-styles';
+  s.textContent = `
+  #reveal-suspense{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;
+    background:rgba(3,5,12,.86);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+  .reveal-susp-box{text-align:center;max-width:440px;padding:0 24px;animation:reveal-fade .3s var(--ease-out) both;}
+  .reveal-susp-eyebrow{font-family:var(--font-hud);letter-spacing:3px;text-transform:uppercase;font-size:.8rem;
+    color:var(--neon-cyan);text-shadow:0 0 12px rgba(0,234,255,.6);margin-bottom:22px;}
+  .reveal-scan{display:flex;gap:8px;justify-content:center;margin-bottom:24px;}
+  .reveal-scan-candle{width:16px;height:44px;border-radius:4px;border:1px solid var(--border-light);
+    background:var(--bg-elevated);transition:background .12s,border-color .12s;}
+  .reveal-scan-candle.green{background:rgba(34,197,94,.35);border-color:var(--success);box-shadow:0 0 10px rgba(34,197,94,.4);}
+  .reveal-scan-candle.red{background:rgba(239,68,68,.35);border-color:var(--danger);box-shadow:0 0 10px rgba(239,68,68,.4);}
+  .reveal-progress{width:100%;height:6px;border-radius:999px;background:var(--bg-base);overflow:hidden;margin-bottom:14px;}
+  .reveal-progress-bar{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#00eaff,#9d4edd);
+    box-shadow:0 0 14px rgba(0,234,255,.6);}
+  .reveal-susp-status{font-family:var(--font-hud);letter-spacing:1px;color:var(--text-secondary);font-size:.95rem;min-height:1.2em;}
+
+  .reveal-hero{position:relative;margin-bottom:22px;text-align:center;}
+  .reveal-hero-eyebrow{font-family:var(--font-hud);letter-spacing:4px;text-transform:uppercase;font-size:.72rem;
+    color:var(--text-muted);margin-bottom:12px;}
+  .reveal-card{position:relative;overflow:hidden;max-width:420px;margin:0 auto;padding:26px 22px;border-radius:16px;
+    border:2px solid var(--rc);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.2));
+    box-shadow:0 0 46px var(--rg),inset 0 0 34px rgba(0,0,0,.45);
+    animation:reveal-pop .62s var(--ease-spring) both;}
+  .reveal-card::before{content:'';position:absolute;top:0;left:-60%;width:55%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.18),transparent);
+    transform:skewX(-18deg);animation:reveal-shine 1.05s ease-out .45s both;}
+  .reveal-rar-badge{display:inline-block;padding:5px 18px;border-radius:999px;background:var(--rc);color:#04121a;
+    font-family:var(--font-display);font-weight:800;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;
+    box-shadow:0 0 18px var(--rg);}
+  .reveal-grade{font-family:var(--font-display);font-weight:900;font-size:4.4rem;line-height:.95;color:var(--rc);
+    text-shadow:0 0 26px var(--rg);margin:8px 0 2px;animation:reveal-grade-in .5s var(--ease-spring) .25s both;}
+  .reveal-headline{font-family:var(--font-display);font-weight:800;font-size:1.05rem;letter-spacing:.04em;
+    color:var(--text-primary);margin:6px 0 14px;text-transform:uppercase;}
+  .reveal-pair{font-family:var(--font-hud);letter-spacing:1px;color:var(--text-secondary);font-size:.95rem;margin-bottom:16px;}
+  .reveal-cenario{font-size:.8rem;color:var(--neon-gold);margin:-8px 0 14px;letter-spacing:.5px;}
+  .reveal-ministats{display:flex;gap:12px;justify-content:center;}
+  .reveal-ministat{flex:1;max-width:140px;padding:10px 6px;border-radius:10px;background:rgba(0,0,0,.28);
+    border:1px solid var(--border);}
+  .reveal-ministat .v{font-family:var(--font-display);font-weight:800;font-size:1.5rem;line-height:1;}
+  .reveal-ministat .l{font-size:.66rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-top:4px;}
+  .reveal-nearmiss{max-width:420px;margin:14px auto 0;padding:12px 16px;border-radius:10px;font-size:.86rem;line-height:1.5;
+    text-align:left;color:#ffe6a8;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);}
+  .reveal-nearmiss b{color:var(--neon-gold);}
+  .reveal-marco{display:inline-block;max-width:420px;margin:12px auto 0;padding:8px 18px;border-radius:999px;
+    font-size:.84rem;color:var(--text-primary);background:rgba(255,255,255,.04);border:1px solid var(--rc);
+    box-shadow:0 0 16px var(--rg);}
+  .reveal-marco b{color:var(--rc);}
+
+  .reveal-confete-layer{position:fixed;inset:0;pointer-events:none;z-index:9600;overflow:hidden;}
+  .reveal-confete{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;animation:reveal-fall linear forwards;}
+
+  @keyframes reveal-fade{from{opacity:0}to{opacity:1}}
+  @keyframes reveal-pop{from{opacity:0;transform:perspective(900px) rotateY(82deg) scale(.86)}
+    to{opacity:1;transform:perspective(900px) rotateY(0) scale(1)}}
+  @keyframes reveal-grade-in{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+  @keyframes reveal-shine{from{left:-60%}to{left:130%}}
+  @keyframes reveal-fall{to{transform:translateY(112vh) rotate(540deg);opacity:.9}}
+  @media(prefers-reduced-motion:reduce){
+    .reveal-card,.reveal-card::before,.reveal-grade{animation:none}
+  }`;
+  document.head.appendChild(s);
+}
+
+// Espelho EXATO da função classificar() do backend (backtest_api.py) — é o que
+// torna o "quase-acerto" honesto. breakeven ~53.5% pra payout 87%.
+function classificarJS(winrate, entries) {
+  let nota, rarity;
+  if (winrate >= 58) { nota = 'S+'; rarity = 'legendary'; }
+  else if (winrate >= 56) { nota = 'S'; rarity = 'epic'; }
+  else if (winrate >= 54) { nota = 'A'; rarity = 'epic'; }
+  else if (winrate >= 53.5) { nota = 'B'; rarity = 'rare'; }
+  else if (winrate >= 51) { nota = 'C'; rarity = 'rare'; }
+  else { nota = 'D'; rarity = 'common'; }
+  if (entries != null) {
+    const ordem = ['common', 'rare', 'epic', 'legendary'];
+    const teto = entries < 30 ? 'rare' : entries < 1000 ? 'epic' : 'legendary';
+    if (ordem.indexOf(rarity) > ordem.indexOf(teto)) rarity = teto;
+  }
+  return { nota, rarity };
+}
+
+const _RAR_LABEL = { common: 'Comum', rare: 'Rara', epic: 'Épica', legendary: 'Lendária' };
+const _RAR_COR = {
+  common: 'var(--rarity-common)', rare: 'var(--rarity-rare)',
+  epic: 'var(--rarity-epic)', legendary: 'var(--rarity-legendary)',
+};
+const _RAR_GLOW = {
+  common: 'var(--rarity-common-glow)', rare: 'var(--rarity-rare-glow)',
+  epic: 'var(--rarity-epic-glow)', legendary: 'var(--rarity-legendary-glow)',
+};
+
+// "Passou perto" — só aparece quando é VERDADE. Dois casos honestos:
+//  1) amostra: a taxa daria raridade maior, mas faltam operações (teto por entries)
+//  2) winrate: faltou <=1.2% de acerto pro próximo limite de nota/raridade
+function calcularQuaseAcerto(r) {
+  const wr = r.winrate, entries = r.entries;
+  const ordem = ['common', 'rare', 'epic', 'legendary'];
+  const semCap = classificarJS(wr, null).rarity;
+  const comCap = classificarJS(wr, entries).rarity;
+
+  if (ordem.indexOf(semCap) > ordem.indexOf(comCap)) {
+    const alvoOps = entries < 30 ? 30 : 1000;
+    return `🔥 Passou perto: sua taxa de acerto daria <b>${_RAR_LABEL[semCap]}</b>, mas a amostra ainda é pequena ` +
+           `(${entries.toLocaleString('pt-BR')} de ${alvoOps.toLocaleString('pt-BR')} operações). ` +
+           `Teste um período maior ou um horário mais movimentado pra confirmar.`;
+  }
+
+  const limites = [
+    { min: 51, grade: 'C', rar: 'rare' },
+    { min: 53.5, grade: 'B', rar: 'rare' },
+    { min: 54, grade: 'A', rar: 'epic' },
+    { min: 56, grade: 'S', rar: 'epic' },
+    { min: 58, grade: 'S+', rar: 'legendary' },
+  ];
+  const prox = limites.find(l => l.min > wr);
+  if (prox) {
+    const gap = Math.round((prox.min - wr) * 10) / 10;
+    if (gap > 0 && gap <= 1.2) {
+      const sobe = ordem.indexOf(prox.rar) > ordem.indexOf(comCap);
+      const alvo = sobe ? `virar <b>${_RAR_LABEL[prox.rar]}</b> (nota ${prox.grade})` : `subir pra nota <b>${prox.grade}</b>`;
+      return `🔥 Passou perto! Faltaram só <b>${gap}%</b> de acerto pra ${alvo}. Tenta outro horário ou outro par.`;
+    }
+  }
+  return null;
+}
+
+// Marco de coleção — puxa do inventário REAL do usuário. Celebra a 1ª carta de
+// cada raridade e mostra quantas já tem. Some pra Comum (não é alvo de caça).
+function marcoColecao(r) {
+  const rar = r.rarity || 'common';
+  if (rar === 'common') return '';
+  const lab = _RAR_LABEL[rar];
+  let inv = [];
+  try { inv = (typeof getInventario === 'function') ? getInventario() : []; } catch (e) { /* sem inventário */ }
+  const jaTem = inv.filter(i => i && i.teste && i.teste.rarity === rar).length;
+  let txt;
+  if (jaTem === 0) {
+    txt = `🏆 Sua 1ª carta <b>${lab}</b> — guarde pra começar a coleção!`;
+  } else {
+    const plural = jaTem === 1 ? lab : lab + 's';
+    txt = `Você já tem <b>${jaTem}</b> ${plural} · esta seria a sua <b>${jaTem + 1}ª</b>.`;
+  }
+  return `<div class="reveal-marco">${txt}</div>`;
+}
+
+// Monta a carta "herói" que abre o resultado (o flip + a celebração).
+function montarHeroReveal(r) {
+  garantirRevealStyles();
+  const rar = r.rarity || 'common';
+  const cor = _RAR_COR[rar] || 'var(--text-secondary)';
+  const glow = _RAR_GLOW[rar] || 'rgba(0,234,255,.3)';
+  const lab = _RAR_LABEL[rar] || 'Comum';
+  const acima = r.winrate >= 53.5;
+  const headline = acima ? `Você descobriu uma carta ${lab}` : 'Carta descoberta';
+  const corWr = acima ? 'var(--success)' : 'var(--danger)';
+  const quase = calcularQuaseAcerto(r);
+  const quaseHTML = quase ? `<div class="reveal-nearmiss">${quase}</div>` : '';
+
+  return `
+  <div class="reveal-hero" style="--rc:${cor};--rg:${glow};">
+    <div class="reveal-hero-eyebrow">⚡ Descoberta no histórico real</div>
+    <div class="reveal-card">
+      <div class="reveal-rar-badge">${lab}</div>
+      <div class="reveal-grade">${r.grade || '—'}</div>
+      <div class="reveal-headline">${headline}</div>
+      <div class="reveal-pair">${r.pair} · ${r.timeframe}</div>
+      ${strategyState.cenarioSorteado ? `<div class="reveal-cenario">🎲 Cenário sorteado: ${strategyState.cenarioSorteado}</div>` : ''}
+      <div class="reveal-ministats">
+        <div class="reveal-ministat"><div class="v" style="color:${corWr};">${r.winrate}%</div><div class="l">Taxa de acerto</div></div>
+        <div class="reveal-ministat"><div class="v">${(r.entries || 0).toLocaleString('pt-BR')}</div><div class="l">Operações</div></div>
+      </div>
+    </div>
+    ${marcoColecao(r)}
+    ${quaseHTML}
+  </div>`;
+}
+
+// Suspense: overlay com velas piscando + barra de progresso + status girando.
+function mostrarSuspense() {
+  garantirRevealStyles();
+  let ov = document.getElementById('reveal-suspense');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'reveal-suspense';
+    ov.innerHTML = `
+      <div class="reveal-susp-box">
+        <div class="reveal-susp-eyebrow">Testando contra o histórico real</div>
+        <div class="reveal-scan" id="reveal-scan"></div>
+        <div class="reveal-progress"><div class="reveal-progress-bar" id="reveal-progress-bar"></div></div>
+        <div class="reveal-susp-status" id="reveal-susp-status">${_SUSP_STATUS[0]}</div>
+      </div>`;
+    document.body.appendChild(ov);
+    const scan = ov.querySelector('#reveal-scan');
+    for (let i = 0; i < 7; i++) {
+      const c = document.createElement('div');
+      c.className = 'reveal-scan-candle';
+      scan.appendChild(c);
+    }
+  }
+  ov.style.display = 'flex';
+  _suspStart = Date.now();
+
+  // Barra: 0 → 100% ao longo do tempo mínimo de suspense.
+  const bar = ov.querySelector('#reveal-progress-bar');
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  void bar.offsetWidth; // força reflow pra a transição valer
+  bar.style.transition = `width ${SUSPENSE_MIN_MS}ms linear`;
+  bar.style.width = '100%';
+
+  // Velas piscando.
+  const candles = ov.querySelectorAll('.reveal-scan-candle');
+  clearInterval(_suspInt);
+  _suspInt = setInterval(() => {
+    candles.forEach(c => {
+      const x = Math.random();
+      c.classList.remove('green', 'red');
+      if (x < 0.42) c.classList.add('green');
+      else if (x < 0.84) c.classList.add('red');
+    });
+  }, 110);
+
+  // Status girando.
+  const status = ov.querySelector('#reveal-susp-status');
+  let si = 0;
+  clearInterval(_suspTxtInt);
+  _suspTxtInt = setInterval(() => {
+    si = (si + 1) % _SUSP_STATUS.length;
+    status.textContent = _SUSP_STATUS[si];
+  }, 620);
+}
+
+// Fecha o suspense respeitando o tempo mínimo e então roda o callback (revelar).
+function fecharSuspense(cb) {
+  const restante = Math.max(0, SUSPENSE_MIN_MS - (Date.now() - _suspStart));
+  setTimeout(() => {
+    clearInterval(_suspInt); _suspInt = null;
+    clearInterval(_suspTxtInt); _suspTxtInt = null;
+    const ov = document.getElementById('reveal-suspense');
+    if (ov) ov.style.display = 'none';
+    if (typeof cb === 'function') cb();
+  }, restante);
+}
+
+// Confete proporcional à raridade (Comum = sem chuva, Lendária = festa).
+function dispararConfete(rarity) {
+  const counts = { common: 0, rare: 18, epic: 42, legendary: 90 };
+  const n = counts[rarity] || 0;
+  if (!n) return;
+  const cores = rarity === 'legendary'
+    ? ['#ffc24b', '#fff0c8', '#f59e0b', '#ffd700']
+    : ['#00eaff', '#ff2e8a', '#9d4edd', '#6ef5ff', '#22c55e'];
+  const layer = document.createElement('div');
+  layer.className = 'reveal-confete-layer';
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('span');
+    p.className = 'reveal-confete';
+    p.style.left = (Math.random() * 100) + 'vw';
+    p.style.background = cores[Math.floor(Math.random() * cores.length)];
+    p.style.animationDelay = (Math.random() * 0.5) + 's';
+    p.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+    layer.appendChild(p);
+  }
+  document.body.appendChild(layer);
+  setTimeout(() => layer.remove(), 3300);
+}
+
+// ── SORTEIO DE CENÁRIO (Pilar 1) ────────────────────────────────────────────
+// Mata o "determinístico": a MESMA pintura testada contra um cenário sorteado
+// (par + janela de horário) dá uma carta diferente — RNG de gacha, mas honesto
+// (dado real). Sorteia só entre pares OTC PERMITIDOS pelo plano: OTC tem dados
+// 24/7, então a janela sempre tem velas (evita resultado vazio). Free sorteia
+// entre os 3 OTC liberados; Premium entre os 12 — gradiente sem gating duro.
+// Reusa todo o fluxo de teste/revelação (suspense → flip → confete).
+const _SESSOES_SORTEIO = [
+  { nome: 'Madrugada', ini: '00:00', fim: '05:59' },
+  { nome: 'Manhã',     ini: '06:00', fim: '11:59' },
+  { nome: 'Tarde',     ini: '12:00', fim: '17:59' },
+  { nome: 'Noite',     ini: '18:00', fim: '23:59' },
+];
+
+function sortearCenario() {
+  const pool = PARES_OTC.filter(p => !parBloqueado(p));
+  if (!pool.length) {
+    showToast('⚠️ Sem pares', 'Nenhum par disponível pra sortear no seu plano.', 'default');
+    return;
+  }
+  const par = pool[Math.floor(Math.random() * pool.length)];
+  const sess = _SESSOES_SORTEIO[Math.floor(Math.random() * _SESSOES_SORTEIO.length)];
+
+  strategyState.pair = par;
+  strategyState.pairFilter = 'otc';
+  strategyState.scheduleStart = sess.ini;
+  strategyState.scheduleEnd = sess.fim;
+  strategyState.periodoModo = 'tudo';
+  strategyState.periodoDataDe = null;
+  strategyState.periodoDataAte = null;
+  const fimH = sess.fim === '23:59' ? '24h' : sess.fim.slice(0, 2) + 'h';
+  strategyState.cenarioSorteado = `${par} · ${sess.nome} (${sess.ini.slice(0, 2)}h–${fimH})`;
+
+  testStrategy(); // dispara suspense → backtest real → revelação da carta
+}

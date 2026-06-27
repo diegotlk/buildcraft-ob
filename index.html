@@ -32,20 +32,20 @@
     </a>
 
     <div class="navbar-links">
-      <a href="index.html" class="navbar-link active">Início</a>
-      <a href="criar_estrategia.html" class="navbar-link">Laboratório</a>
-      <a href="inventario.html" class="navbar-link">Inventário</a>
-      <a href="planos.html" class="navbar-link">Planos</a>
+      <a href="index.html" class="navbar-link active" data-i18n="nav.inicio">Início</a>
+      <a href="criar_estrategia.html" class="navbar-link" data-i18n="nav.laboratorio">Laboratório</a>
+      <a href="inventario.html" class="navbar-link" data-i18n="nav.inventario">Inventário</a>
+      <a href="planos.html" class="navbar-link" data-i18n="nav.planos">Planos</a>
       <!-- MVP: abas ainda sem página/backend real, temporariamente DESATIVADAS
            (não remover — só tirar a classe/title quando for reabilitar). -->
-      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Ranking</a>
-      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Batalhas</a>
-      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Loja</a>
-      <a href="#" class="navbar-link navbar-link-disabled" title="Em breve" onclick="return false;">Cartas</a>
+      <a href="#" class="navbar-link navbar-link-disabled" data-i18n-title="nav.embreve" title="Em breve" onclick="return false;" data-i18n="nav.ranking">Ranking</a>
+      <a href="#" class="navbar-link navbar-link-disabled" data-i18n-title="nav.embreve" title="Em breve" onclick="return false;" data-i18n="nav.batalhas">Batalhas</a>
+      <a href="#" class="navbar-link navbar-link-disabled" data-i18n-title="nav.embreve" title="Em breve" onclick="return false;" data-i18n="nav.loja">Loja</a>
+      <a href="#" class="navbar-link navbar-link-disabled" data-i18n-title="nav.embreve" title="Em breve" onclick="return false;" data-i18n="nav.cartas">Cartas</a>
     </div>
 
     <div class="navbar-actions">
-      <a href="login.html" class="btn btn-sm btn-primary">Começar Grátis</a>
+      <a href="login.html" class="btn btn-sm btn-primary" data-i18n="nav.comecargratis">Começar Grátis</a>
       <a href="login.html" class="navbar-avatar">?</a>
     </div>
 
@@ -61,25 +61,25 @@
 
     <div class="container">
       <div class="hero-content">
-        <div class="hero-eyebrow">
+        <div class="hero-eyebrow" data-i18n="hero.eyebrow">
           ⚡ O primeiro laboratório gamificado de estratégias
         </div>
 
-        <h1 class="hero-title">
+        <h1 class="hero-title" data-i18n-html="hero.title">
           Monte sua build.<br>
           Descubra <span class="glow-legendary">cartas raras</span>.<br>
           Entre no ranking.
         </h1>
 
-        <p class="hero-subtitle">
+        <p class="hero-subtitle" data-i18n="hero.subtitle">
           Combine estratégias, gerenciamentos, pares e filtros.
           Teste contra o histórico real de velas.
           Transforme dados em descobertas — e descobertas em status.
         </p>
 
         <div class="hero-actions">
-          <a href="criar_estrategia.html" class="btn btn-lg btn-legendary">⚗️ Criar Minha Build</a>
-          <a href="#how-it-works" class="btn btn-lg btn-outline">Como Funciona →</a>
+          <a href="criar_estrategia.html" class="btn btn-lg btn-legendary" data-i18n="hero.criarbuild">⚗️ Criar Minha Build</a>
+          <a href="#how-it-works" class="btn btn-lg btn-outline" data-i18n="hero.comofunciona">Como Funciona →</a>
         </div>
 
         <!-- Floating demo cards -->
@@ -186,8 +186,8 @@
   <section class="section how-it-works" id="how-it-works">
     <div class="container">
       <div style="text-align:center;margin-bottom:48px">
-        <h2 class="section-title scroll-animate">Como Funciona</h2>
-        <p class="section-subtitle scroll-animate" style="margin:0 auto">
+        <h2 class="section-title scroll-animate" data-i18n="how.titulo">Como Funciona</h2>
+        <p class="section-subtitle scroll-animate" style="margin:0 auto" data-i18n="how.subtitulo">
           Quatro passos para transformar dados em descobertas raras.
         </p>
       </div>
@@ -195,23 +195,23 @@
       <div class="steps-grid">
         <div class="step-card scroll-animate">
           <div class="step-number">1</div>
-          <h3 class="step-title">Escolha</h3>
-          <p class="step-desc">Selecione uma estratégia, gerenciamento, par, horário e filtros.</p>
+          <h3 class="step-title" data-i18n="how.1.titulo">Escolha</h3>
+          <p class="step-desc" data-i18n="how.1.desc">Selecione uma estratégia, gerenciamento, par, horário e filtros.</p>
         </div>
         <div class="step-card scroll-animate">
           <div class="step-number">2</div>
-          <h3 class="step-title">Combine</h3>
-          <p class="step-desc">Monte sua build combinando componentes como peças de RPG.</p>
+          <h3 class="step-title" data-i18n="how.2.titulo">Combine</h3>
+          <p class="step-desc" data-i18n="how.2.desc">Monte sua build combinando componentes como peças de RPG.</p>
         </div>
         <div class="step-card scroll-animate">
           <div class="step-number">3</div>
-          <h3 class="step-title">Teste</h3>
-          <p class="step-desc">Rode contra o histórico real de velas e veja o resultado gamificado.</p>
+          <h3 class="step-title" data-i18n="how.3.titulo">Teste</h3>
+          <p class="step-desc" data-i18n="how.3.desc">Rode contra o histórico real de velas e veja o resultado gamificado.</p>
         </div>
         <div class="step-card scroll-animate">
           <div class="step-number">4</div>
-          <h3 class="step-title">Descubra</h3>
-          <p class="step-desc">Receba sua carta com raridade, nota, classe e potenciais escondidos.</p>
+          <h3 class="step-title" data-i18n="how.4.titulo">Descubra</h3>
+          <p class="step-desc" data-i18n="how.4.desc">Receba sua carta com raridade, nota, classe e potenciais escondidos.</p>
         </div>
       </div>
     </div>
@@ -222,8 +222,8 @@
   <section class="section featured-section">
     <div class="container">
       <div style="text-align:center;margin-bottom:48px">
-        <h2 class="section-title scroll-animate">Cartas em Destaque</h2>
-        <p class="section-subtitle scroll-animate" style="margin:0 auto">
+        <h2 class="section-title scroll-animate" data-i18n="featured.titulo">Cartas em Destaque</h2>
+        <p class="section-subtitle scroll-animate" style="margin:0 auto" data-i18n="featured.subtitulo">
           As melhores descobertas da comunidade nesta temporada.
         </p>
       </div>
@@ -240,22 +240,22 @@
     <div class="container">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap;gap:16px">
         <div>
-          <h2 class="section-title scroll-animate">🏆 Rankings</h2>
-          <p class="section-subtitle scroll-animate">As melhores builds da temporada atual.</p>
+          <h2 class="section-title scroll-animate" data-i18n="rankings.titulo">🏆 Rankings</h2>
+          <p class="section-subtitle scroll-animate" data-i18n="rankings.subtitulo">As melhores builds da temporada atual.</p>
         </div>
-        <a href="rankings.html" class="btn btn-outline scroll-animate">Ver todos os rankings →</a>
+        <a href="rankings.html" class="btn btn-outline scroll-animate" data-i18n="rankings.vertodos">Ver todos os rankings →</a>
       </div>
 
       <div class="scroll-animate" style="overflow-x:auto">
         <table class="ranking-table" id="ranking-preview">
           <thead>
             <tr>
-              <th style="width:60px">Pos</th>
-              <th>Build</th>
-              <th>Raridade</th>
-              <th>Winrate</th>
-              <th>Entradas</th>
-              <th>Nota</th>
+              <th style="width:60px" data-i18n="rankings.pos">Pos</th>
+              <th data-i18n="rankings.build">Build</th>
+              <th data-i18n="rankings.raridade">Raridade</th>
+              <th data-i18n="rankings.winrate">Winrate</th>
+              <th data-i18n="rankings.entradas">Entradas</th>
+              <th data-i18n="rankings.nota">Nota</th>
             </tr>
           </thead>
           <tbody id="ranking-body">
@@ -271,8 +271,8 @@
   <section class="section battle-preview">
     <div class="container">
       <div style="text-align:center;margin-bottom:48px">
-        <h2 class="section-title scroll-animate">⚔️ Batalhas de Cartas</h2>
-        <p class="section-subtitle scroll-animate" style="margin:0 auto">
+        <h2 class="section-title scroll-animate" data-i18n="battle.titulo">⚔️ Batalhas de Cartas</h2>
+        <p class="section-subtitle scroll-animate" style="margin:0 auto" data-i18n="battle.subtitulo">
           Coloque suas cartas frente a frente e descubra qual domina.
         </p>
       </div>
@@ -288,21 +288,21 @@
               <div style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Estratégia de Tendência</div>
               <div style="display:flex;flex-direction:column;gap:8px">
                 <div style="display:flex;justify-content:space-between;font-size:.85rem">
-                  <span style="color:var(--text-muted)">Winrate</span>
+                  <span style="color:var(--text-muted)" data-i18n="battle.winrate">Winrate</span>
                   <span style="font-weight:700;color:var(--success)">54,3%</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:.85rem">
-                  <span style="color:var(--text-muted)">Drawdown</span>
+                  <span style="color:var(--text-muted)" data-i18n="battle.drawdown">Drawdown</span>
                   <span style="font-weight:700">R$ 245</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:.85rem">
-                  <span style="color:var(--text-muted)">Estabilidade</span>
+                  <span style="color:var(--text-muted)" data-i18n="battle.estabilidade">Estabilidade</span>
                   <span style="font-weight:700">72%</span>
                 </div>
               </div>
             </div>
 
-            <div class="versus-vs">VS</div>
+            <div class="versus-vs" data-i18n="battle.vs">VS</div>
 
             <div class="versus-card">
               <div style="margin-bottom:12px">
@@ -312,15 +312,15 @@
               <div style="color:var(--text-muted);font-size:.85rem;margin-bottom:16px">Estratégia de Reversão</div>
               <div style="display:flex;flex-direction:column;gap:8px">
                 <div style="display:flex;justify-content:space-between;font-size:.85rem">
-                  <span style="color:var(--text-muted)">Winrate</span>
+                  <span style="color:var(--text-muted)" data-i18n="battle.winrate">Winrate</span>
                   <span style="font-weight:700;color:var(--success)">55,8%</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:.85rem">
-                  <span style="color:var(--text-muted)">Drawdown</span>
+                  <span style="color:var(--text-muted)" data-i18n="battle.drawdown">Drawdown</span>
                   <span style="font-weight:700">R$ 165</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:.85rem">
-                  <span style="color:var(--text-muted)">Estabilidade</span>
+                  <span style="color:var(--text-muted)" data-i18n="battle.estabilidade">Estabilidade</span>
                   <span style="font-weight:700">82%</span>
                 </div>
               </div>
@@ -329,15 +329,15 @@
 
           <!-- Monthly results -->
           <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border)">
-            <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;text-align:center">Melhor de 12 Meses</div>
+            <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;text-align:center" data-i18n="battle.melhor12meses">Melhor de 12 Meses</div>
             <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap" id="monthly-battle">
               <!-- Rendered by JS -->
             </div>
             <div style="text-align:center;margin-top:20px">
               <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800">
-                🏆 Vencedora: <span style="color:var(--rarity-epic)">Torres Gêmeas</span>
+                🏆 <span data-i18n="battle.vencedora">Vencedora:</span> <span style="color:var(--rarity-epic)">Torres Gêmeas</span>
               </div>
-              <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Placar: 7 x 4 (1 empate)</div>
+              <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px"><span data-i18n="battle.placar">Placar:</span> 7 x 4 (1 <span data-i18n="battle.empate">empate</span>)</div>
             </div>
           </div>
         </div>
@@ -352,19 +352,19 @@
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:32px;text-align:center" class="scroll-animate">
         <div>
           <div class="text-4xl font-black glow-text" data-count="500" data-suffix="+">0</div>
-          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Estratégias no sistema</div>
+          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px" data-i18n="stats.estrategias">Estratégias no sistema</div>
         </div>
         <div>
           <div class="text-4xl font-black glow-text" data-count="12847" data-suffix="">0</div>
-          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Builds testadas</div>
+          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px" data-i18n="stats.builds">Builds testadas</div>
         </div>
         <div>
           <div class="text-4xl font-black glow-legendary" data-count="47" data-suffix="">0</div>
-          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Cartas Lendárias</div>
+          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px" data-i18n="stats.lendarias">Cartas Lendárias</div>
         </div>
         <div>
           <div class="text-4xl font-black glow-text" data-count="2340" data-suffix="">0</div>
-          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px">Criadores ativos</div>
+          <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px" data-i18n="stats.criadores">Criadores ativos</div>
         </div>
       </div>
     </div>
@@ -375,8 +375,8 @@
   <section class="section" id="pricing" style="background:var(--bg-base)">
     <div class="container">
       <div style="text-align:center;margin-bottom:48px">
-        <h2 class="section-title scroll-animate">Planos</h2>
-        <p class="section-subtitle scroll-animate" style="margin:0 auto">
+        <h2 class="section-title scroll-animate" data-i18n="pricing.titulo">Planos</h2>
+        <p class="section-subtitle scroll-animate" style="margin:0 auto" data-i18n="pricing.subtitulo">
           Comece grátis. Evolua quando quiser.
         </p>
       </div>
@@ -389,16 +389,16 @@
           <div class="pricing-name">Free</div>
           <div class="pricing-price">
             <span class="amount">R$ 0</span>
-            <span class="period">/mês</span>
+            <span class="period" data-i18n="pricing.mes">/mês</span>
           </div>
           <div class="pricing-features">
-            <div class="pricing-feature"><span class="check">✓</span> 2 estratégias (MHI 1 e Milhão)</div>
-            <div class="pricing-feature"><span class="check">✓</span> Pares disponíveis</div>
-            <div class="pricing-feature"><span class="check">✓</span> Testes no histórico real</div>
-            <div class="pricing-feature disabled"><span class="check">✗</span> Demais estratégias</div>
-            <div class="pricing-feature disabled"><span class="check">✗</span> Montar estratégia do zero</div>
+            <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.free.1">2 estratégias (MHI 1 e Milhão)</span></div>
+            <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.free.2">Pares disponíveis</span></div>
+            <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.free.3">Testes no histórico real</span></div>
+            <div class="pricing-feature disabled"><span class="check">✗</span> <span data-i18n="pricing.free.4">Demais estratégias</span></div>
+            <div class="pricing-feature disabled"><span class="check">✗</span> <span data-i18n="pricing.free.5">Montar estratégia do zero</span></div>
           </div>
-          <a href="login.html" class="btn btn-outline" style="width:100%">Começar Grátis</a>
+          <a href="login.html" class="btn btn-outline" style="width:100%" data-i18n="nav.comecargratis">Começar Grátis</a>
         </div>
 
         <!-- Premium -->
@@ -406,16 +406,16 @@
           <div class="pricing-name" style="color:var(--accent-hover)">Premium</div>
           <div class="pricing-price">
             <span class="amount" style="color:var(--accent-hover)">R$ 9,90</span>
-            <span class="period">/mês</span>
+            <span class="period" data-i18n="pricing.mes">/mês</span>
           </div>
           <div class="pricing-features">
-            <div class="pricing-feature"><span class="check">✓</span> Todas as estratégias</div>
-            <div class="pricing-feature"><span class="check">✓</span> Montar estratégia do zero</div>
-            <div class="pricing-feature"><span class="check">✓</span> Todos os pares</div>
-            <div class="pricing-feature"><span class="check">✓</span> Testes ilimitados</div>
-            <div class="pricing-feature"><span class="check">✓</span> Tudo que entrar depois</div>
+            <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.premium.1">Todas as estratégias</span></div>
+            <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.premium.2">Montar estratégia do zero</span></div>
+            <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.premium.3">Todos os pares</span></div>
+            <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.premium.4">Testes ilimitados</span></div>
+            <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.premium.5">Tudo que entrar depois</span></div>
           </div>
-          <a href="#" class="btn btn-primary" style="width:100%" onclick="comprarPremium(); return false;">Assinar Premium</a>
+          <a href="#" class="btn btn-primary" style="width:100%" onclick="comprarPremium(); return false;" data-i18n="pricing.assinar">Assinar Premium</a>
         </div>
       </div>
     </div>
@@ -426,15 +426,15 @@
   <section class="section" style="background:var(--bg-deepest)">
     <div class="container">
       <div class="cta-banner scroll-animate">
-        <h2 style="font-family:var(--font-display);font-size:2.25rem;font-weight:900;margin-bottom:12px;position:relative;z-index:2">
+        <h2 style="font-family:var(--font-display);font-size:2.25rem;font-weight:900;margin-bottom:12px;position:relative;z-index:2" data-i18n-html="cta.titulo">
           Pronto para caçar <span class="glow-legendary">builds raras</span>?
         </h2>
-        <p style="color:var(--text-secondary);font-size:1.05rem;max-width:500px;margin:0 auto 28px;position:relative;z-index:2">
+        <p style="color:var(--text-secondary);font-size:1.05rem;max-width:500px;margin:0 auto 28px;position:relative;z-index:2" data-i18n="cta.subtitulo">
           Estratégias deixam de ser regras frias e viram personagens vivos.
           Sua próxima descoberta lendária está esperando.
         </p>
         <div style="position:relative;z-index:2">
-          <a href="criar_estrategia.html" class="btn btn-lg btn-legendary">⚗️ Começar Agora</a>
+          <a href="criar_estrategia.html" class="btn btn-lg btn-legendary" data-i18n="cta.comecar">⚗️ Começar Agora</a>
         </div>
       </div>
     </div>
@@ -447,39 +447,39 @@
       <div class="footer-grid">
         <div>
           <div class="footer-brand"><img src="img/logo-wordmark.png" alt="Binaryzando" class="footer-logo"></div>
-          <p class="footer-desc">
+          <p class="footer-desc" data-i18n="footer.desc">
             O primeiro laboratório gamificado de estratégias.
             Monte, teste, descubra e colecione.
           </p>
         </div>
         <div>
-          <div class="footer-title">Produto</div>
-          <a href="criar_estrategia.html" class="footer-link">Laboratório</a>
-          <a href="rankings.html" class="footer-link">Ranking</a>
-          <a href="batalhas.html" class="footer-link">Batalhas</a>
-          <a href="loja.html" class="footer-link">Loja</a>
-          <a href="cartas.html" class="footer-link">Cartas</a>
+          <div class="footer-title" data-i18n="footer.produto">Produto</div>
+          <a href="criar_estrategia.html" class="footer-link" data-i18n="nav.laboratorio">Laboratório</a>
+          <a href="rankings.html" class="footer-link" data-i18n="nav.ranking">Ranking</a>
+          <a href="batalhas.html" class="footer-link" data-i18n="nav.batalhas">Batalhas</a>
+          <a href="loja.html" class="footer-link" data-i18n="nav.loja">Loja</a>
+          <a href="cartas.html" class="footer-link" data-i18n="nav.cartas">Cartas</a>
         </div>
         <div>
-          <div class="footer-title">Comunidade</div>
-          <a href="rankings.html" class="footer-link">Top Criadores</a>
-          <a href="#" class="footer-link">Hall da Fama</a>
-          <a href="#" class="footer-link">Eventos</a>
-          <a href="#" class="footer-link">Educação</a>
+          <div class="footer-title" data-i18n="footer.comunidade">Comunidade</div>
+          <a href="rankings.html" class="footer-link" data-i18n="footer.topcriadores">Top Criadores</a>
+          <a href="#" class="footer-link" data-i18n="footer.halldafama">Hall da Fama</a>
+          <a href="#" class="footer-link" data-i18n="footer.eventos">Eventos</a>
+          <a href="#" class="footer-link" data-i18n="footer.educacao">Educação</a>
         </div>
         <div>
-          <div class="footer-title">Planos</div>
+          <div class="footer-title" data-i18n="nav.planos">Planos</div>
           <a href="planos.html" class="footer-link">Free</a>
           <a href="planos.html" class="footer-link">Premium</a>
-          <div class="footer-title" style="margin-top:20px">Legal</div>
-          <a href="termos.html" class="footer-link">Termos de Uso</a>
-          <a href="privacidade.html" class="footer-link">Privacidade</a>
-          <a href="aviso-risco.html" class="footer-link">Aviso de Risco</a>
+          <div class="footer-title" style="margin-top:20px" data-i18n="footer.legal">Legal</div>
+          <a href="termos.html" class="footer-link" data-i18n="footer.termos">Termos de Uso</a>
+          <a href="privacidade.html" class="footer-link" data-i18n="footer.privacidade">Privacidade</a>
+          <a href="aviso-risco.html" class="footer-link" data-i18n="footer.avisorisco">Aviso de Risco</a>
         </div>
       </div>
 
       <!-- Disclaimer de risco fixo no rodapé (nicho sensível — CVM). -->
-      <p style="font-size:.78rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:24px;margin-bottom:20px">
+      <p style="font-size:.78rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:24px;margin-bottom:20px" data-i18n-html="footer.disclaimer">
         ⚠️ O Binaryzando é uma ferramenta <strong>educacional de simulação</strong>. Não é recomendação
         de investimento e não garante resultados. Operar opções binárias envolve <strong>alto risco de
         perda</strong>. Resultados passados não garantem resultados futuros. Leia o
@@ -487,8 +487,8 @@
       </p>
 
       <div class="footer-bottom">
-        <span>© 2026 Binaryzando. Todos os direitos reservados.</span>
-        <span>Feito com ⚡ por Diego</span>
+        <span data-i18n="footer.copyright">© 2026 Binaryzando. Todos os direitos reservados.</span>
+        <span data-i18n="footer.feitopor">Feito com ⚡ por Diego</span>
       </div>
     </div>
   </footer>
@@ -498,6 +498,7 @@
   <script src="js/data.js?v=11"></script>
   <script src="js/app.js?v=11"></script>
   <script src="js/auth.js?v=5"></script>
+  <script src="js/i18n.js?v=1"></script>
   <script>
     // Render featured cards
     const featuredContainer = document.getElementById('featured-cards');
