@@ -46,14 +46,19 @@ function renderTotaisCatalogador(totais) {
 }
 
 // Modo "velas": cada vela individual do período, igual a parede de tijolos.
+// Período com muitas velas (semana) vira "densa": célula minúscula, sem
+// texto e sem animação por célula — só a cor, com o horário no tooltip.
+const CAT_LIMITE_DENSA = 300;
+
 function renderGradeVelas(velas) {
   const el = document.getElementById('cat-grade');
   if (!el) return;
-  el.innerHTML = velas.map((v, i) => `
-    <div class="cat-vela ${v.cor}" style="animation-delay:${Math.min(i * 6, 600)}ms" title="${v.hora} · ${v.cor}">
-      ${v.hora}
-    </div>
-  `).join('');
+  const densa = velas.length > CAT_LIMITE_DENSA;
+  el.classList.toggle('cat-grade-densa', densa);
+  el.innerHTML = velas.map((v, i) => densa
+    ? `<div class="cat-vela ${v.cor}" title="${v.hora} · ${v.cor}"></div>`
+    : `<div class="cat-vela ${v.cor}" style="animation-delay:${Math.min(i * 6, 600)}ms" title="${v.hora} · ${v.cor}">${v.hora}</div>`
+  ).join('');
 }
 
 // Modo "horas": período longo (semana/mês) agregado em 24 células — uma
@@ -62,6 +67,7 @@ function renderGradeVelas(velas) {
 function renderGradeHoras(horas) {
   const el = document.getElementById('cat-grade');
   if (!el) return;
+  el.classList.remove('cat-grade-densa');
   el.innerHTML = horas.map((h, i) => `
     <div class="cat-vela cat-vela-hora ${h.cor}" style="animation-delay:${Math.min(i * 20, 600)}ms"
          title="${h.hora} · ${h.total} velas · ${h.pct_verde}% verde / ${h.pct_vermelha}% vermelha">

@@ -85,6 +85,24 @@
     .auth-back a:hover {
       color: var(--text-secondary);
     }
+
+    /* Campo de senha com olho de mostrar/ocultar */
+    .auth-senha-wrap { position: relative; }
+    .auth-senha-wrap .form-input { padding-right: 44px; }
+    .auth-senha-toggle {
+      position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 1.1rem;
+      padding: 6px 8px; line-height: 1; color: var(--text-secondary);
+    }
+    .auth-senha-toggle:hover { color: var(--text-primary); }
+
+    .auth-lembrar {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 4px; margin-bottom: 4px;
+      font-size: .82rem; color: var(--text-secondary);
+      cursor: pointer; user-select: none;
+    }
+    .auth-lembrar input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
   </style>
 </head>
 <body>
@@ -118,10 +136,19 @@
         </div>
         <div class="form-group">
           <label class="form-label" for="auth-senha" data-i18n="auth.senha">Senha</label>
-          <input type="password" id="auth-senha" class="form-input" placeholder="••••••••"
-                 autocomplete="current-password" minlength="8" required
-                 oninput="atualizarRequisitos()">
+          <div class="auth-senha-wrap">
+            <input type="password" id="auth-senha" class="form-input" placeholder="••••••••"
+                   autocomplete="current-password" minlength="8" required
+                   oninput="atualizarRequisitos()">
+            <button type="button" class="auth-senha-toggle" id="auth-senha-toggle"
+                    onclick="alternarVisibilidadeSenha()" aria-label="Mostrar senha" title="Mostrar senha">👁</button>
+          </div>
         </div>
+
+        <label class="auth-lembrar">
+          <input type="checkbox" id="auth-lembrar" checked>
+          <span data-i18n="auth.lembrar">Lembrar de mim</span>
+        </label>
 
         <div class="auth-reqs" id="auth-reqs">
           <div class="auth-reqs-titulo" data-i18n="auth.senhaprecisa">Sua senha precisa ter:</div>
@@ -162,8 +189,8 @@
     </div>
   </div>
 
-  <script src="js/auth.js?v=5"></script>
-  <script src="js/i18n.js?v=1"></script>
+  <script src="js/auth.js?v=6"></script>
+  <script src="js/i18n.js?v=3"></script>
   <script>
     let abaAuthAtual = 'entrar';
 
@@ -208,6 +235,15 @@
       document.getElementById('auth-error').style.display = 'none';
     }
 
+    function alternarVisibilidadeSenha() {
+      const input = document.getElementById('auth-senha');
+      const btn = document.getElementById('auth-senha-toggle');
+      const oculta = input.type === 'password';
+      input.type = oculta ? 'text' : 'password';
+      btn.textContent = oculta ? '🙈' : '👁';
+      btn.title = oculta ? 'Ocultar senha' : 'Mostrar senha';
+    }
+
     function redirecionarPosLogin() {
       const params = new URLSearchParams(location.search);
       const destino = params.get('redirect');
@@ -250,7 +286,8 @@
           return;
         }
 
-        salvarSessao(dados.token, dados.email, dados.plano || 'free');
+        const lembrar = document.getElementById('auth-lembrar')?.checked !== false;
+        salvarSessao(dados.token, dados.email, dados.plano || 'free', lembrar);
         redirecionarPosLogin();
       } catch (e) {
         mostrarErroAuth(t('auth.erro.apioffline'));

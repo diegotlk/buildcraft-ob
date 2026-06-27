@@ -32,7 +32,7 @@ const I18N_DICT = {
     'nav.inicio': 'Início', 'nav.laboratorio': 'Laboratório', 'nav.inventario': 'Inventário',
     'nav.planos': 'Planos', 'nav.embreve': 'Em breve', 'nav.ranking': 'Ranking',
     'nav.batalhas': 'Batalhas', 'nav.loja': 'Loja', 'nav.cartas': 'Cartas',
-    'nav.comecargratis': 'Começar Grátis',
+    'nav.comecargratis': 'Começar Grátis', 'nav.sair': 'Sair',
 
     'hero.eyebrow': '🎮 Backtest gamificado de opções binárias',
     'hero.title': 'Monte sua <span class="hl">estratégia</span>, teste contra o histórico real e <span class="hl">ganhe cartas</span>.',
@@ -82,6 +82,7 @@ const I18N_DICT = {
     'pricing.avisorisco': '⚠️ Ferramenta <strong>educacional de simulação</strong>. Não é recomendação de investimento e não garante resultados. Opções binárias têm <strong>alto risco de perda</strong>. Ao assinar, você concorda com os <a href="termos.html" style="color:var(--accent-hover)">Termos de Uso</a>, a <a href="privacidade.html" style="color:var(--accent-hover)">Política de Privacidade</a> e o <a href="aviso-risco.html" style="color:var(--accent-hover)">Aviso de Risco</a>.',
 
     'auth.entrar': 'Entrar', 'auth.criarconta': 'Criar Conta', 'auth.email': 'E-mail', 'auth.senha': 'Senha',
+    'auth.lembrar': 'Lembrar de mim',
     'auth.senhaprecisa': 'Sua senha precisa ter:',
     'auth.req.tamanho': 'Pelo menos 8 caracteres', 'auth.req.maiuscula': 'Uma letra maiúscula (A-Z)',
     'auth.req.minuscula': 'Uma letra minúscula (a-z)', 'auth.req.numero': 'Um número (0-9)',
@@ -298,7 +299,7 @@ const I18N_DICT = {
     'nav.inicio': 'Home', 'nav.laboratorio': 'Lab', 'nav.inventario': 'Inventory',
     'nav.planos': 'Plans', 'nav.embreve': 'Coming soon', 'nav.ranking': 'Ranking',
     'nav.batalhas': 'Battles', 'nav.loja': 'Shop', 'nav.cartas': 'Cards',
-    'nav.comecargratis': 'Start Free',
+    'nav.comecargratis': 'Start Free', 'nav.sair': 'Log out',
 
     'hero.eyebrow': '🎮 Gamified backtesting for binary options',
     'hero.title': 'Build your <span class="hl">strategy</span>, test it against real history, and <span class="hl">earn cards</span>.',
@@ -348,6 +349,7 @@ const I18N_DICT = {
     'pricing.avisorisco': '⚠️ <strong>Educational simulation</strong> tool. Not investment advice and does not guarantee results. Binary options carry a <strong>high risk of loss</strong>. By subscribing, you agree to the <a href="termos.html" style="color:var(--accent-hover)">Terms of Use</a>, the <a href="privacidade.html" style="color:var(--accent-hover)">Privacy Policy</a>, and the <a href="aviso-risco.html" style="color:var(--accent-hover)">Risk Disclosure</a>.',
 
     'auth.entrar': 'Log In', 'auth.criarconta': 'Sign Up', 'auth.email': 'Email', 'auth.senha': 'Password',
+    'auth.lembrar': 'Remember me',
     'auth.senhaprecisa': 'Your password needs:',
     'auth.req.tamanho': 'At least 8 characters', 'auth.req.maiuscula': 'One uppercase letter (A-Z)',
     'auth.req.minuscula': 'One lowercase letter (a-z)', 'auth.req.numero': 'One number (0-9)',

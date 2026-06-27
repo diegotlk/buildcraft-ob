@@ -8,24 +8,44 @@
 const AUTH_API_BASE = 'https://api.binaryzando.com';
 const SESSAO_KEY = 'buildcraft_sessao';
 
+// "Lembrar de mim" decide ONDE a sessão fica: localStorage (sobrevive a
+// fechar o navegador) ou sessionStorage (esquece ao fechar a aba/navegador).
+// getSessao() olha as duas pra não importar qual delas o login usou.
 function getSessao() {
   try {
-    return JSON.parse(localStorage.getItem(SESSAO_KEY));
+    const raw = sessionStorage.getItem(SESSAO_KEY) || localStorage.getItem(SESSAO_KEY);
+    return raw ? JSON.parse(raw) : null;
   } catch (e) {
     return null;
   }
 }
 
-function salvarSessao(token, email, plano) {
+function salvarSessao(token, email, plano, lembrar) {
   // Se plano não vier, preserva o que já estava salvo (ex.: ao trocar o e-mail
   // não queremos zerar o plano da conta).
   const atual = getSessao();
   const planoFinal = plano !== undefined ? plano : (atual?.plano || 'free');
-  localStorage.setItem(SESSAO_KEY, JSON.stringify({ token, email, plano: planoFinal }));
+  const dados = JSON.stringify({ token, email, plano: planoFinal });
+
+  // Sem "lembrar" explícito (chamadas internas, ex.: refresh do plano), mantém
+  // o mesmo tipo de armazenamento que já estava em uso — não promove nem
+  // rebaixa a sessão por engano.
+  const usarSessionStorage = lembrar === undefined
+    ? (!!sessionStorage.getItem(SESSAO_KEY) && !localStorage.getItem(SESSAO_KEY))
+    : (lembrar === false);
+
+  if (usarSessionStorage) {
+    sessionStorage.setItem(SESSAO_KEY, dados);
+    localStorage.removeItem(SESSAO_KEY);
+  } else {
+    localStorage.setItem(SESSAO_KEY, dados);
+    sessionStorage.removeItem(SESSAO_KEY);
+  }
 }
 
 function limparSessao() {
   localStorage.removeItem(SESSAO_KEY);
+  sessionStorage.removeItem(SESSAO_KEY);
 }
 
 function estaLogado() {
@@ -514,7 +534,13 @@ async function renderNavbarAuth() {
 
   if (sessao?.token) {
     if (btnGratis) {
-      btnGratis.textContent = 'Sair';
+      // Atualiza também o data-i18n (não só o texto): js/i18n.js roda seu
+      // próprio DOMContentLoaded e RE-aplica a tradução em qualquer elemento
+      // com esse atributo — sem isso, ele sobrescrevia "Sair" de volta para
+      // "Começar Grátis" (o texto mudava, mas onclick/href ficavam os de
+      // logout, daí clicar em "Começar Grátis" deslogava o usuário).
+      btnGratis.setAttribute('data-i18n', 'nav.sair');
+      btnGratis.textContent = typeof t === 'function' ? t('nav.sair') : 'Sair';
       btnGratis.href = '#';
       btnGratis.onclick = (e) => { e.preventDefault(); fazerLogout(); };
     }
@@ -544,7 +570,8 @@ async function renderNavbarAuth() {
     }
   } else {
     if (btnGratis) {
-      btnGratis.textContent = 'Começar Grátis';
+      btnGratis.setAttribute('data-i18n', 'nav.comecargratis');
+      btnGratis.textContent = typeof t === 'function' ? t('nav.comecargratis') : 'Começar Grátis';
       btnGratis.href = 'login.html';
       btnGratis.onclick = null;
     }

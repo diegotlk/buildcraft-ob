@@ -54,6 +54,18 @@
     .cat-vela.vermelha { background: linear-gradient(135deg, #ff4d6d, #c81e3e); box-shadow: 0 0 10px rgba(255,77,109,.25); }
     .cat-vela.doji     { background: var(--bg-hover); color: var(--text-secondary); box-shadow: none; }
 
+    /* Período com muitas velas (semana): célula bem menor, sem o texto do
+       horário (ficaria ilegível de qualquer forma) — só a cor conta, com o
+       horário exato disponível no tooltip ao passar o mouse. */
+    .cat-grade.cat-grade-densa {
+      grid-template-columns: repeat(auto-fill, minmax(10px, 1fr));
+      gap: 2px;
+    }
+    .cat-grade.cat-grade-densa .cat-vela {
+      padding: 0; height: 14px; font-size: 0; border-radius: 3px;
+      box-shadow: none; animation: none; opacity: 1; transform: none;
+    }
+
     .cat-controles {
       display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
       justify-content: center; margin-bottom: 8px;
@@ -84,7 +96,7 @@
 <body>
 
   <!-- Catalogador exige login, igual o resto do laboratório. -->
-  <script src="js/auth.js?v=5"></script>
+  <script src="js/auth.js?v=6"></script>
   <script>exigirLogin();</script>
 
   <!-- ==================== NAVBAR ==================== -->
@@ -140,7 +152,7 @@
 
   <script src="js/app.js?v=11"></script>
   <script src="js/pares.js?v=10"></script>
-  <script src="js/catalogador.js?v=1"></script>
-  <script src="js/i18n.js?v=2"></script>
+  <script src="js/catalogador.js?v=2"></script>
+  <script src="js/i18n.js?v=3"></script>
 </body>
 </html>
