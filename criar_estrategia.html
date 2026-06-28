@@ -602,6 +602,17 @@
     /* Catalogador tem grade própria, mais larga que o resto do wizard —
        não faz sentido espremer no max-width:900px do strategy-builder. */
     #phase-catalogador { max-width: 1100px; margin: 0 auto 24px; }
+    /* Tile "Sem carta" — mesmo padrão visual dos cards reais (build-card-pick),
+       só que sem a carta de verdade dentro (mantém o tamanho/proporção). */
+    .cat-sem-carta-tile {
+      width: 100%; max-width: 250px; margin: 0 auto;
+      aspect-ratio: 25 / 42;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; font-size: 28px; text-align: center; line-height: 1.4;
+      border: 2px dashed var(--border-light); border-radius: var(--radius-md, 12px);
+      color: var(--text-secondary); font-weight: 700;
+    }
+    .cat-sem-carta-tile span { font-size: 12px; color: var(--text-muted); font-weight: 400; }
 
     /* ── Aba Refinar (assertividade por dia da semana / horário) ── */
     #phase-refinar { max-width: 900px; margin: 0 auto 24px; }
@@ -1669,13 +1680,12 @@
               <option value="mes">1 mês 🔒</option>
             </select>
             <input type="date" id="cat-data">
-            <select id="cat-carta" onchange="aoTrocarCartaCatalogador()">
-              <option value="">— Cor da vela (sem carta) —</option>
-            </select>
             <button class="btn btn-sm btn-accent" onclick="carregarCatalogador()">🔄 Atualizar</button>
           </div>
           <p id="cat-aviso-premium" class="cat-aviso-premium" style="display:none">🔒 Período de 1 mês é exclusivo Premium.</p>
-          <p id="cat-carta-aviso" class="cat-carta-aviso" style="display:none"></p>
+
+          <div class="ger-section-label" style="margin-top:16px;">Testar uma carta salva (opcional)</div>
+          <div id="cat-estrategias" class="build-pick-grid" style="margin-bottom:20px;"></div>
 
           <div id="cat-totais" class="cat-totais"></div>
           <div id="cat-grade" class="cat-grade"></div>
@@ -1745,7 +1755,7 @@
   <script src="js/gerenciamento.js?v=11"></script>
   <script src="js/build.js?v=10"></script>
   <script src="js/strategy-builder.js?v=21"></script>
-  <script src="js/catalogador.js?v=11"></script>
+  <script src="js/catalogador.js?v=12"></script>
   <script src="js/refinar.js?v=1"></script>
   <script src="js/i18n.js?v=4"></script>
   <script>
