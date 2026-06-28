@@ -1620,12 +1620,18 @@ function trocarGrupoLab(grupo) {
   document.getElementById('lab-grupo-criar').classList.toggle('active', grupo === 'criar');
   document.getElementById('lab-grupo-testar').classList.toggle('active', grupo === 'testar');
   document.getElementById('lab-grupo-catalogador')?.classList.toggle('active', grupo === 'catalogador');
+  document.getElementById('lab-grupo-refinar')?.classList.toggle('active', grupo === 'refinar');
   document.getElementById('lab-subtabs-criar').style.display = grupo === 'criar' ? 'flex' : 'none';
   document.getElementById('lab-subtabs-testar').style.display = grupo === 'testar' ? 'flex' : 'none';
 
   if (grupo === 'catalogador') {
     goToPhase('catalogador');
     if (typeof carregarCatalogador === 'function') carregarCatalogador();
+    return;
+  }
+  if (grupo === 'refinar') {
+    goToPhase('refinar');
+    if (typeof renderRefinarEstrategias === 'function') renderRefinarEstrategias();
     return;
   }
   trocarAbaLab(grupo === 'criar' ? 'criar-estrategia' : 'testar-estrategia');
@@ -1646,6 +1652,7 @@ function trocarAbaLab(aba) {
   document.getElementById('lab-grupo-criar').classList.toggle('active', grupo === 'criar');
   document.getElementById('lab-grupo-testar').classList.toggle('active', grupo === 'testar');
   document.getElementById('lab-grupo-catalogador')?.classList.remove('active');
+  document.getElementById('lab-grupo-refinar')?.classList.remove('active');
   document.getElementById('lab-subtabs-criar').style.display = grupo === 'criar' ? 'flex' : 'none';
   document.getElementById('lab-subtabs-testar').style.display = grupo === 'testar' ? 'flex' : 'none';
 
