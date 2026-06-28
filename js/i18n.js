@@ -29,7 +29,7 @@ const I18N_DICT = {
     'dias.seg': 'Seg', 'dias.ter': 'Ter', 'dias.qua': 'Qua', 'dias.qui': 'Qui',
     'dias.sex': 'Sex', 'dias.sab': 'Sáb', 'dias.dom': 'Dom',
 
-    'nav.inicio': 'Início', 'nav.laboratorio': 'Criar, Testar e Catalogar', 'nav.inventario': 'Inventário',
+    'nav.inicio': 'Início', 'nav.laboratorio': 'Laboratório', 'nav.inventario': 'Inventário',
     'nav.planos': 'Planos', 'nav.embreve': 'Em breve', 'nav.ranking': 'Ranking',
     'nav.batalhas': 'Batalhas', 'nav.loja': 'Loja', 'nav.cartas': 'Cartas',
     'nav.comecargratis': 'Começar Grátis', 'nav.sair': 'Sair',
@@ -132,7 +132,7 @@ const I18N_DICT = {
 
     'lab.titulo': '🎨 Criar Estratégia',
     'lab.subtitulo': 'Monte seu padrão de velas, escolha a direção e teste contra histórico real.',
-    'lab.grupo.criar': '🎨 Criar', 'lab.grupo.testar': '♻️ Testar', 'lab.grupo.catalogador': '🔥 Catalogador',
+    'lab.grupo.criar': '🎨 Criar', 'lab.grupo.testar': '♻️ Testar', 'lab.grupo.catalogador': '🔥 Catalogar',
     'lab.criarestrategia': '📐 Criar Estratégia', 'lab.testarestrategia': '📐 Testar Estratégia',
     'lab.antesdetudo': 'Antes de tudo',
     'lab.timeframe.titulo': '⏱️ Qual timeframe você vai operar?',
