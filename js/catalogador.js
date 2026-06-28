@@ -161,33 +161,44 @@ async function buscarOverlayCarta(carta, par, tf, periodo, dataStr, tz) {
 // caro em milhares de elementos), nunca sem o texto.
 const CAT_LIMITE_DENSA = 300;
 
-// overlayCarta: Map opcional ts -> 'W'/'L'/'E' (resultado da carta naquela
-// vela). Quando presente, sobrepõe a cor crua da vela: W=verde, L=vermelha,
-// E=cinza (empate) — vela sem entrada da carta fica quase invisível, pra só
-// os pontos de entrada chamarem atenção.
-const CAT_COR_OVERLAY = { W: 'verde', L: 'vermelha', E: 'doji' };
-
-function renderGradeVelas(velas, overlayCarta) {
+function renderGradeVelas(velas) {
   const el = document.getElementById('cat-grade');
   if (!el) return;
   const densa = velas.length > CAT_LIMITE_DENSA;
   el.classList.toggle('cat-grade-densa', densa);
   el.innerHTML = velas.map((v, i) => {
-    let cor = v.cor;
-    let titulo = `${v.hora} · ${v.cor}`;
-    if (overlayCarta) {
-      const r = overlayCarta.get(v.ts);
-      if (r) {
-        cor = CAT_COR_OVERLAY[r];
-        titulo = `${v.hora} · ${r === 'W' ? 'WIN' : r === 'L' ? 'LOSS' : 'EMPATE'}`;
-      } else {
-        cor = 'sem-entrada';
-        titulo = `${v.hora} · sem entrada da carta`;
-      }
-    }
+    const cor = v.cor;
+    const titulo = `${v.hora} · ${v.cor}`;
     return densa
       ? `<div class="cat-vela ${cor}" title="${titulo}">${v.hora}</div>`
       : `<div class="cat-vela ${cor}" style="animation-delay:${Math.min(i * 6, 600)}ms" title="${titulo}">${v.hora}</div>`;
+  }).join('');
+}
+
+// Overlay "testar carta": mostra SÓ as entradas (não a grade inteira de
+// velas do período) — sem isso, com 1 entrada a cada hora ou mais, a grade
+// fica 99% de células quase invisíveis e o pouco que importa vira pontinho
+// espalhado. Compacta tudo junto, em ordem cronológica.
+const CAT_COR_OVERLAY = { W: 'verde', L: 'vermelha', E: 'doji' };
+
+function formatarDataHoraCatalogador(tsSegundos, tz) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: tz, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+  }).format(new Date(tsSegundos * 1000));
+}
+
+function renderGradeEntradas(entradas, tz) {
+  const el = document.getElementById('cat-grade');
+  if (!el) return;
+  const densa = entradas.length > CAT_LIMITE_DENSA;
+  el.classList.toggle('cat-grade-densa', densa);
+  el.innerHTML = entradas.map(([ts, r], i) => {
+    const cor = CAT_COR_OVERLAY[r];
+    const label = formatarDataHoraCatalogador(ts, tz);
+    const titulo = `${label} · ${r === 'W' ? 'WIN' : r === 'L' ? 'LOSS' : 'EMPATE'}`;
+    return densa
+      ? `<div class="cat-vela ${cor}" title="${titulo}">${label}</div>`
+      : `<div class="cat-vela ${cor}" style="animation-delay:${Math.min(i * 6, 600)}ms" title="${titulo}">${label}</div>`;
   }).join('');
 }
 
@@ -262,12 +273,11 @@ async function carregarCatalogador() {
       try {
         const resultado = await buscarOverlayCarta(carta, par, tf, periodo, data, tz);
         const seq = resultado.sequencia_completa || [];
-        const overlay = new Map(seq.map(([ts, r]) => [ts, r]));
         const wins = seq.filter(([, r]) => r === 'W').length;
         const losses = seq.filter(([, r]) => r === 'L').length;
         const empates = seq.filter(([, r]) => r === 'E').length;
         renderTotaisCarta(wins, losses, empates);
-        renderGradeVelas(dados.velas, overlay);
+        renderGradeEntradas(seq, tz);
         estado.textContent = seq.length ? '' : 'A carta não teve nenhuma entrada nesse período.';
       } catch (e) {
         estado.textContent = e.message || 'Não foi possível testar a carta nesse período.';
