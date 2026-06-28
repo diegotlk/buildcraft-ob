@@ -13,12 +13,18 @@ const CATALOGADOR_API_URL = 'https://api.binaryzando.com';
 function popularSelectParesCatalogador() {
   const sel = document.getElementById('cat-par');
   if (!sel || typeof TODOS_OS_PARES === 'undefined') return;
-  // Ordem alfabética continua igual — só os liberados ganham cor de destaque
-  // (ciano + negrito) pra saltar aos olhos em meio aos trancados.
-  sel.innerHTML = TODOS_OS_PARES.map(par => {
+  // Liberados primeiro (em ciano), trancados depois — senão fica difícil de
+  // achar os liberados no meio da lista alfabética toda.
+  const pares = [...TODOS_OS_PARES].sort((a, b) => {
+    const bloqA = typeof parBloqueado === 'function' && parBloqueado(a);
+    const bloqB = typeof parBloqueado === 'function' && parBloqueado(b);
+    if (bloqA !== bloqB) return bloqA ? 1 : -1;
+    return a < b ? -1 : a > b ? 1 : 0;
+  });
+  sel.innerHTML = pares.map(par => {
     const bloqueado = typeof parBloqueado === 'function' && parBloqueado(par);
     const estilo = bloqueado ? '' : ' style="color:#00eaff;font-weight:700"';
-    return `<option value="${par}" ${bloqueado ? 'disabled' : ''}${estilo}>${par}${bloqueado ? ' 🔒' : ' 🔓'}</option>`;
+    return `<option value="${par}" ${bloqueado ? 'disabled' : ''}${estilo}>${par}${bloqueado ? ' 🔒' : ''}</option>`;
   }).join('');
 }
 
