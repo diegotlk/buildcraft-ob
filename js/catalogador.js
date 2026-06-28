@@ -87,35 +87,35 @@ function renderTotaisCarta(wins, losses, empates) {
 // montarPayloadEstrategia); só cartas com espelho (CALL+PUT combinados)
 // ficam de fora, porque a ordem cronológica se perde ao combinar os dois
 // backtests.
-function popularSelectCartasCatalogador() {
-  const sel = document.getElementById('cat-carta');
-  if (!sel || typeof getEstrategiasSalvas !== 'function') return;
-  const valorAtual = sel.value;
+// Mesmo padrão visual de seleção da aba Refinar (grade de cartas reais +
+// tique no card escolhido) — null = nenhuma carta (mostra a cor crua da vela).
+let catalogadorCartaId = null;
+
+function renderCatalogadorEstrategias() {
+  const cont = document.getElementById('cat-estrategias');
+  if (!cont || typeof getEstrategiasSalvas !== 'function') return;
+
   const cartas = getEstrategiasSalvas().filter(item => !(item.mode === 'pintar' && item.definicao?.mirror));
-  sel.innerHTML = '<option value="">— Cor da vela (sem carta) —</option>' + cartas.map(c =>
-    `<option value="${c.id}">${c.nome} (testada em ${c.teste.pair} · ${c.teste.timeframeOperado})</option>`
+  if (catalogadorCartaId && !cartas.some(c => c.id === catalogadorCartaId)) {
+    catalogadorCartaId = null;
+  }
+
+  const semCartaSelecionada = !catalogadorCartaId;
+  const tileSemCarta = `
+    <div class="build-card-pick ${semCartaSelecionada ? 'selected' : ''}" onclick="setCatalogadorCarta(null)">
+      ${semCartaSelecionada ? '<div class="build-card-pick-check">✓</div>' : ''}
+      <div class="cat-sem-carta-tile">🚫<br>Sem carta<br><span>cor da vela</span></div>
+    </div>
+  `;
+  cont.innerHTML = tileSemCarta + cartas.map(c =>
+    renderBuildCardPick(c, catalogadorCartaId === c.id, 'setCatalogadorCarta')
   ).join('');
-  if (cartas.some(c => c.id === valorAtual)) sel.value = valorAtual;
 }
 
-function aoTrocarCartaCatalogador() {
-  const cartaId = document.getElementById('cat-carta')?.value;
-  const aviso = document.getElementById('cat-carta-aviso');
-  if (!cartaId) {
-    aviso.style.display = 'none';
-    return;
-  }
-  const carta = getInventario().find(c => c.id === cartaId);
-  if (!carta) return;
-  // O padrão (cores/ancoragem/direção) é uma regra genérica — não trava par
-  // nem timeframe: o usuário escolhe livremente onde quer rodar essa mesma
-  // estratégia, igual ele escolheria pra montar uma carta nova do zero.
-  if (carta.definicao?.mirror) {
-    aviso.textContent = '⚠️ Essa carta usa espelho (CALL+PUT combinados) — a ordem cronológica se perde ao combinar, então o overlay de entradas não fica disponível pra ela ainda.';
-    aviso.style.display = 'block';
-  } else {
-    aviso.style.display = 'none';
-  }
+function setCatalogadorCarta(id) {
+  catalogadorCartaId = id || null;
+  renderCatalogadorEstrategias();
+  if (typeof carregarCatalogador === 'function') carregarCatalogador();
 }
 
 // Replica em JS o mesmo cálculo de intervalo que o backend do Catalogador
@@ -314,21 +314,13 @@ async function carregarCatalogador() {
       return;
     }
 
-    const cartaId = document.getElementById('cat-carta')?.value;
-    const carta = cartaId && typeof getInventario === 'function'
-      ? getInventario().find(c => c.id === cartaId) : null;
+    const carta = catalogadorCartaId && typeof getInventario === 'function'
+      ? getInventario().find(c => c.id === catalogadorCartaId) : null;
 
     if (carta && dados.modo === 'horas') {
       // Overlay de entradas só faz sentido vela a vela — período agregado
       // por hora (mês) não tem ts individual pra casar com a entrada.
       estado.textContent = 'Testar carta só funciona em "1 dia" ou "1 semana" (o mês agrega por hora e perde o timestamp de cada vela).';
-      return;
-    }
-
-    if (carta && carta.definicao?.mirror) {
-      renderTotaisCatalogador(dados.totais);
-      renderGradeVelas(dados.velas);
-      estado.textContent = '⚠️ Essa carta usa espelho — mostrando a cor crua da vela (overlay de entradas indisponível pra cartas com espelho).';
       return;
     }
 
@@ -364,7 +356,7 @@ async function carregarCatalogador() {
 
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectParesCatalogador();
-  popularSelectCartasCatalogador();
+  renderCatalogadorEstrategias();
   aoTrocarPeriodoCatalogador();
   // Quando o Catalogador é a própria página (catalogador.html standalone),
   // a fase já nasce visível e busca a grade direto. Quando ele está embutido
@@ -378,6 +370,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Inventário sincroniza com o servidor de forma assíncrona (pode trazer
-// cartas que não estavam no localStorage ainda) — repopula o seletor quando
+// cartas que não estavam no localStorage ainda) — repopula a grade quando
 // isso terminar, sem precisar recarregar a página.
-document.addEventListener('inventarioSincronizado', popularSelectCartasCatalogador);
+document.addEventListener('inventarioSincronizado', renderCatalogadorEstrategias);
