@@ -13,9 +13,12 @@ const CATALOGADOR_API_URL = 'https://api.binaryzando.com';
 function popularSelectParesCatalogador() {
   const sel = document.getElementById('cat-par');
   if (!sel || typeof TODOS_OS_PARES === 'undefined') return;
+  // Ordem alfabética continua igual — só os liberados ganham cor de destaque
+  // (ciano + negrito) pra saltar aos olhos em meio aos trancados.
   sel.innerHTML = TODOS_OS_PARES.map(par => {
     const bloqueado = typeof parBloqueado === 'function' && parBloqueado(par);
-    return `<option value="${par}" ${bloqueado ? 'disabled' : ''}>${par}${bloqueado ? ' 🔒' : ''}</option>`;
+    const estilo = bloqueado ? '' : ' style="color:#00eaff;font-weight:700"';
+    return `<option value="${par}" ${bloqueado ? 'disabled' : ''}${estilo}>${par}${bloqueado ? ' 🔒' : ' 🔓'}</option>`;
   }).join('');
 }
 
