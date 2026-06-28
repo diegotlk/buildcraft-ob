@@ -82,15 +82,16 @@ function renderTotaisCarta(wins, losses, empates) {
 // ============================================================
 // Reaproveita uma estratégia salva no inventário e mostra, na própria grade
 // de velas reais, onde ela teria ganhado (verde), perdido (vermelha) ou
-// empatado (cinza) — em vez da cor crua da vela. Por ora só funciona com
-// cartas do modo "pintar" (padrão de velas desenhado): os outros modos
-// (quadrante, indicador, figura...) ainda não aceitam recorte por período
-// fechado no backend.
+// empatado (cinza) — em vez da cor crua da vela. Funciona com qualquer modo
+// re-testável (pintar, quadrante, indicador, figura — ver
+// montarPayloadEstrategia); só cartas com espelho (CALL+PUT combinados)
+// ficam de fora, porque a ordem cronológica se perde ao combinar os dois
+// backtests.
 function popularSelectCartasCatalogador() {
   const sel = document.getElementById('cat-carta');
-  if (!sel || typeof getInventario !== 'function') return;
+  if (!sel || typeof getEstrategiasSalvas !== 'function') return;
   const valorAtual = sel.value;
-  const cartas = getInventario().filter(item => !item.deletadoEm && item.mode === 'pintar');
+  const cartas = getEstrategiasSalvas().filter(item => !(item.mode === 'pintar' && item.definicao?.mirror));
   sel.innerHTML = '<option value="">— Cor da vela (sem carta) —</option>' + cartas.map(c =>
     `<option value="${c.id}">${c.nome} (testada em ${c.teste.pair} · ${c.teste.timeframeOperado})</option>`
   ).join('');
@@ -133,24 +134,77 @@ function calcularIntervaloPeriodoCatalogador(periodo, dataStr) {
 // O padrão salvo na carta vem em emoji (🟩/🟥/⬜ — é como o canvas de desenho
 // guarda), igual ao COLORS de strategy-builder.js. O backend espera número
 // (1/-1/null); essa conversão normalmente só acontece no momento de testar
-// (testStrategy() faz isso ali), e o Catalogador precisa repetir aqui.
+// (testStrategy() faz isso ali), e quem reaproveita uma carta salva precisa
+// repetir aqui.
 function catEmojiParaNum(c) {
   return c === '🟩' ? 1 : c === '🟥' ? -1 : null;
 }
 
-// par/tf vêm do que está selecionado NA TELA do Catalogador — não da carta.
-// A regra (padrão de velas/ancoragem/direção) é genérica; o usuário decide
-// onde quer rodá-la, igual decidiria ao montar uma carta nova do zero.
-async function buscarOverlayCarta(carta, par, tf, periodo, dataStr, tz) {
+// Monta o payload de POST /api/test-build pra QUALQUER carta re-testável
+// (pintar, quadrante — maioria/minoria/referência/flip —, indicador, montador,
+// figura), a partir da definição salva + os parâmetros que o usuário escolheu
+// na tela (par/timeframe/período/dias da semana/fuso). Usado pelo Catalogador
+// ("testar carta") e pela aba Refinar — mesma regra genérica nos dois: o
+// usuário decide onde rodar a estratégia, igual decidiria ao criar uma carta
+// nova do zero. Cartas com espelho não são suportadas (a ordem cronológica
+// se perde ao combinar os dois backtests).
+function montarPayloadEstrategia(carta, { par, tf, data_de, data_ate, dias_semana, timezone }) {
   const def = carta.definicao || {};
-  const { data_de, data_ate } = calcularIntervaloPeriodoCatalogador(periodo, dataStr);
-  const payload = {
-    pattern: (def.pattern || []).map(catEmojiParaNum), anchoring: def.anchoring, direction: def.direction,
-    mirror: !!def.mirror, mirror_direction: def.mirrorDirection,
-    pair: par, timeframe: tf,
-    periodo_modo: 'personalizado', data_de, data_ate,
-    dias_semana: def.diasSemana, timezone: tz,
+  const base = {
+    pair: par, periodo_modo: 'personalizado', data_de, data_ate,
+    dias_semana, timezone,
   };
+
+  if (carta.mode === 'figura') {
+    return { ...base, mode: 'figura', figura: def.fig.tipo, timeframe: tf };
+  }
+  if (carta.mode === 'indicador' && def.ind?.tipo === 'montador') {
+    const m = def.mont || {};
+    return { ...base, mode: 'montador', condicoes: m.condicoes, combinador: m.combinador, direcao: m.direcao, timeframe: tf };
+  }
+  if (carta.mode === 'indicador') {
+    return { ...base, mode: 'indicador', indicador: def.ind.tipo, params: def.ind.params, timeframe: tf };
+  }
+  if (carta.mode === 'quadrante' && def.q?.tipo === 'referencia') {
+    const ref = def.q.ref;
+    return {
+      ...base, mode: 'referencia', nome: ref.nome, bloco_velas: ref.blocoVelas,
+      ref_pos: ref.refPos, entry_pos: ref.entryPos, relacao: ref.relacao,
+      ref_bloco: ref.refBloco, cond_posicoes: ref.condPosicoes, tf_entrada: tf,
+    };
+  }
+  if (carta.mode === 'quadrante' && def.q?.tipo === 'confluencia') {
+    const conf = def.q.conf;
+    return { ...base, mode: 'confluencia', nome: conf.nome, spec_a: conf.specA, spec_b: conf.specB, tf_entrada: tf };
+  }
+  if (carta.mode === 'quadrante') {
+    const q = def.q;
+    return {
+      ...base, mode: 'quadrante', tf_entrada: tf, bloco: q.bloco,
+      analise_modo: q.analiseModo,
+      analise_padrao: q.analiseModo === 'editar' ? (q.analisePadrao || []).map(catEmojiParaNum) : null,
+      posicoes_analise: q.analiseModo === 'contar' ? q.posicoes : null,
+      entrada_modo: q.entradaModo, entrada_pos: q.entradaPos,
+    };
+  }
+  // 'pintar' (default)
+  return {
+    ...base,
+    pattern: (def.pattern || []).map(catEmojiParaNum),
+    anchoring: def.anchoring, direction: def.direction,
+    mirror: !!def.mirror, mirror_direction: def.mirrorDirection,
+    timeframe: tf,
+    // sem filtro vindo de quem chamou, respeita o recorte de dias que a
+    // própria carta já tinha quando foi salva (ex.: "Otimizar" achou que ela
+    // só funciona de seg-sex) — isso é parte da regra da estratégia.
+    dias_semana: dias_semana ?? def.diasSemana,
+  };
+}
+
+// par/tf vêm do que está selecionado NA TELA do Catalogador — não da carta.
+async function buscarOverlayCarta(carta, par, tf, periodo, dataStr, tz) {
+  const { data_de, data_ate } = calcularIntervaloPeriodoCatalogador(periodo, dataStr);
+  const payload = montarPayloadEstrategia(carta, { par, tf, data_de, data_ate, dias_semana: undefined, timezone: tz });
   const resp = await fetch(`${CATALOGADOR_API_URL}/api/test-build`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
