@@ -128,11 +128,19 @@ function calcularIntervaloPeriodoCatalogador(periodo, dataStr) {
   return { data_de: fmt(ini), data_ate: fmt(fim) };
 }
 
+// O padrão salvo na carta vem em emoji (🟩/🟥/⬜ — é como o canvas de desenho
+// guarda), igual ao COLORS de strategy-builder.js. O backend espera número
+// (1/-1/null); essa conversão normalmente só acontece no momento de testar
+// (testStrategy() faz isso ali), e o Catalogador precisa repetir aqui.
+function catEmojiParaNum(c) {
+  return c === '🟩' ? 1 : c === '🟥' ? -1 : null;
+}
+
 async function buscarOverlayCarta(carta, periodo, dataStr, tz) {
   const def = carta.definicao || {};
   const { data_de, data_ate } = calcularIntervaloPeriodoCatalogador(periodo, dataStr);
   const payload = {
-    pattern: def.pattern, anchoring: def.anchoring, direction: def.direction,
+    pattern: (def.pattern || []).map(catEmojiParaNum), anchoring: def.anchoring, direction: def.direction,
     mirror: !!def.mirror, mirror_direction: def.mirrorDirection,
     pair: carta.teste.pair, timeframe: carta.teste.timeframeOperado,
     periodo_modo: 'personalizado', data_de, data_ate,
