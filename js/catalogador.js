@@ -83,30 +83,23 @@ function popularSelectCartasCatalogador() {
   const valorAtual = sel.value;
   const cartas = getInventario().filter(item => !item.deletadoEm && item.mode === 'pintar');
   sel.innerHTML = '<option value="">— Cor da vela (sem carta) —</option>' + cartas.map(c =>
-    `<option value="${c.id}">${c.nome} (${c.teste.pair} · ${c.teste.timeframeOperado})</option>`
+    `<option value="${c.id}">${c.nome} (testada em ${c.teste.pair} · ${c.teste.timeframeOperado})</option>`
   ).join('');
   if (cartas.some(c => c.id === valorAtual)) sel.value = valorAtual;
 }
 
 function aoTrocarCartaCatalogador() {
   const cartaId = document.getElementById('cat-carta')?.value;
-  const selPar = document.getElementById('cat-par');
-  const selTf = document.getElementById('cat-tf');
   const aviso = document.getElementById('cat-carta-aviso');
   if (!cartaId) {
-    selPar.disabled = false;
-    selTf.disabled = false;
     aviso.style.display = 'none';
     return;
   }
   const carta = getInventario().find(c => c.id === cartaId);
   if (!carta) return;
-  // A entrada da carta só faz sentido no par/timeframe em que ela foi
-  // desenhada — trava os dois pra evitar comparar ts de mercados diferentes.
-  selPar.value = carta.teste.pair;
-  selTf.value = carta.teste.timeframeOperado;
-  selPar.disabled = true;
-  selTf.disabled = true;
+  // O padrão (cores/ancoragem/direção) é uma regra genérica — não trava par
+  // nem timeframe: o usuário escolhe livremente onde quer rodar essa mesma
+  // estratégia, igual ele escolheria pra montar uma carta nova do zero.
   if (carta.definicao?.mirror) {
     aviso.textContent = '⚠️ Essa carta usa espelho (CALL+PUT combinados) — a ordem cronológica se perde ao combinar, então o overlay de entradas não fica disponível pra ela ainda.';
     aviso.style.display = 'block';
@@ -136,13 +129,16 @@ function catEmojiParaNum(c) {
   return c === '🟩' ? 1 : c === '🟥' ? -1 : null;
 }
 
-async function buscarOverlayCarta(carta, periodo, dataStr, tz) {
+// par/tf vêm do que está selecionado NA TELA do Catalogador — não da carta.
+// A regra (padrão de velas/ancoragem/direção) é genérica; o usuário decide
+// onde quer rodá-la, igual decidiria ao montar uma carta nova do zero.
+async function buscarOverlayCarta(carta, par, tf, periodo, dataStr, tz) {
   const def = carta.definicao || {};
   const { data_de, data_ate } = calcularIntervaloPeriodoCatalogador(periodo, dataStr);
   const payload = {
     pattern: (def.pattern || []).map(catEmojiParaNum), anchoring: def.anchoring, direction: def.direction,
     mirror: !!def.mirror, mirror_direction: def.mirrorDirection,
-    pair: carta.teste.pair, timeframe: carta.teste.timeframeOperado,
+    pair: par, timeframe: tf,
     periodo_modo: 'personalizado', data_de, data_ate,
     dias_semana: def.diasSemana, timezone: tz,
   };
@@ -264,7 +260,7 @@ async function carregarCatalogador() {
 
     if (carta) {
       try {
-        const resultado = await buscarOverlayCarta(carta, periodo, data, tz);
+        const resultado = await buscarOverlayCarta(carta, par, tf, periodo, data, tz);
         const seq = resultado.sequencia_completa || [];
         const overlay = new Map(seq.map(([ts, r]) => [ts, r]));
         const wins = seq.filter(([, r]) => r === 'W').length;
