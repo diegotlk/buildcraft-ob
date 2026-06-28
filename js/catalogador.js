@@ -303,7 +303,15 @@ document.addEventListener('DOMContentLoaded', () => {
   popularSelectParesCatalogador();
   popularSelectCartasCatalogador();
   aoTrocarPeriodoCatalogador();
-  carregarCatalogador();
+  // Quando o Catalogador é a própria página (catalogador.html standalone),
+  // a fase já nasce visível e busca a grade direto. Quando ele está embutido
+  // como aba dentro do Laboratório (#phase-catalogador escondido por padrão),
+  // só busca quando o usuário de fato abrir essa aba — trocarGrupoLab() faz
+  // essa chamada nesse caso.
+  const fase = document.getElementById('phase-catalogador');
+  if (!fase || fase.classList.contains('active')) {
+    carregarCatalogador();
+  }
 });
 
 // Inventário sincroniza com o servidor de forma assíncrona (pode trazer

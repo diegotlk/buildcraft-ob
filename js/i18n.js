@@ -29,7 +29,7 @@ const I18N_DICT = {
     'dias.seg': 'Seg', 'dias.ter': 'Ter', 'dias.qua': 'Qua', 'dias.qui': 'Qui',
     'dias.sex': 'Sex', 'dias.sab': 'Sáb', 'dias.dom': 'Dom',
 
-    'nav.inicio': 'Início', 'nav.laboratorio': 'Laboratório', 'nav.inventario': 'Inventário',
+    'nav.inicio': 'Início', 'nav.laboratorio': 'Criar, Testar e Catalogar', 'nav.inventario': 'Inventário',
     'nav.planos': 'Planos', 'nav.embreve': 'Em breve', 'nav.ranking': 'Ranking',
     'nav.batalhas': 'Batalhas', 'nav.loja': 'Loja', 'nav.cartas': 'Cartas',
     'nav.comecargratis': 'Começar Grátis', 'nav.sair': 'Sair',
@@ -132,7 +132,7 @@ const I18N_DICT = {
 
     'lab.titulo': '🎨 Criar Estratégia',
     'lab.subtitulo': 'Monte seu padrão de velas, escolha a direção e teste contra histórico real.',
-    'lab.grupo.criar': '🎨 Criar', 'lab.grupo.testar': '♻️ Testar',
+    'lab.grupo.criar': '🎨 Criar', 'lab.grupo.testar': '♻️ Testar', 'lab.grupo.catalogador': '🔥 Catalogador',
     'lab.criarestrategia': '📐 Criar Estratégia', 'lab.testarestrategia': '📐 Testar Estratégia',
     'lab.antesdetudo': 'Antes de tudo',
     'lab.timeframe.titulo': '⏱️ Qual timeframe você vai operar?',
@@ -296,7 +296,7 @@ const I18N_DICT = {
     'dias.seg': 'Mon', 'dias.ter': 'Tue', 'dias.qua': 'Wed', 'dias.qui': 'Thu',
     'dias.sex': 'Fri', 'dias.sab': 'Sat', 'dias.dom': 'Sun',
 
-    'nav.inicio': 'Home', 'nav.laboratorio': 'Lab', 'nav.inventario': 'Inventory',
+    'nav.inicio': 'Home', 'nav.laboratorio': 'Create, Test & Catalog', 'nav.inventario': 'Inventory',
     'nav.planos': 'Plans', 'nav.embreve': 'Coming soon', 'nav.ranking': 'Ranking',
     'nav.batalhas': 'Battles', 'nav.loja': 'Shop', 'nav.cartas': 'Cards',
     'nav.comecargratis': 'Start Free', 'nav.sair': 'Log out',
@@ -399,7 +399,7 @@ const I18N_DICT = {
 
     'lab.titulo': '🎨 Create Strategy',
     'lab.subtitulo': 'Build your candle pattern, pick a direction, and test it against real history.',
-    'lab.grupo.criar': '🎨 Create', 'lab.grupo.testar': '♻️ Test',
+    'lab.grupo.criar': '🎨 Create', 'lab.grupo.testar': '♻️ Test', 'lab.grupo.catalogador': '🔥 Catalog',
     'lab.criarestrategia': '📐 Create Strategy', 'lab.testarestrategia': '📐 Test Strategy',
     'lab.antesdetudo': 'Before anything',
     'lab.timeframe.titulo': '⏱️ Which timeframe will you trade?',

@@ -1612,15 +1612,22 @@ function velasPorBloco() {
   return Q_BLOCO_SEG[strategyState.q.bloco] / Q_TF_SEG[tf];
 }
 
-// ── ABAS: CRIAR NOVA × TESTAR EXISTENTE ──
-// Grupo de alto nível: "criar" ou "testar". Cada grupo tem suas 3 sub-abas
-// (Estratégia / Gerenciamento / Build) — ver trocarAbaLab().
+// ── ABAS: CRIAR NOVA × TESTAR EXISTENTE × CATALOGAR ──
+// Grupo de alto nível: "criar", "testar" ou "catalogador". Criar/Testar têm
+// suas 3 sub-abas (Estratégia / Gerenciamento / Build) — ver trocarAbaLab().
+// Catalogador não tem sub-aba — é uma fase única (movida de catalogador.html).
 function trocarGrupoLab(grupo) {
   document.getElementById('lab-grupo-criar').classList.toggle('active', grupo === 'criar');
   document.getElementById('lab-grupo-testar').classList.toggle('active', grupo === 'testar');
+  document.getElementById('lab-grupo-catalogador')?.classList.toggle('active', grupo === 'catalogador');
   document.getElementById('lab-subtabs-criar').style.display = grupo === 'criar' ? 'flex' : 'none';
   document.getElementById('lab-subtabs-testar').style.display = grupo === 'testar' ? 'flex' : 'none';
 
+  if (grupo === 'catalogador') {
+    goToPhase('catalogador');
+    if (typeof carregarCatalogador === 'function') carregarCatalogador();
+    return;
+  }
   trocarAbaLab(grupo === 'criar' ? 'criar-estrategia' : 'testar-estrategia');
 }
 
@@ -1638,6 +1645,7 @@ function trocarAbaLab(aba) {
   const grupo = aba.startsWith('testar') ? 'testar' : 'criar';
   document.getElementById('lab-grupo-criar').classList.toggle('active', grupo === 'criar');
   document.getElementById('lab-grupo-testar').classList.toggle('active', grupo === 'testar');
+  document.getElementById('lab-grupo-catalogador')?.classList.remove('active');
   document.getElementById('lab-subtabs-criar').style.display = grupo === 'criar' ? 'flex' : 'none';
   document.getElementById('lab-subtabs-testar').style.display = grupo === 'testar' ? 'flex' : 'none';
 

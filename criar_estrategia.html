@@ -520,6 +520,88 @@
     #build-btn-testar:disabled {
       opacity: .45; cursor: not-allowed; pointer-events: none;
     }
+
+    /* ── Aba Catalogador (movida de catalogador.html pra dentro do Laboratório) ── */
+    .cat-totais {
+      display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+      margin: 20px 0 28px;
+    }
+    .cat-totais .cat-total-item {
+      background: var(--bg-card); border: 1px solid var(--bg-hover);
+      border-radius: var(--radius-lg, 12px); padding: 10px 18px;
+      text-align: center; min-width: 110px;
+    }
+    .cat-total-item .num { font-size: 1.4rem; font-weight: 800; display: block; }
+    .cat-total-item .lbl { font-size: .72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+    .cat-total-item.verde .num    { color: #1ee08a; }
+    .cat-total-item.vermelha .num { color: #ff4d6d; }
+    .cat-total-item.doji .num     { color: var(--text-muted); }
+
+    .cat-grade {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+      gap: 6px;
+      margin-bottom: 28px;
+    }
+    .cat-vela {
+      border-radius: 8px;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: .72rem;
+      font-weight: 700;
+      font-family: var(--font-mono, monospace);
+      color: #fff;
+      opacity: 0;
+      transform: scale(.85);
+      animation: catVelaIn .25s ease forwards;
+    }
+    @keyframes catVelaIn { to { opacity: 1; transform: scale(1); } }
+    .cat-vela.verde    { background: linear-gradient(135deg, #1ee08a, #14a866); box-shadow: 0 0 10px rgba(30,224,138,.25); }
+    .cat-vela.vermelha { background: linear-gradient(135deg, #ff4d6d, #c81e3e); box-shadow: 0 0 10px rgba(255,77,109,.25); }
+    .cat-vela.doji     { background: var(--bg-hover); color: var(--text-secondary); box-shadow: none; }
+    .cat-vela.sem-entrada { background: var(--bg-hover); opacity: .15; box-shadow: none; color: transparent; }
+    .cat-grade.cat-grade-densa .cat-vela.sem-entrada { opacity: .1; }
+
+    .cat-carta-aviso {
+      text-align: center; color: var(--text-muted); font-size: .78rem;
+      margin: -4px 0 14px;
+    }
+
+    .cat-grade.cat-grade-densa {
+      grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+      gap: 3px;
+    }
+    .cat-grade.cat-grade-densa .cat-vela {
+      padding: 3px 1px; font-size: .56rem; border-radius: 4px;
+      box-shadow: none; animation: none; opacity: 1; transform: none;
+    }
+
+    .cat-controles {
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+      justify-content: center; margin-bottom: 8px;
+    }
+    .cat-controles select, .cat-controles input[type="date"] {
+      background: var(--bg-input); color: var(--text-primary);
+      border: 1px solid var(--bg-hover); border-radius: var(--radius-md, 8px);
+      padding: 8px 12px; font-size: .85rem;
+    }
+    .cat-estado {
+      text-align: center; color: var(--text-secondary); padding: 40px 0;
+    }
+
+    .cat-vela.cat-vela-hora {
+      padding: 14px 6px;
+      font-size: .8rem;
+      line-height: 1.3;
+    }
+    .cat-vela-hora .cat-vela-pct { display: block; font-size: .68rem; opacity: .85; font-weight: 600; }
+    .cat-aviso-premium {
+      text-align: center; color: var(--neon-gold, #ffc24b); font-size: .8rem;
+      margin-top: -4px; margin-bottom: 12px;
+    }
+    /* Catalogador tem grade própria, mais larga que o resto do wizard —
+       não faz sentido espremer no max-width:900px do strategy-builder. */
+    #phase-catalogador { max-width: 1100px; margin: 0 auto 24px; }
   </style>
 </head>
 <body>
@@ -537,7 +619,6 @@
     <div class="navbar-links">
       <a href="index.html" class="navbar-link" data-i18n="nav.inicio">Início</a>
       <a href="criar_estrategia.html" class="navbar-link active" data-i18n="nav.laboratorio">Laboratório</a>
-      <a href="catalogador.html" class="navbar-link">🔥 Catalogador</a>
       <a href="inventario.html" class="navbar-link" data-i18n="nav.inventario">Inventário</a>
       <a href="planos.html" class="navbar-link" data-i18n="nav.planos">Planos</a>
       <!-- MVP: abas ainda sem página/backend real, temporariamente DESATIVADAS
@@ -568,10 +649,11 @@
       <!-- Builder -->
       <div class="strategy-builder">
 
-        <!-- ── GRUPO: CRIAR ou TESTAR ── -->
+        <!-- ── GRUPO: CRIAR, TESTAR ou CATALOGAR ── -->
         <div class="lab-tabs" id="lab-grupo-tabs">
           <button class="lab-tab active" id="lab-grupo-criar" onclick="trocarGrupoLab('criar')" data-i18n="lab.grupo.criar">🎨 Criar</button>
           <button class="lab-tab" id="lab-grupo-testar" onclick="trocarGrupoLab('testar')" data-i18n="lab.grupo.testar">♻️ Testar</button>
+          <button class="lab-tab" id="lab-grupo-catalogador" onclick="trocarGrupoLab('catalogador')" data-i18n="lab.grupo.catalogador">🔥 Catalogador</button>
         </div>
 
         <!-- ── SUB-ABAS DO GRUPO "CRIAR" ──
@@ -1535,6 +1617,40 @@
           </div>
         </div>
 
+        <!-- ── GRUPO: CATALOGADOR (movido de catalogador.html) ── -->
+        <div class="phase-section" id="phase-catalogador">
+          <div class="step-counter">🔥 Catalogador</div>
+          <h2 class="card-box-title">Velas reais, coloridas por resultado</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 8px;">
+            Escolha um par e um período (dia, semana ou mês). Cada vela real do período aparece colorida — verde, vermelha ou cinza (doji/sem definição). Pra ver onde uma carta sua teria ganhado, perdido ou empatado, escolha-a no seletor "carta" — ela roda no par/timeframe que você escolher aqui, não só no original.
+          </p>
+
+          <div class="cat-controles">
+            <select id="cat-par"></select>
+            <select id="cat-tf">
+              <option value="M1" selected>M1 (1 min)</option>
+              <option value="M5">M5 (5 min)</option>
+              <option value="M15">M15 (15 min)</option>
+            </select>
+            <select id="cat-periodo" onchange="aoTrocarPeriodoCatalogador()">
+              <option value="dia" selected>1 dia</option>
+              <option value="semana">1 semana</option>
+              <option value="mes">1 mês 🔒</option>
+            </select>
+            <input type="date" id="cat-data">
+            <select id="cat-carta" onchange="aoTrocarCartaCatalogador()">
+              <option value="">— Cor da vela (sem carta) —</option>
+            </select>
+            <button class="btn btn-sm btn-accent" onclick="carregarCatalogador()">🔄 Atualizar</button>
+          </div>
+          <p id="cat-aviso-premium" class="cat-aviso-premium" style="display:none">🔒 Período de 1 mês é exclusivo Premium.</p>
+          <p id="cat-carta-aviso" class="cat-carta-aviso" style="display:none"></p>
+
+          <div id="cat-totais" class="cat-totais"></div>
+          <div id="cat-grade" class="cat-grade"></div>
+          <div id="cat-estado" class="cat-estado"></div>
+        </div>
+
       </div>
 
     </div>
@@ -1549,7 +1665,8 @@
   <script src="js/historico.js?v=10"></script>
   <script src="js/gerenciamento.js?v=11"></script>
   <script src="js/build.js?v=10"></script>
-  <script src="js/strategy-builder.js?v=19"></script>
+  <script src="js/strategy-builder.js?v=20"></script>
+  <script src="js/catalogador.js?v=8"></script>
   <script src="js/i18n.js?v=3"></script>
   <script>
     // Esta página não carrega js/app.js (ela já define seu próprio showToast,
@@ -1568,6 +1685,13 @@
       links.addEventListener('click', (e) => {
         if (e.target.closest('a')) links.classList.remove('mobile-open');
       });
+    });
+
+    // Link antigo (catalogador.html?aba=catalogador, ou favorito salvo) abre
+    // direto na aba Catalogador em vez de cair na fase inicial de Criar.
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(location.search);
+      if (params.get('aba') === 'catalogador') trocarGrupoLab('catalogador');
     });
 
     // Se a sincronização com o servidor trouxer estratégias novas (criadas em
