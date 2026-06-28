@@ -81,6 +81,7 @@ function renderGradeHoras(horas) {
 
 async function carregarCatalogador() {
   const par = document.getElementById('cat-par')?.value;
+  const tf = document.getElementById('cat-tf')?.value || 'M1';
   const periodo = document.getElementById('cat-periodo')?.value || 'dia';
   const data = document.getElementById('cat-data')?.value || '';
   const estado = document.getElementById('cat-estado');
@@ -99,7 +100,7 @@ async function carregarCatalogador() {
   const plano = (typeof ehPremium === 'function' && ehPremium()) ? 'premium' : 'free';
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Sao_Paulo';
 
-  const params = new URLSearchParams({ par, tf: 'M1', periodo, plano, tz });
+  const params = new URLSearchParams({ par, tf, periodo, plano, tz });
   if (data) params.set('data', data);
 
   try {
