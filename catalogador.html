@@ -53,6 +53,16 @@
     .cat-vela.verde    { background: linear-gradient(135deg, #1ee08a, #14a866); box-shadow: 0 0 10px rgba(30,224,138,.25); }
     .cat-vela.vermelha { background: linear-gradient(135deg, #ff4d6d, #c81e3e); box-shadow: 0 0 10px rgba(255,77,109,.25); }
     .cat-vela.doji     { background: var(--bg-hover); color: var(--text-secondary); box-shadow: none; }
+    /* Overlay "testar carta": vela onde a carta NÃO entrou — quase invisível
+       de propósito, pra só os pontos de entrada (win/loss/empate) chamarem
+       atenção na grade. */
+    .cat-vela.sem-entrada { background: var(--bg-hover); opacity: .15; box-shadow: none; color: transparent; }
+    .cat-grade.cat-grade-densa .cat-vela.sem-entrada { opacity: .1; }
+
+    .cat-carta-aviso {
+      text-align: center; color: var(--text-muted); font-size: .78rem;
+      margin: -4px 0 14px;
+    }
 
     /* Período com muitas velas (semana): célula menor que a do dia, mas o
        horário continua escrito DENTRO dela — sem isso vira só pontinho
@@ -130,7 +140,7 @@
     <div class="container">
       <div class="lab-header" style="margin-top: 40px; margin-bottom: 28px;">
         <h1 class="page-title">🔥 Catalogador</h1>
-        <p class="page-subtitle">Escolha um par e um período (dia, semana ou mês). Cada vela real do período aparece colorida — verde, vermelha ou cinza (doji/sem definição).</p>
+        <p class="page-subtitle">Escolha um par e um período (dia, semana ou mês). Cada vela real do período aparece colorida — verde, vermelha ou cinza (doji/sem definição). Pra ver onde uma carta sua teria ganhado, perdido ou empatado, escolha-a no seletor "carta".</p>
       </div>
 
       <div class="cat-controles">
@@ -146,9 +156,13 @@
           <option value="mes">1 mês 🔒</option>
         </select>
         <input type="date" id="cat-data">
+        <select id="cat-carta" onchange="aoTrocarCartaCatalogador()">
+          <option value="">— Cor da vela (sem carta) —</option>
+        </select>
         <button class="btn btn-sm btn-accent" onclick="carregarCatalogador()">🔄 Atualizar</button>
       </div>
       <p id="cat-aviso-premium" class="cat-aviso-premium" style="display:none">🔒 Período de 1 mês é exclusivo Premium.</p>
+      <p id="cat-carta-aviso" class="cat-carta-aviso" style="display:none"></p>
 
       <div id="cat-totais" class="cat-totais"></div>
       <div id="cat-grade" class="cat-grade"></div>
@@ -158,7 +172,8 @@
 
   <script src="js/app.js?v=11"></script>
   <script src="js/pares.js?v=10"></script>
-  <script src="js/catalogador.js?v=4"></script>
+  <script src="js/inventario.js?v=1"></script>
+  <script src="js/catalogador.js?v=5"></script>
   <script src="js/i18n.js?v=3"></script>
 </body>
 </html>
