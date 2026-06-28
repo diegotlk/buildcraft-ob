@@ -602,6 +602,36 @@
     /* Catalogador tem grade própria, mais larga que o resto do wizard —
        não faz sentido espremer no max-width:900px do strategy-builder. */
     #phase-catalogador { max-width: 1100px; margin: 0 auto 24px; }
+
+    /* ── Aba Refinar (assertividade por dia da semana / horário) ── */
+    #phase-refinar { max-width: 900px; margin: 0 auto 24px; }
+    .refinar-media {
+      text-align: center; color: var(--text-secondary); font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .refinar-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 64px minmax(110px, auto);
+      align-items: center; gap: 12px;
+      padding: 10px 14px; border-radius: var(--radius-md, 8px);
+      background: var(--bg-card); border: 1px solid var(--bg-hover);
+      margin-bottom: 6px;
+    }
+    .refinar-row-label { font-weight: 700; font-size: 13px; }
+    .refinar-row-bar {
+      display: block; height: 8px; border-radius: 999px;
+      background: var(--bg-hover); overflow: hidden;
+    }
+    .refinar-row-fill { display: block; height: 100%; border-radius: 999px; }
+    .refinar-row-acima .refinar-row-fill { background: linear-gradient(90deg, #1ee08a, #14a866); }
+    .refinar-row-abaixo .refinar-row-fill { background: linear-gradient(90deg, #ff4d6d, #c81e3e); }
+    .refinar-row-neutro .refinar-row-fill { background: var(--text-muted); }
+    .refinar-row-acima .refinar-row-wr { color: #1ee08a; }
+    .refinar-row-abaixo .refinar-row-wr { color: #ff4d6d; }
+    .refinar-row-wr { font-weight: 800; text-align: right; font-size: 14px; }
+    .refinar-row-n { font-size: 11.5px; color: var(--text-muted); text-align: right; }
+    .refinar-row-vazia { opacity: .5; }
+    .refinar-row-vazio { grid-column: 2 / -1; font-size: 12px; color: var(--text-muted); text-align: center; }
   </style>
 </head>
 <body>
@@ -654,6 +684,7 @@
           <button class="lab-tab active" id="lab-grupo-criar" onclick="trocarGrupoLab('criar')" data-i18n="lab.grupo.criar">🎨 Criar</button>
           <button class="lab-tab" id="lab-grupo-testar" onclick="trocarGrupoLab('testar')" data-i18n="lab.grupo.testar">♻️ Testar</button>
           <button class="lab-tab" id="lab-grupo-catalogador" onclick="trocarGrupoLab('catalogador')" data-i18n="lab.grupo.catalogador">🔥 Catalogar</button>
+          <button class="lab-tab" id="lab-grupo-refinar" onclick="trocarGrupoLab('refinar')" data-i18n="lab.grupo.refinar">🎯 Refinar</button>
         </div>
 
         <!-- ── SUB-ABAS DO GRUPO "CRIAR" ──
@@ -1651,6 +1682,54 @@
           <div id="cat-estado" class="cat-estado"></div>
         </div>
 
+        <!-- ── GRUPO: REFINAR (assertividade por dia da semana / horário) ── -->
+        <div class="phase-section" id="phase-refinar">
+          <div class="step-counter">🎯 Refinar</div>
+          <h2 class="card-box-title">Quando sua estratégia funciona melhor</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 8px;">
+            Escolha uma estratégia salva, rode contra um período e descubra em quais dias da semana
+            e horários ela é mais assertiva que a média dela mesma.
+          </p>
+
+          <div class="ger-section-label" style="margin-top:24px;">1. Escolha a estratégia</div>
+          <div id="refinar-estrategias" class="build-pick-grid"></div>
+
+          <div class="ger-section-label">2. Par, timeframe e período</div>
+          <div class="cat-controles">
+            <select id="refinar-par"></select>
+            <select id="refinar-tf">
+              <option value="M1" selected>M1 (1 min)</option>
+              <option value="M5">M5 (5 min)</option>
+              <option value="M15">M15 (15 min)</option>
+            </select>
+            <select id="refinar-periodo" onchange="aoTrocarPeriodoRefinar()">
+              <option value="dia">1 dia</option>
+              <option value="semana" selected>1 semana</option>
+              <option value="mes">1 mês 🔒</option>
+            </select>
+            <input type="date" id="refinar-data">
+            <button class="btn btn-sm btn-accent" id="refinar-btn-rodar" onclick="rodarRefinar()" disabled>🎯 Rodar Análise</button>
+          </div>
+          <p id="refinar-aviso-premium" class="cat-aviso-premium" style="display:none">🔒 Período de 1 mês é exclusivo Premium.</p>
+          <div id="refinar-estado" class="cat-estado"></div>
+
+          <div id="refinar-resultado" style="display:none; margin-top:24px;">
+            <div class="lab-tabs" id="refinar-visao-tabs" style="margin-bottom:16px;">
+              <button class="lab-tab active" onclick="setRefinarVisao('dia', this)">📅 Por Dia da Semana</button>
+              <button class="lab-tab" onclick="setRefinarVisao('hora', this)">🕐 Por Horário</button>
+            </div>
+
+            <div id="refinar-filtro-dias" style="display:none; margin-bottom:18px;">
+              <p style="text-align:center; color:var(--text-secondary); font-size:13px; margin-bottom:8px;">
+                Quer tirar algum dia da semana dessa visão por horário? Desmarque abaixo.
+              </p>
+              <div class="dias-semana-grid" id="refinar-dias-chips" style="max-width:460px; margin:0 auto;"></div>
+            </div>
+
+            <div id="refinar-lista"></div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -1665,9 +1744,10 @@
   <script src="js/historico.js?v=10"></script>
   <script src="js/gerenciamento.js?v=11"></script>
   <script src="js/build.js?v=10"></script>
-  <script src="js/strategy-builder.js?v=20"></script>
-  <script src="js/catalogador.js?v=10"></script>
-  <script src="js/i18n.js?v=3"></script>
+  <script src="js/strategy-builder.js?v=21"></script>
+  <script src="js/catalogador.js?v=11"></script>
+  <script src="js/refinar.js?v=1"></script>
+  <script src="js/i18n.js?v=4"></script>
   <script>
     // Esta página não carrega js/app.js (ela já define seu próprio showToast,
     // entre outras coisas) — só o pedacinho do menu mobile (☰) é replicado aqui.
