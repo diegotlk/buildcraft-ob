@@ -10,9 +10,13 @@
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 
   <link rel="stylesheet" href="css/global.css?v=5">
-  <link rel="stylesheet" href="css/cards.css?v=6">
+  <link rel="stylesheet" href="css/cards.css?v=7">
   <link rel="stylesheet" href="css/components.css?v=5">
   <link rel="stylesheet" href="css/pages.css?v=6">
+
+  <style>
+    .rk-filtros { display: flex; gap: 8px; flex-wrap: wrap; }
+  </style>
 </head>
 <body>
 
@@ -70,6 +74,7 @@
         <div class="lab-tabs">
           <button class="lab-tab active" id="inv-tab-cartas" onclick="trocarAbaInventario('cartas')" data-i18n="inv.tab.cartas">🃏 Minhas Cartas</button>
           <button class="lab-tab" id="inv-tab-historicos" onclick="trocarAbaInventario('historicos')" data-i18n="inv.tab.historicos">📊 Históricos</button>
+          <button class="lab-tab" id="inv-tab-arquivar" onclick="trocarAbaInventario('arquivar')" data-i18n="inv.tab.arquivar">📦 Arquivar</button>
           <button class="lab-tab" id="inv-tab-lixeira" onclick="trocarAbaInventario('lixeira')" data-i18n="inv.tab.lixeira">🗑️ Lixeira</button>
         </div>
 
@@ -79,8 +84,21 @@
             <button class="lab-tab active" id="inv-subtab-estrategias" onclick="trocarSubAbaCartas('estrategias')" data-i18n="inv.subtab.estrategias">📋 Estratégias</button>
             <button class="lab-tab" id="inv-subtab-gerenciamentos" onclick="trocarSubAbaCartas('gerenciamentos')" data-i18n="inv.subtab.gerenciamentos">♻️ Gerenciamentos</button>
           </div>
+          <div class="rk-filtros" style="margin-bottom:16px;">
+            <button class="btn btn-sm btn-outline inv-filtro-raridade active" data-raridade="" onclick="trocarFiltroRaridade(this, '')" data-i18n="inv.raridade.todas">Todas</button>
+            <button class="btn btn-sm btn-outline inv-filtro-raridade" data-raridade="legendary" onclick="trocarFiltroRaridade(this, 'legendary')" data-i18n="inv.raridade.lendaria">Lendária</button>
+            <button class="btn btn-sm btn-outline inv-filtro-raridade" data-raridade="epic" onclick="trocarFiltroRaridade(this, 'epic')" data-i18n="inv.raridade.epica">Épica</button>
+            <button class="btn btn-sm btn-outline inv-filtro-raridade" data-raridade="rare" onclick="trocarFiltroRaridade(this, 'rare')" data-i18n="inv.raridade.rara">Rara</button>
+            <button class="btn btn-sm btn-outline inv-filtro-raridade" data-raridade="common" onclick="trocarFiltroRaridade(this, 'common')" data-i18n="inv.raridade.comum">Comum</button>
+          </div>
           <p class="carta-hint" style="margin-bottom:16px;" data-i18n="inv.dica.virar">Clique em uma carta para virar e ver os detalhes.</p>
           <div id="inv-cartas" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:28px;"></div>
+        </div>
+
+        <!-- Arquivar (permanente — nunca expira, só "tira da vista") -->
+        <div id="inv-arquivar-section" style="display:none;">
+          <p class="carta-hint" style="margin-bottom:16px;" data-i18n="inv.dica.arquivar">Cartas arquivadas ficam guardadas pra sempre, fora da lista principal. Desarquive quando quiser ver de novo.</p>
+          <div id="inv-arquivar" style="display:flex; flex-direction:column; gap:12px;"></div>
         </div>
 
         <!-- Históricos (sequências de W/L geradas ao testar estratégias — usadas pra testar Gerenciamentos) -->
@@ -104,12 +122,13 @@
 
   <script src="js/app.js?v=11"></script>
   <script src="js/cartas-xadrez.js?v=1"></script>
-  <script src="js/inventario.js?v=15"></script>
+  <script src="js/inventario.js?v=16"></script>
   <script src="js/historico.js?v=10"></script>
   <script src="js/i18n.js?v=4"></script>
   <script>
     let abaInventarioAtual = 'cartas';
     let subAbaCartasAtual = 'estrategias';
+    let raridadeFiltroAtual = '';
 
     function trocarSubAbaCartas(sub) {
       subAbaCartasAtual = sub;
@@ -118,14 +137,23 @@
       renderInventario();
     }
 
+    function trocarFiltroRaridade(btn, raridade) {
+      raridadeFiltroAtual = raridade;
+      document.querySelectorAll('.inv-filtro-raridade').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderInventario();
+    }
+
     function trocarAbaInventario(aba) {
       abaInventarioAtual = aba;
       document.getElementById('inv-tab-cartas').classList.toggle('active', aba === 'cartas');
       document.getElementById('inv-tab-historicos').classList.toggle('active', aba === 'historicos');
+      document.getElementById('inv-tab-arquivar').classList.toggle('active', aba === 'arquivar');
       document.getElementById('inv-tab-lixeira').classList.toggle('active', aba === 'lixeira');
 
       document.getElementById('inv-cartas-section').style.display = aba === 'cartas' ? 'block' : 'none';
       document.getElementById('inv-historicos-section').style.display = aba === 'historicos' ? 'block' : 'none';
+      document.getElementById('inv-arquivar-section').style.display = aba === 'arquivar' ? 'block' : 'none';
       document.getElementById('inv-lixeira-section').style.display = aba === 'lixeira' ? 'block' : 'none';
     }
 
@@ -154,6 +182,35 @@
       restaurarDaLixeira(id);
       showToast(t('inv.toast.restaurado.titulo'), `"${item?.nome || ''}" ${t('inv.toast.restaurado.desc')}`, 'default');
       renderInventario();
+    }
+
+    function arquivarDoInventario(id) {
+      const item = getInventario().find(e => e.id === id);
+      arquivarItem(id);
+      showToast(t('inv.toast.arquivado.titulo'), `"${item?.nome || ''}" ${t('inv.toast.arquivado.desc')}`, 'default');
+      renderInventario();
+    }
+
+    function desarquivarItemInventario(id) {
+      const item = getInventario().find(e => e.id === id);
+      desarquivarItem(id);
+      showToast(t('inv.toast.desarquivado.titulo'), `"${item?.nome || ''}" ${t('inv.toast.desarquivado.desc')}`, 'default');
+      renderInventario();
+    }
+
+    function renderItemArquivado(item) {
+      const tag = item.carta ? `🃏 ${t('inv.arquivado.carta')} #${String(item.carta.numero).padStart(3, '0')}` : `📋 ${t('inv.lixeira.estrategiasalva')}`;
+      return `
+        <div class="card-box" style="padding:14px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div style="font-weight:700">${item.nome}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px">${tag}</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-accent" onclick="desarquivarItemInventario('${item.id}')">♻️ ${t('inv.desarquivar')}</button>
+          </div>
+        </div>
+      `;
     }
 
     function excluirPermanenteInventario(id) {
@@ -200,15 +257,18 @@
       });
       if (precisaMigrar) salvarInventario(listaCompleta);
 
-      const lista = getInventario().filter(e => !e.deletadoEm);
+      // Lista "ativa" exclui tanto lixeira quanto arquivadas — cada uma tem
+      // sua própria aba.
+      const lista = getInventario().filter(e => !e.deletadoEm && !e.arquivadoEm);
       const lixeira = getLixeira();
+      const arquivados = getArquivados();
       const cartas = lista.filter(e => e.carta);
       const historicos = getHistoricos();
 
       const emptyState = document.getElementById('inv-empty');
       const conteudo = document.getElementById('inv-conteudo');
 
-      if (lista.length === 0 && lixeira.length === 0 && historicos.length === 0) {
+      if (lista.length === 0 && lixeira.length === 0 && arquivados.length === 0 && historicos.length === 0) {
         emptyState.style.display = 'block';
         conteudo.style.display = 'none';
         return;
@@ -219,6 +279,7 @@
 
       const contador = (n) => `<span style="color:var(--accent-hover);font-weight:800">(${n})</span>`;
       document.getElementById('inv-tab-cartas').innerHTML = `${t('inv.tab.cartas')} ${contador(cartas.length)}`;
+      document.getElementById('inv-tab-arquivar').innerHTML = `${t('inv.tab.arquivar')} ${contador(arquivados.length)}`;
       document.getElementById('inv-tab-lixeira').innerHTML = `${t('inv.tab.lixeira')} ${contador(lixeira.length)}`;
 
       // Sub-abas dentro de "Minhas Cartas": gerenciamento é o próprio modo;
@@ -228,12 +289,19 @@
       document.getElementById('inv-subtab-estrategias').innerHTML = `${t('inv.subtab.estrategias')} ${contador(cartasEstrategia.length)}`;
       document.getElementById('inv-subtab-gerenciamentos').innerHTML = `${t('inv.subtab.gerenciamentos')} ${contador(cartasGerenciamento.length)}`;
 
-      const cartasFiltradas = subAbaCartasAtual === 'gerenciamentos' ? cartasGerenciamento : cartasEstrategia;
+      let cartasFiltradas = subAbaCartasAtual === 'gerenciamentos' ? cartasGerenciamento : cartasEstrategia;
+      if (raridadeFiltroAtual) {
+        cartasFiltradas = cartasFiltradas.filter(e => e.teste && e.teste.rarity === raridadeFiltroAtual);
+      }
       document.getElementById('inv-cartas').innerHTML = cartasFiltradas.length
         ? cartasFiltradas.slice().sort((a, b) => a.carta.numero - b.carta.numero).map(renderCartaFlip).join('')
         : vazio(subAbaCartasAtual === 'gerenciamentos'
             ? t('inv.vazio.gerenciamentos')
             : t('inv.vazio.estrategias'));
+
+      document.getElementById('inv-arquivar').innerHTML = arquivados.length
+        ? arquivados.map(renderItemArquivado).join('')
+        : vazio(t('inv.vazio.arquivar'));
 
       document.getElementById('inv-lixeira').innerHTML = lixeira.length
         ? lixeira.map(renderItemLixeira).join('')

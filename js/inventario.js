@@ -177,6 +177,32 @@ function removerVestigios(ids) {
   } catch (e) { /* histórico inválido/ausente — nada a limpar */ }
 }
 
+// ── ARQUIVAR ──
+// Diferente da lixeira: arquivar é permanente (nunca expira, nunca é
+// apagado automaticamente) — é só "tirar da vista" sem perder a carta.
+// Usa um campo próprio (arquivadoEm) pra não se confundir com deletadoEm.
+function arquivarItem(id) {
+  const lista = getInventario();
+  const item = lista.find(e => e.id === id);
+  if (!item) return;
+  item.arquivadoEm = new Date().toISOString();
+  salvarInventario(lista);
+}
+
+function desarquivarItem(id) {
+  const lista = getInventario();
+  const item = lista.find(e => e.id === id);
+  if (!item) return;
+  delete item.arquivadoEm;
+  salvarInventario(lista);
+}
+
+function getArquivados() {
+  return getInventario()
+    .filter(e => e.arquivadoEm && !e.deletadoEm)
+    .sort((a, b) => new Date(b.arquivadoEm) - new Date(a.arquivadoEm));
+}
+
 function getLixeira() {
   return getInventario()
     .filter(e => e.deletadoEm)
@@ -695,6 +721,7 @@ async function publicarNoRanking(id) {
 function renderCartaFlip(item) {
   return `
     <div class="carta-flip-wrap" data-carta-id="${item.id}" onclick="this.classList.toggle('is-flipped')">
+      <button class="carta-arquivar-rapido" title="Arquivar (guarda pra sempre, some da lista)" onclick="event.stopPropagation(); arquivarDoInventario('${item.id}')">📦</button>
       <button class="carta-excluir-rapido" title="Mover para a lixeira" onclick="event.stopPropagation(); excluirDoInventario('${item.id}')">🗑️</button>
       <div class="carta-flip-inner">
         ${renderCartaFront(item)}
