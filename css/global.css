@@ -234,6 +234,18 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
   box-shadow:0 0 20px rgba(0,234,255,.4),inset 0 0 12px rgba(0,234,255,.1);
 }
 
+/* Estado "selecionado" pra botões de filtro tipo abinha (ex.: raridade no
+   Inventário, raridade no Ranking) — azul-oceano preenchido + ✓ antes do texto. */
+.btn-outline.active{
+  border-color:var(--neon-cyan);
+  color:#04121a;
+  background:var(--neon-cyan);
+  box-shadow:0 0 20px rgba(0,234,255,.55),inset 0 0 12px rgba(0,234,255,.2);
+}
+.btn-outline.active::before{
+  content:'✓ ';
+}
+
 .btn-ghost{
   color:var(--text-secondary);
   padding:8px 16px;
