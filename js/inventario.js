@@ -281,6 +281,27 @@ function proximoNumeroDescoberta() {
   return proximo;
 }
 
+// Chance de a carta nascer "shiny" (holográfica) — 1%, sorteado uma única
+// vez no momento da descoberta. Puro flex: NÃO muda winrate/nota/raridade
+// nenhuma, é só um verniz visual diferente na mesma carta.
+const CARTA_SHINY_CHANCE = 0.01;
+
+function criarMetaCarta() {
+  return {
+    numero: proximoNumeroDescoberta(),
+    transformadaEm: new Date().toISOString(),
+    shiny: Math.random() < CARTA_SHINY_CHANCE,
+  };
+}
+
+// Toast extra de celebração quando a carta acabou de nascer shiny — chamar
+// depois do toast normal de "Carta criada!", nos 3 lugares que salvam carta
+// (build.js, gerenciamento.js, strategy-builder.js).
+function avisarShinySeAplicavel(item) {
+  if (!item?.carta?.shiny || typeof showToast !== 'function') return;
+  showToast('✨ SHINY!!', `"${item.nome}" nasceu numa versão holográfica raríssima (1 em 100). Mesmos stats, brilho único — flex puro.`, 'success');
+}
+
 function transformarEmCarta(id) {
   const lista = getInventario();
   const item = lista.find(e => e.id === id);
@@ -581,9 +602,11 @@ function renderCartaFront(item) {
   }
   const tipoTag = isBuild ? 'BUILD' : (isGerenciamento ? 'GERENCIAMENTO' : 'ESTRATÉGIA');
   const tipoTagClasse = isBuild ? 'card-type-tag-build' : (isGerenciamento ? 'card-type-tag-gerenciamento' : 'card-type-tag-estrategia');
+  const isShiny = !!item.carta?.shiny;
 
   return `
-    <div class="carta-face carta-face-front rarity-${t.rarity}">
+    <div class="carta-face carta-face-front rarity-${t.rarity}${isShiny ? ' carta-shiny' : ''}">
+      ${isShiny ? '<div class="carta-shiny-badge">✨ SHINY</div>' : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px 8px">
         <span class="card-type-tag ${tipoTagClasse}">${tipoTag}</span>
         <span class="card-rarity-badge ${t.rarity}">${RARITY_LABEL[t.rarity] || 'Comum'}</span>
@@ -655,8 +678,10 @@ function renderCartaBack(item) {
   `;
   }
 
+  const isShinyBack = !!item.carta?.shiny;
   return `
-    <div class="carta-face carta-face-back rarity-${t.rarity}">
+    <div class="carta-face carta-face-back rarity-${t.rarity}${isShinyBack ? ' carta-shiny' : ''}">
+      ${isShinyBack ? '<div class="carta-shiny-badge">✨ SHINY</div>' : ''}
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="card-title" style="font-size:1.05rem">${item.nome}</div>
         <span class="card-rarity-badge ${t.rarity}">${RARITY_LABEL[t.rarity] || 'Comum'}</span>

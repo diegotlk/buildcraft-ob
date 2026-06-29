@@ -1551,7 +1551,7 @@ function confirmSaveStrategy() {
       entradasPorDia: dias ? Math.max(1, Math.round(r.entries / dias)) : null,
       velasUsadas: r.velas_usadas,
     },
-    carta: { numero: proximoNumeroDescoberta(), transformadaEm: new Date().toISOString() },
+    carta: criarMetaCarta(),
   };
 
   lista.push(item);
@@ -1601,6 +1601,7 @@ function confirmSaveStrategy() {
   } else {
     showToast('🃏 Carta criada!', `"${nome}" agora é a carta #${String(item.carta.numero).padStart(3, '0')} do seu inventário.`, 'discovery');
   }
+  avisarShinySeAplicavel(item);
 }
 
 // ════════════════════════════════════════════════

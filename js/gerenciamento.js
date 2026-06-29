@@ -665,7 +665,7 @@ function salvarTesteGerenciamentoNoInventario() {
       payout: r.payout,
       zerou: r.zerou,
     },
-    carta: { numero: proximoNumeroDescoberta(), transformadaEm: new Date().toISOString() },
+    carta: criarMetaCarta(),
   };
 
   const lista = getInventario();
@@ -679,6 +679,7 @@ function salvarTesteGerenciamentoNoInventario() {
   });
   fecharTesteGerenciamento();
   showToast('🃏 Carta criada!', `"${item.nome}" agora é a carta #${String(item.carta.numero).padStart(3, '0')} do seu inventário.`, 'discovery');
+  avisarShinySeAplicavel(item);
 }
 
 // ── RENDERIZAÇÃO ──

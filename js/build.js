@@ -282,11 +282,12 @@ function salvarBuildNoInventario() {
       bancaDisponivel: r.bancaDisponivel, payout: r.payout, zerou: r.zerou,
       pair: meta.pair, timeframe: meta.timeframe, periodoDe: meta.periodoDe, periodoAte: meta.periodoAte,
     },
-    carta: { numero: proximoNumeroDescoberta(), transformadaEm: new Date().toISOString() },
+    carta: criarMetaCarta(),
   };
 
   const lista = getInventario();
   lista.push(item);
   if (!salvarInventario(lista)) return;
   showToast('🃏 Carta criada!', `"${item.nome}" agora é a carta #${String(item.carta.numero).padStart(3, '0')} do seu inventário.`, 'discovery');
+  avisarShinySeAplicavel(item);
 }
