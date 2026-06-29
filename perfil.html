@@ -80,6 +80,16 @@
         </div>
       </div>
 
+      <!-- Título (emerge do seu comportamento real ao testar estratégias) -->
+      <div class="card-box" style="margin-bottom:24px">
+        <h3 style="margin-bottom:6px">🎭 Seu Título</h3>
+        <p style="color:var(--text-muted);font-size:.82rem;margin:0 0 16px">
+          Apelidos que nascem do seu jeito de caçar — sem sorteio, sem escolher em menu.
+          Toda estratégia que você salva conta pra desbloquear um novo.
+        </p>
+        <div id="secao-titulos"></div>
+      </div>
+
       <!-- Som do site (efeitos de clique/revelação + música ambiente da home) -->
       <div class="card-box" style="margin-bottom:24px">
         <h3 style="margin-bottom:6px">🔊 Som do site</h3>
@@ -193,6 +203,8 @@
   </main>
 
   <script src="js/app.js?v=11"></script>
+  <script src="js/inventario.js?v=1"></script>
+  <script src="js/titulos.js?v=1"></script>
   <script src="js/i18n.js?v=4"></script>
   <script>
     // Fusos comuns (mesma lista usada antes no widget global) + o detectado.
@@ -233,14 +245,19 @@
       }
 
       atualizarSecaoPlano();
+      montarESalvarSecaoTitulos();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('.som-toggle-check').checked = somAtivo();
       montarSelectFuso();
+      montarESalvarSecaoTitulos();
       // renderNavbarAuth (chamado por auth.js) busca /api/auth/me antes de
       // termos a sessão completa — espera ela terminar pra preencher os campos.
       renderNavbarAuth().then(preencherDadosPerfil).catch(preencherDadosPerfil);
+      // Inventário pode chegar do servidor depois do 1º render (outro
+      // aparelho) — re-renderiza os títulos quando a sincronização terminar.
+      document.addEventListener('inventarioSincronizado', montarESalvarSecaoTitulos);
       if (location.hash === '#premium') {
         document.getElementById('premium').scrollIntoView({ behavior: 'smooth' });
       }

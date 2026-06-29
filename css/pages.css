@@ -819,6 +819,89 @@
   color: var(--text-muted);
 }
 
+/* ---------- Títulos (emergem do comportamento real — IDEIAS item 10) ---------- */
+.titulo-preview-linha {
+  font-size: .85rem;
+  color: var(--text-secondary);
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.titulo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.titulo-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,.02);
+}
+
+.titulo-bloqueado {
+  opacity: .55;
+}
+
+.titulo-desbloqueado {
+  cursor: pointer;
+  transition: transform .25s var(--ease-out), border-color .25s, box-shadow .25s;
+  border-color: color-mix(in srgb, var(--titulo-cor) 45%, var(--border));
+}
+.titulo-desbloqueado:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--titulo-cor) 30%, transparent);
+}
+
+.titulo-ativo {
+  border-color: var(--titulo-cor);
+  box-shadow: 0 0 0 1px var(--titulo-cor), 0 6px 24px color-mix(in srgb, var(--titulo-cor) 35%, transparent);
+}
+
+.titulo-emblema-wrap {
+  margin-bottom: 8px;
+}
+
+.titulo-card-nome {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: .82rem;
+  margin-bottom: 4px;
+}
+
+.titulo-card-criterio {
+  font-size: .68rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.titulo-card-badge-ativo {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: .6rem;
+  font-weight: 800;
+  color: var(--bg-deepest);
+  background: var(--titulo-cor);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+}
+
+.titulo-config {
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
 /* ==================== PLANS ==================== */
 
 .plans-hero {
