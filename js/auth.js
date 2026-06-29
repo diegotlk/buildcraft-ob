@@ -20,12 +20,13 @@ function getSessao() {
   }
 }
 
-function salvarSessao(token, email, plano, lembrar) {
-  // Se plano não vier, preserva o que já estava salvo (ex.: ao trocar o e-mail
-  // não queremos zerar o plano da conta).
+function salvarSessao(token, email, plano, lembrar, nome) {
+  // Se plano/nome não vierem, preserva o que já estava salvo (ex.: ao trocar
+  // o e-mail não queremos zerar o plano ou o nome da conta).
   const atual = getSessao();
   const planoFinal = plano !== undefined ? plano : (atual?.plano || 'free');
-  const dados = JSON.stringify({ token, email, plano: planoFinal });
+  const nomeFinal = nome !== undefined ? nome : (atual?.nome || '');
+  const dados = JSON.stringify({ token, email, plano: planoFinal, nome: nomeFinal });
 
   // Sem "lembrar" explícito (chamadas internas, ex.: refresh do plano), mantém
   // o mesmo tipo de armazenamento que já estava em uso — não promove nem
@@ -64,8 +65,8 @@ function avisarConta(titulo, msg) {
 }
 
 // Inicia a compra do Premium. Precisa estar logado (a compra fica amarrada ao
-// e-mail da conta). Abre um modal pedindo Nome + CPF/CNPJ — o Asaas exige esses
-// dados pra emitir a cobrança — e depois leva pra tela de pagamento do Asaas.
+// e-mail da conta). O formulário de Nome + CPF/CNPJ — o Asaas exige esses
+// dados pra emitir a cobrança — vive na seção "Premium" da página de perfil.
 function comprarPremium() {
   if (ehPremium()) {
     avisarConta('⭐ Você já é Premium', 'Sua conta já tem acesso a tudo. Aproveite!');
@@ -75,31 +76,7 @@ function comprarPremium() {
     window.location.href = 'login.html?redirect=planos.html';
     return;
   }
-  abrirModalPremium();
-}
-
-function abrirModalPremium() {
-  // O modal genérico de conta só existe quando a navbar logada já renderizou.
-  if (typeof abrirModalConta !== 'function') {
-    avisarConta('💎 Premium', 'Recarregue a página e tente novamente.');
-    return;
-  }
-  abrirModalConta('💎 Assinar Premium', `
-    ${erroContaHtml()}
-    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px">
-      Premium por R$ 9,90/mês. Precisamos destes dados pra emitir a cobrança.
-      Você escolhe a forma de pagamento (Pix ou cartão) na próxima tela.
-    </p>
-    <div class="form-group">
-      <label class="form-label">Nome completo</label>
-      <input type="text" id="pr-nome" class="form-input" autocomplete="name">
-    </div>
-    <div class="form-group">
-      <label class="form-label">CPF ou CNPJ</label>
-      <input type="text" id="pr-cpf" class="form-input" inputmode="numeric" placeholder="Somente números">
-    </div>
-    <button class="btn btn-primary" style="width:100%" id="pr-btn" onclick="enviarAssinatura()">Ir para o pagamento</button>
-  `);
+  window.location.href = 'perfil.html#premium';
 }
 
 async function enviarAssinatura() {
@@ -193,120 +170,58 @@ function aplicarChecklistSenha(senha, idPara) {
 }
 
 /* ============================================================
-   Menu da conta (dropdown do avatar): mudar senha, e-mail e foto.
-   Montado uma vez por página, na primeira vez que o usuário aparece
-   logado (renderNavbarAuth chama montarMenuConta).
+   Conta: mudar nome, senha, e-mail, foto — agora tudo em perfil.html
+   (não mais num dropdown/modal). Estas funções são chamadas pelos
+   formulários inline daquela página.
    ============================================================ */
 let fotoSelecionadaBase64 = null;
 
-function montarMenuConta(avatar) {
-  if (document.getElementById('conta-menu')) return; // já montado nesta página
-
-  const wrap = document.createElement('div');
-  wrap.className = 'account-menu-wrap';
-  avatar.replaceWith(wrap);
-  wrap.appendChild(avatar);
-
-  const menu = document.createElement('div');
-  menu.className = 'account-menu';
-  menu.id = 'conta-menu';
-  menu.innerHTML = `
-    <div class="account-menu-email" id="conta-menu-email"></div>
-    <div class="account-menu-plano" id="conta-menu-plano"></div>
-    <div class="account-menu-item destaque" id="conta-menu-comprar" onclick="comprarPremium()">💎 Comprar Premium</div>
-    <div class="account-menu-item" onclick="abrirModalSenha()">🔒 Mudar senha</div>
-    <div class="account-menu-item" onclick="abrirModalEmail()">📧 Mudar e-mail</div>
-    <div class="account-menu-item" onclick="abrirModalFoto()">🖼️ Mudar foto de perfil</div>
-    <div class="account-menu-item" id="conta-menu-cancelar" onclick="abrirModalCancelar()">🚫 Cancelar assinatura</div>
-    <div class="account-menu-item" onclick="abrirModalExcluir()">🗑️ Excluir minha conta</div>
-  `;
-  wrap.appendChild(menu);
-
-  avatar.removeAttribute('href');
-  avatar.style.cursor = 'pointer';
-  avatar.onclick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    menu.classList.toggle('open');
-  };
-
-  document.addEventListener('click', (e) => {
-    if (!wrap.contains(e.target)) menu.classList.remove('open');
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { fecharModalConta(); menu.classList.remove('open'); }
-  });
-
-  // Modal genérico: as 3 opções acima só trocam o título e o corpo dele.
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.id = 'conta-modal-overlay';
-  modal.innerHTML = `
-    <div class="modal-content" style="max-width:420px">
-      <div class="modal-header">
-        <span class="modal-title" id="conta-modal-title">Conta</span>
-        <button class="modal-close" onclick="fecharModalConta()">×</button>
-      </div>
-      <div id="conta-modal-body"></div>
-    </div>
-  `;
-  modal.addEventListener('click', (e) => { if (e.target === modal) fecharModalConta(); });
-  document.body.appendChild(modal);
+function erroContaHtml(elId) {
+  return `<div class="auth-error" id="${elId || 'conta-erro'}"></div>`;
 }
 
-function abrirModalConta(titulo, corpoHtml) {
-  document.getElementById('conta-modal-title').textContent = titulo;
-  document.getElementById('conta-modal-body').innerHTML = corpoHtml;
-  document.getElementById('conta-modal-overlay').classList.add('open');
-  document.getElementById('conta-menu')?.classList.remove('open');
-}
-
-function fecharModalConta() {
-  document.getElementById('conta-modal-overlay')?.classList.remove('open');
-  fotoSelecionadaBase64 = null;
-}
-
-function erroContaHtml() {
-  return '<div class="auth-error" id="conta-erro"></div>';
-}
-
-function mostrarErroConta(msg) {
-  const el = document.getElementById('conta-erro');
+function mostrarErroConta(msg, elId) {
+  const el = document.getElementById(elId || 'conta-erro');
   if (!el) return;
   el.textContent = msg;
   el.style.display = 'block';
 }
 
-function abrirModalSenha() {
-  abrirModalConta('🔒 Mudar senha', `
-    ${erroContaHtml()}
-    <div class="form-group">
-      <label class="form-label">Senha atual</label>
-      <input type="password" id="cs-atual" class="form-input" autocomplete="current-password">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nova senha</label>
-      <input type="password" id="cs-nova" class="form-input" autocomplete="new-password"
-             oninput="aplicarChecklistSenha(this.value, c => 'cs-req-' + c)">
-    </div>
-    <div class="auth-reqs show">
-      <div class="auth-reqs-titulo">Sua nova senha precisa ter:</div>
-      <div class="auth-req" id="cs-req-tamanho"><span class="icone">○</span> Pelo menos 8 caracteres</div>
-      <div class="auth-req" id="cs-req-maiuscula"><span class="icone">○</span> Uma letra maiúscula (A-Z)</div>
-      <div class="auth-req" id="cs-req-minuscula"><span class="icone">○</span> Uma letra minúscula (a-z)</div>
-      <div class="auth-req" id="cs-req-numero"><span class="icone">○</span> Um número (0-9)</div>
-      <div class="auth-req" id="cs-req-especial"><span class="icone">○</span> Um caractere especial (!@#$%...)</div>
-    </div>
-    <button class="btn btn-primary" style="width:100%" onclick="enviarMudarSenha()">Salvar nova senha</button>
-  `);
+function esconderErroConta(elId) {
+  const el = document.getElementById(elId || 'conta-erro');
+  if (el) el.style.display = 'none';
+}
+
+async function enviarMudarNome() {
+  const nomeNovo = (document.getElementById('pf-nome')?.value || '').trim();
+  esconderErroConta('pf-erro-nome');
+  if (nomeNovo.length < 2) { mostrarErroConta('Informe um nome com pelo menos 2 caracteres.', 'pf-erro-nome'); return; }
+
+  try {
+    const resp = await fetch(`${AUTH_API_BASE}/api/auth/nome`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
+      body: JSON.stringify({ nome: nomeNovo }),
+    });
+    const dados = await resp.json();
+    if (!resp.ok || !dados.success) {
+      mostrarErroConta(dados.message || 'Não foi possível salvar o nome.', 'pf-erro-nome');
+      return;
+    }
+    salvarSessao(getSessao().token, getSessao().email, undefined, undefined, nomeNovo);
+    avisarConta('Nome salvo', 'Seu nome foi atualizado.');
+  } catch (e) {
+    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-nome');
+  }
 }
 
 async function enviarMudarSenha() {
   const senhaAtual = document.getElementById('cs-atual').value;
   const senhaNova = document.getElementById('cs-nova').value;
+  esconderErroConta('pf-erro-senha');
 
   if (!senhaForte(senhaNova)) {
-    mostrarErroConta('Sua nova senha ainda não cumpre todos os requisitos acima.');
+    mostrarErroConta('Sua nova senha ainda não cumpre todos os requisitos acima.', 'pf-erro-senha');
     return;
   }
 
@@ -318,34 +233,21 @@ async function enviarMudarSenha() {
     });
     const dados = await resp.json();
     if (!resp.ok || !dados.success) {
-      mostrarErroConta(dados.message || 'Não foi possível trocar a senha.');
+      mostrarErroConta(dados.message || 'Não foi possível trocar a senha.', 'pf-erro-senha');
       return;
     }
-    fecharModalConta();
+    document.getElementById('cs-atual').value = '';
+    document.getElementById('cs-nova').value = '';
+    avisarConta('Senha atualizada', 'Sua senha foi trocada com sucesso.');
   } catch (e) {
-    mostrarErroConta('Não foi possível conectar à API.');
+    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-senha');
   }
-}
-
-function abrirModalEmail() {
-  const sessao = getSessao();
-  abrirModalConta('📧 Mudar e-mail', `
-    ${erroContaHtml()}
-    <div class="form-group">
-      <label class="form-label">Senha atual</label>
-      <input type="password" id="ce-senha" class="form-input" autocomplete="current-password">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Novo e-mail</label>
-      <input type="email" id="ce-email" class="form-input" autocomplete="email" placeholder="${sessao?.email || 'novo@email.com'}">
-    </div>
-    <button class="btn btn-primary" style="width:100%" onclick="enviarMudarEmail()">Salvar novo e-mail</button>
-  `);
 }
 
 async function enviarMudarEmail() {
   const senhaAtual = document.getElementById('ce-senha').value;
   const emailNovo = document.getElementById('ce-email').value.trim();
+  esconderErroConta('pf-erro-email');
 
   try {
     const resp = await fetch(`${AUTH_API_BASE}/api/auth/email`, {
@@ -355,31 +257,15 @@ async function enviarMudarEmail() {
     });
     const dados = await resp.json();
     if (!resp.ok || !dados.success) {
-      mostrarErroConta(dados.message || 'Não foi possível trocar o e-mail.');
+      mostrarErroConta(dados.message || 'Não foi possível trocar o e-mail.', 'pf-erro-email');
       return;
     }
     salvarSessao(getSessao().token, dados.email);
-    fecharModalConta();
+    avisarConta('E-mail atualizado', 'Seu e-mail foi trocado com sucesso.');
     renderNavbarAuth();
   } catch (e) {
-    mostrarErroConta('Não foi possível conectar à API.');
+    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-email');
   }
-}
-
-function abrirModalFoto() {
-  const sessao = getSessao();
-  const avatarAtual = document.querySelector('.navbar-actions .navbar-avatar');
-  const fotoAtual = avatarAtual?.style.backgroundImage;
-  const temFotoAtual = !!fotoAtual && fotoAtual !== 'none';
-
-  abrirModalConta('🖼️ Mudar foto de perfil', `
-    ${erroContaHtml()}
-    <div class="foto-preview-wrap">
-      <div class="foto-preview" id="cf-preview" style="${temFotoAtual ? `background-image:${fotoAtual}` : ''}">${temFotoAtual ? '' : (sessao?.email || '?').charAt(0).toUpperCase()}</div>
-    </div>
-    <input type="file" id="cf-arquivo" accept="image/*" class="form-input" style="margin-bottom:16px" onchange="previewFoto(event)">
-    <button class="btn btn-primary" style="width:100%" id="cf-salvar" onclick="enviarMudarFoto()" disabled>Salvar foto</button>
-  `);
 }
 
 function previewFoto(event) {
@@ -387,7 +273,7 @@ function previewFoto(event) {
   if (!arquivo) return;
 
   if (arquivo.size > 1500000) {
-    mostrarErroConta('Imagem muito grande. Escolha uma foto com menos de 1.5MB.');
+    mostrarErroConta('Imagem muito grande. Escolha uma foto com menos de 1.5MB.', 'pf-erro-foto');
     return;
   }
 
@@ -404,6 +290,7 @@ function previewFoto(event) {
 
 async function enviarMudarFoto() {
   if (!fotoSelecionadaBase64) return;
+  esconderErroConta('pf-erro-foto');
 
   try {
     const resp = await fetch(`${AUTH_API_BASE}/api/auth/foto`, {
@@ -413,13 +300,13 @@ async function enviarMudarFoto() {
     });
     const dados = await resp.json();
     if (!resp.ok || !dados.success) {
-      mostrarErroConta(dados.message || 'Não foi possível salvar a foto.');
+      mostrarErroConta(dados.message || 'Não foi possível salvar a foto.', 'pf-erro-foto');
       return;
     }
-    fecharModalConta();
     aplicarFotoNoAvatar(dados.foto_url);
+    avisarConta('Foto atualizada', 'Sua nova foto de perfil foi salva.');
   } catch (e) {
-    mostrarErroConta('Não foi possível conectar à API.');
+    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-foto');
   }
 }
 
@@ -433,21 +320,11 @@ function aplicarFotoNoAvatar(fotoUrl) {
 }
 
 /* ============================================================
-   Cancelar assinatura e excluir conta (reusam o modal genérico).
+   Cancelar assinatura e excluir conta (formulários inline em perfil.html).
    ============================================================ */
-function abrirModalCancelar() {
-  abrirModalConta('🚫 Cancelar assinatura', `
-    ${erroContaHtml()}
-    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px">
-      Você deixa de ser cobrado nos próximos meses. Seu acesso Premium continua
-      <strong>até o fim do período já pago</strong> — depois disso a conta volta a ser Free.
-    </p>
-    <button class="btn btn-primary" style="width:100%" id="cc-btn" onclick="enviarCancelamento()">Confirmar cancelamento</button>
-  `);
-}
-
 async function enviarCancelamento() {
   const btn = document.getElementById('cc-btn');
+  esconderErroConta('pf-erro-cancelar');
   if (btn) { btn.disabled = true; btn.textContent = 'Cancelando...'; }
   try {
     const resp = await fetch(`${AUTH_API_BASE}/api/assinatura/cancelar`, {
@@ -456,37 +333,23 @@ async function enviarCancelamento() {
     });
     const dados = await resp.json();
     if (!resp.ok || !dados.success) {
-      mostrarErroConta(dados.message || 'Não foi possível cancelar.');
+      mostrarErroConta(dados.message || 'Não foi possível cancelar.', 'pf-erro-cancelar');
       if (btn) { btn.disabled = false; btn.textContent = 'Confirmar cancelamento'; }
       return;
     }
-    fecharModalConta();
     const ate = dados.acesso_ate ? ` Seu Premium continua até ${dados.acesso_ate}.` : '';
     avisarConta('Assinatura cancelada', 'Você não será mais cobrado.' + ate);
+    if (typeof atualizarSecaoPlano === 'function') atualizarSecaoPlano();
   } catch (e) {
-    mostrarErroConta('Não foi possível conectar à API.');
+    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-cancelar');
     if (btn) { btn.disabled = false; btn.textContent = 'Confirmar cancelamento'; }
   }
 }
 
-function abrirModalExcluir() {
-  abrirModalConta('🗑️ Excluir minha conta', `
-    ${erroContaHtml()}
-    <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px">
-      Essa ação é <strong>permanente</strong>: sua conta, estratégias e cartas serão apagadas
-      e a assinatura (se houver) é cancelada. Confirme sua senha para continuar.
-    </p>
-    <div class="form-group">
-      <label class="form-label">Senha</label>
-      <input type="password" id="ex-senha" class="form-input" autocomplete="current-password">
-    </div>
-    <button class="btn btn-primary" style="width:100%;background:var(--danger,#e04e4a);border-color:var(--danger,#e04e4a)" onclick="enviarExclusao()">Excluir para sempre</button>
-  `);
-}
-
 async function enviarExclusao() {
   const senha = document.getElementById('ex-senha')?.value || '';
-  if (!senha) { mostrarErroConta('Digite sua senha para confirmar.'); return; }
+  esconderErroConta('pf-erro-excluir');
+  if (!senha) { mostrarErroConta('Digite sua senha para confirmar.', 'pf-erro-excluir'); return; }
   try {
     const resp = await fetch(`${AUTH_API_BASE}/api/auth/excluir`, {
       method: 'POST',
@@ -495,38 +358,19 @@ async function enviarExclusao() {
     });
     const dados = await resp.json();
     if (!resp.ok || !dados.success) {
-      mostrarErroConta(dados.message || 'Não foi possível excluir a conta.');
+      mostrarErroConta(dados.message || 'Não foi possível excluir a conta.', 'pf-erro-excluir');
       return;
     }
     limparSessao();
     window.location.href = 'index.html';
   } catch (e) {
-    mostrarErroConta('Não foi possível conectar à API.');
+    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-excluir');
   }
-}
-
-// Atualiza o selo de plano no menu da conta conforme a sessão atual e mostra/
-// esconde o "Comprar Premium" (quem já é premium não precisa dele).
-function atualizarMenuPlano() {
-  const el = document.getElementById('conta-menu-plano');
-  if (el) {
-    if (ehPremium()) {
-      el.textContent = '⭐ Premium';
-      el.className = 'account-menu-plano premium';
-    } else {
-      el.textContent = 'Plano Free';
-      el.className = 'account-menu-plano';
-    }
-  }
-  const comprar = document.getElementById('conta-menu-comprar');
-  if (comprar) comprar.style.display = ehPremium() ? 'none' : 'flex';
-  // Cancelar assinatura só faz sentido pra quem é premium.
-  const cancelar = document.getElementById('conta-menu-cancelar');
-  if (cancelar) cancelar.style.display = ehPremium() ? 'flex' : 'none';
 }
 
 // Ajusta a navbar conforme a sessão: troca "Começar Grátis" -> "Sair", troca
-// o avatar genérico pela inicial (ou foto) do usuário, e liga o menu da conta.
+// o avatar genérico pela inicial (ou foto) do usuário, e faz o avatar levar
+// pra página de perfil (perfil.html) em vez de um dropdown.
 async function renderNavbarAuth() {
   const sessao = getSessao();
   const btnGratis = document.querySelector('.navbar-actions .btn-primary');
@@ -547,10 +391,8 @@ async function renderNavbarAuth() {
     if (avatar) {
       avatar.textContent = sessao.email.charAt(0).toUpperCase();
       avatar.title = sessao.email;
-      montarMenuConta(avatar);
-      const emailEl = document.getElementById('conta-menu-email');
-      if (emailEl) emailEl.textContent = sessao.email;
-      atualizarMenuPlano(); // mostra logo o plano que já está na sessão
+      avatar.href = 'perfil.html';
+      avatar.onclick = null;
 
       try {
         const resp = await fetch(`${AUTH_API_BASE}/api/auth/me`, {
@@ -558,10 +400,9 @@ async function renderNavbarAuth() {
         });
         const dados = await resp.json();
         if (dados.success) {
-          // Reflete o plano atual do servidor (pode ter virado premium após
-          // uma compra) e atualiza o selo do menu.
-          salvarSessao(sessao.token, sessao.email, dados.plano || 'free');
-          atualizarMenuPlano();
+          // Reflete o plano/nome atuais do servidor (pode ter virado premium
+          // após uma compra, ou o nome ter sido salvo em outra sessão).
+          salvarSessao(sessao.token, sessao.email, dados.plano || 'free', undefined, dados.nome);
           if (dados.foto_url) aplicarFotoNoAvatar(dados.foto_url);
         }
       } catch (e) {

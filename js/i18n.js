@@ -629,13 +629,11 @@ const I18N_FUSOS_COMUNS = [
   'Europe/Lisbon', 'Europe/London', 'Europe/Madrid', 'UTC',
 ];
 
+// O fuso horário é auto-detectado (getFusoHorario) e configurável em
+// perfil.html — não precisa mais de um seletor flutuante em toda página.
 function montarWidgetIdiomaFuso() {
+  if (I18N_LANG_LOCKED) return; // sem seletor de fuso flutuante nem botão de idioma
   if (document.getElementById('i18n-widget')) return;
-
-  const tzAtual = getFusoHorario();
-  const fusos = I18N_FUSOS_COMUNS.includes(tzAtual)
-    ? I18N_FUSOS_COMUNS
-    : [tzAtual, ...I18N_FUSOS_COMUNS];
 
   const wrap = document.createElement('div');
   wrap.id = 'i18n-widget';
@@ -647,24 +645,14 @@ function montarWidgetIdiomaFuso() {
     font-family: inherit; font-size: 12px;
   `;
   wrap.innerHTML = `
-    <select id="i18n-tz-select" title="${t('tz.label')}" style="
-      background: transparent; color: #b8c2cc; border: none; font-size: 12px;
-      max-width: 140px; cursor: pointer;">
-      ${fusos.map(f => `<option value="${f}" ${f === tzAtual ? 'selected' : ''}>${f.replace('_', ' ')}</option>`).join('')}
-    </select>
-    ${I18N_LANG_LOCKED ? '' : `<button id="i18n-lang-btn" style="
+    <button id="i18n-lang-btn" style="
       background: linear-gradient(135deg, #00e5ff, #7b2ff7); color: white; border: none;
       border-radius: 6px; padding: 4px 10px; font-weight: 700; cursor: pointer; font-size: 12px;
-    ">${t('lang.toggle.label')}</button>`}
+    ">${t('lang.toggle.label')}</button>
   `;
   document.body.appendChild(wrap);
 
-  document.getElementById('i18n-tz-select').addEventListener('change', (e) => {
-    setFusoHorario(e.target.value);
-  });
-  if (!I18N_LANG_LOCKED) {
-    document.getElementById('i18n-lang-btn').addEventListener('click', toggleIdioma);
-  }
+  document.getElementById('i18n-lang-btn').addEventListener('click', toggleIdioma);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
