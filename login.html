@@ -151,6 +151,11 @@
           <span data-i18n="auth.lembrar">Lembrar de mim</span>
         </label>
 
+        <label class="auth-lembrar auth-confirma" id="auth-confirma-wrap" style="display:none; align-items:flex-start; line-height:1.4;">
+          <input type="checkbox" id="auth-confirma" style="margin-top:3px;">
+          <span data-i18n-html="auth.confirmoidade">Confirmo que tenho <strong>18 anos ou mais</strong> e li e concordo com os <a href="termos.html" target="_blank" style="color:var(--accent-hover)">Termos de Uso</a>, a <a href="privacidade.html" target="_blank" style="color:var(--accent-hover)">Política de Privacidade</a> e o <a href="aviso-risco.html" target="_blank" style="color:var(--accent-hover)">Aviso de Risco</a>.</span>
+        </label>
+
         <div class="auth-reqs" id="auth-reqs">
           <div class="auth-reqs-titulo" data-i18n="auth.senhaprecisa">Sua senha precisa ter:</div>
           <div class="auth-req" id="req-tamanho"><span class="icone">○</span> <span data-i18n="auth.req.tamanho">Pelo menos 8 caracteres</span></div>
@@ -217,6 +222,9 @@
       document.getElementById('auth-reqs').classList.toggle('show', aba === 'cadastro');
       if (aba === 'cadastro') atualizarRequisitos();
 
+      document.getElementById('auth-confirma-wrap').style.display = (aba === 'cadastro') ? 'flex' : 'none';
+      if (aba !== 'cadastro') document.getElementById('auth-confirma').checked = false;
+
       esconderErroAuth();
     }
 
@@ -264,6 +272,11 @@
       // valida — isto é só pra dar um aviso rápido e claro ao usuário).
       if (abaAuthAtual === 'cadastro' && !senhaForte(senha)) {
         mostrarErroAuth(t('auth.erro.senhafraca'));
+        return;
+      }
+
+      if (abaAuthAtual === 'cadastro' && !document.getElementById('auth-confirma').checked) {
+        mostrarErroAuth(t('auth.erro.semconfirmacao'));
         return;
       }
 

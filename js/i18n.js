@@ -83,6 +83,8 @@ const I18N_DICT = {
 
     'auth.entrar': 'Entrar', 'auth.criarconta': 'Criar Conta', 'auth.email': 'E-mail', 'auth.senha': 'Senha',
     'auth.lembrar': 'Lembrar de mim',
+    'auth.confirmoidade': 'Confirmo que tenho <strong>18 anos ou mais</strong> e li e concordo com os <a href="termos.html" target="_blank" style="color:var(--accent-hover)">Termos de Uso</a>, a <a href="privacidade.html" target="_blank" style="color:var(--accent-hover)">Política de Privacidade</a> e o <a href="aviso-risco.html" target="_blank" style="color:var(--accent-hover)">Aviso de Risco</a>.',
+    'auth.erro.semconfirmacao': 'Você precisa confirmar que tem 18 anos ou mais e que concorda com os Termos para criar uma conta.',
     'auth.senhaprecisa': 'Sua senha precisa ter:',
     'auth.req.tamanho': 'Pelo menos 8 caracteres', 'auth.req.maiuscula': 'Uma letra maiúscula (A-Z)',
     'auth.req.minuscula': 'Uma letra minúscula (a-z)', 'auth.req.numero': 'Um número (0-9)',
@@ -351,6 +353,8 @@ const I18N_DICT = {
 
     'auth.entrar': 'Log In', 'auth.criarconta': 'Sign Up', 'auth.email': 'Email', 'auth.senha': 'Password',
     'auth.lembrar': 'Remember me',
+    'auth.confirmoidade': 'I confirm I am <strong>18 years old or older</strong> and that I have read and agree to the <a href="termos.html" target="_blank" style="color:var(--accent-hover)">Terms of Use</a>, <a href="privacidade.html" target="_blank" style="color:var(--accent-hover)">Privacy Policy</a>, and <a href="aviso-risco.html" target="_blank" style="color:var(--accent-hover)">Risk Disclosure</a>.',
+    'auth.erro.semconfirmacao': 'You need to confirm you are 18+ and agree to the Terms to create an account.',
     'auth.senhaprecisa': 'Your password needs:',
     'auth.req.tamanho': 'At least 8 characters', 'auth.req.maiuscula': 'One uppercase letter (A-Z)',
     'auth.req.minuscula': 'One lowercase letter (a-z)', 'auth.req.numero': 'One number (0-9)',
