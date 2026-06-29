@@ -1245,6 +1245,7 @@ function renderResult(r) {
   container.innerHTML = montarHeroReveal(r) + html;
   container.style.display = 'block';
   dispararConfete(r.rarity);
+  tocarRevelacao(r.rarity);
   strategyState.cenarioSorteado = null; // consumido na revelação
 
   // Mantém o botão de sorteio visível pós-teste e vira "de novo" — é o que
@@ -2335,6 +2336,91 @@ document.addEventListener('DOMContentLoaded', () => {
 const SUSPENSE_MIN_MS = 2300; // tempo mínimo de suspense, mesmo se a API for rápida
 let _suspStart = 0, _suspInt = null, _suspTxtInt = null;
 
+// ============================================================
+// SOM (Web Audio, sintetizado — sem arquivo de áudio nenhum):
+// tic-tic-tic crescente no suspense + nota de revelação por raridade.
+// Ligado por padrão (ajuda retenção pra quem gosta); botão de
+// mudo fica no canto do overlay de suspense, preferência salva.
+// ============================================================
+const SOM_KEY = 'buildcraft_som_ativo';
+let _audioCtx = null;
+
+function somAtivo() {
+  return localStorage.getItem(SOM_KEY) !== '0';
+}
+
+function alternarSom() {
+  const novoEstado = !somAtivo();
+  localStorage.setItem(SOM_KEY, novoEstado ? '1' : '0');
+  const btn = document.getElementById('reveal-som-toggle');
+  if (btn) btn.textContent = novoEstado ? '🔊' : '🔇';
+}
+
+function garantirAudioCtx() {
+  if (!_audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    _audioCtx = new Ctx();
+  }
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+
+// 1 tic curto, com o tom subindo conforme o suspense se aproxima do fim
+// (progresso 0→1) — é o "caça-níquel" crescente.
+function tocarTic(progresso) {
+  if (!somAtivo()) return;
+  const ctx = garantirAudioCtx();
+  if (!ctx) return;
+  const freq = 320 + Math.max(0, Math.min(1, progresso)) * 420;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'square';
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.05, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+  o.connect(g); g.connect(ctx.destination);
+  o.start();
+  o.stop(ctx.currentTime + 0.06);
+}
+
+function _tocarNota(ctx, tStart, freq, tipo, vol, dur, detune) {
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = tipo;
+  o.frequency.value = freq;
+  if (detune) o.detune.value = detune;
+  g.gain.setValueAtTime(0.0001, tStart);
+  g.gain.exponentialRampToValueAtTime(vol, tStart + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, tStart + dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(tStart);
+  o.stop(tStart + dur + 0.05);
+}
+
+// Som do reveal, diferente por raridade: Comum = "tum" seco e curto;
+// Rara/Épica = chime curto subindo; Lendária = acorde tipo coral (várias
+// notas detunadas) + nota aguda por cima, mais sustentado.
+function tocarRevelacao(rarity) {
+  if (!somAtivo()) return;
+  const ctx = garantirAudioCtx();
+  if (!ctx) return;
+  const t0 = ctx.currentTime;
+  if (rarity === 'rare') {
+    _tocarNota(ctx, t0, 440, 'triangle', 0.22, 0.14, 0);
+    _tocarNota(ctx, t0 + 0.1, 660, 'triangle', 0.22, 0.2, 0);
+  } else if (rarity === 'epic') {
+    _tocarNota(ctx, t0, 440, 'triangle', 0.2, 0.12, 0);
+    _tocarNota(ctx, t0 + 0.09, 554.37, 'triangle', 0.2, 0.12, 0);
+    _tocarNota(ctx, t0 + 0.18, 880, 'triangle', 0.26, 0.22, 0);
+  } else if (rarity === 'legendary') {
+    [523.25, 659.25, 784, 1046.5].forEach((freq, i) => _tocarNota(ctx, t0, freq, 'sine', 0.14, 0.9, i * 5));
+    _tocarNota(ctx, t0 + 0.06, 1046.5, 'triangle', 0.2, 0.6, 0);
+  } else {
+    _tocarNota(ctx, t0, 110, 'sine', 0.35, 0.18, 0);
+  }
+}
+
 const _SUSP_STATUS = [
   'varrendo milhões de velas reais…',
   'procurando o seu padrão no histórico…',
@@ -2561,6 +2647,9 @@ function mostrarSuspense() {
     ov = document.createElement('div');
     ov.id = 'reveal-suspense';
     ov.innerHTML = `
+      <button id="reveal-som-toggle" onclick="alternarSom()" title="Ativar/desativar som"
+              style="position:absolute;top:18px;right:18px;background:none;border:none;
+              font-size:1.3rem;cursor:pointer;opacity:.75;">${somAtivo() ? '🔊' : '🔇'}</button>
       <div class="reveal-susp-box">
         <div class="reveal-susp-eyebrow">Testando contra o histórico real</div>
         <div class="reveal-scan" id="reveal-scan"></div>
@@ -2596,6 +2685,7 @@ function mostrarSuspense() {
       if (x < 0.42) c.classList.add('green');
       else if (x < 0.84) c.classList.add('red');
     });
+    tocarTic((Date.now() - _suspStart) / SUSPENSE_MIN_MS);
   }, 110);
 
   // Status girando.
