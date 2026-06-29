@@ -631,12 +631,65 @@ function renderCartaBack(item) {
       <div class="carta-back-meta">
         ${metaHTML}
       </div>
+      ${(!isBuild && !isGerenciamento) ? renderBotaoRanking(item) : ''}
       <div class="carta-footer" style="margin:8px -16px -14px;padding:9px 16px">
         <div class="card-footer-stat"><strong>1</strong> usuário</div>
         <div class="grade ${getGradeClass(t.grade)}">${t.grade}</div>
       </div>
     </div>
   `;
+}
+
+// Botão "Publicar no Ranking" — só faz sentido pra carta "estratégia" pura
+// (tem pair/timeframeOperado/grade/rarity no formato que o ranking espera).
+// Build/gerenciamento ficam de fora por enquanto (formato de teste diferente).
+function renderBotaoRanking(item) {
+  if (typeof ehPremium !== 'function' || !ehPremium()) {
+    return `
+      <button class="btn btn-sm btn-outline" style="width:100%;margin-top:8px" onclick="event.stopPropagation(); window.location.href='planos.html';">
+        🏆 Publicar no Ranking (Premium)
+      </button>
+    `;
+  }
+  return `
+    <button class="btn btn-sm btn-outline" id="btn-rank-${item.id}" style="width:100%;margin-top:8px"
+            onclick="event.stopPropagation(); publicarNoRanking('${item.id}')">
+      🏆 Publicar no Ranking
+    </button>
+  `;
+}
+
+async function publicarNoRanking(id) {
+  const btn = document.getElementById('btn-rank-' + id);
+  if (!btn) return;
+  const sessao = typeof getSessao === 'function' ? getSessao() : null;
+  if (!sessao?.token) {
+    showToast('⚠️ Faça login', 'Entre na sua conta pra publicar no ranking.', 'default');
+    return;
+  }
+  btn.disabled = true;
+  const textoOriginal = btn.textContent;
+  btn.textContent = 'Publicando…';
+  try {
+    const resp = await fetch(`${AUTH_API_BASE}/api/ranking/publicar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessao.token}` },
+      body: JSON.stringify({ item_id: id }),
+    });
+    const dados = await resp.json();
+    if (!resp.ok || !dados.success) {
+      showToast('❌ Não foi possível publicar', dados.message || 'Tenta de novo em um instante.', 'default');
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+      return;
+    }
+    btn.textContent = `✅ Publicado como ${dados.apelido}`;
+    showToast('🏆 Publicado no Ranking!', `Sua carta já aparece no ranking público como "${dados.apelido}".`, 'success');
+  } catch (e) {
+    showToast('❌ Erro de conexão', 'Não consegui falar com o servidor agora.', 'default');
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+  }
 }
 
 function renderCartaFlip(item) {
