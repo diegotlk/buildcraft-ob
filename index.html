@@ -356,19 +356,19 @@
     <div class="container">
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:32px;text-align:center" class="scroll-animate">
         <div>
-          <div class="text-4xl font-black glow-text" data-count="500" data-suffix="+">0</div>
+          <div class="text-4xl font-black glow-text" id="stat-estrategias" data-count="0" data-suffix="">0</div>
           <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px" data-i18n="stats.estrategias">Estratégias no sistema</div>
         </div>
         <div>
-          <div class="text-4xl font-black glow-text" data-count="12847" data-suffix="">0</div>
+          <div class="text-4xl font-black glow-text" id="stat-builds" data-count="0" data-suffix="">0</div>
           <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px" data-i18n="stats.builds">Builds testadas</div>
         </div>
         <div>
-          <div class="text-4xl font-black glow-legendary" data-count="47" data-suffix="">0</div>
+          <div class="text-4xl font-black glow-legendary" id="stat-lendarias" data-count="0" data-suffix="">0</div>
           <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px" data-i18n="stats.lendarias">Cartas Lendárias</div>
         </div>
         <div>
-          <div class="text-4xl font-black glow-text" data-count="2340" data-suffix="">0</div>
+          <div class="text-4xl font-black glow-text" id="stat-criadores" data-count="0" data-suffix="">0</div>
           <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px" data-i18n="stats.criadores">Criadores ativos</div>
         </div>
       </div>
@@ -542,6 +542,40 @@
     // (autoplay de áudio é bloqueado sem gesto do usuário) e respeita o
     // mudo configurado em Meu Perfil.
     ativarMusicaAmbienteNaHome();
+
+    // Seção "STATS COUNTER" — números 100% REAIS (sem maquiagem nenhuma,
+    // diferente do contador da hero). Começam baixos de propósito: o site
+    // ainda não foi divulgado pra ninguém, então é honesto mostrar isso.
+    // Não usa o initCountUp() genérico (data-count fixo no HTML) porque o
+    // valor só chega depois de um fetch — anima manualmente quando os dados
+    // chegam, pra não correr risco de animar pro valor mockado antigo.
+    (function carregarEstatisticasHome() {
+      function animarStat(id, valor) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.dataset.count = valor;
+        const duration = 1200;
+        const startTime = performance.now();
+        function passo(t) {
+          const progresso = Math.min((t - startTime) / duration, 1);
+          const suavizado = 1 - Math.pow(1 - progresso, 3);
+          el.textContent = Math.round(valor * suavizado).toLocaleString('pt-BR');
+          if (progresso < 1) requestAnimationFrame(passo);
+        }
+        requestAnimationFrame(passo);
+      }
+
+      fetch(`${AUTH_API_BASE}/api/estatisticas/home`)
+        .then(r => r.json())
+        .then(d => {
+          if (!d.success) return;
+          animarStat('stat-estrategias', d.estrategias);
+          animarStat('stat-builds', d.builds);
+          animarStat('stat-lendarias', d.lendarias);
+          animarStat('stat-criadores', d.criadores);
+        })
+        .catch(() => {});
+    })();
 
     // Contador global de cartas caçadas hoje — número REAL vindo do servidor
     // (soma honesta dos inventários sincronizados), com um "respiro" visual
