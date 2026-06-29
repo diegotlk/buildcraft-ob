@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="css/global.css?v=5">
   <link rel="stylesheet" href="css/cards.css?v=5">
   <link rel="stylesheet" href="css/components.css?v=5">
-  <link rel="stylesheet" href="css/pages.css?v=5">
+  <link rel="stylesheet" href="css/pages.css?v=6">
 </head>
 <body>
 
@@ -76,6 +76,11 @@
           Teste contra o histórico real de velas.
           Transforme dados em descobertas — e descobertas em status.
         </p>
+
+        <div class="hero-contador" id="hero-contador" style="display:none">
+          <span class="hero-contador-numero" id="hero-contador-numero">0</span>
+          <span class="hero-contador-label" data-i18n="hero.cartascacadashoje">cartas caçadas hoje</span>
+        </div>
 
         <div class="hero-actions">
           <a href="criar_estrategia.html" class="btn btn-lg btn-legendary" data-i18n="hero.criarbuild">⚗️ Criar Minha Build</a>
@@ -531,6 +536,45 @@
           rankingBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px 0">Não foi possível carregar o ranking agora.</td></tr>`;
         });
     }
+
+    // Contador global de cartas caçadas hoje — número REAL vindo do servidor
+    // (soma honesta dos inventários sincronizados), com um "respiro" visual
+    // entre as atualizações reais pra parecer vivo (cassino vivo, sem mentir
+    // o valor de base — a cada 45s ele resincroniza com o número real).
+    (function iniciarContadorGlobal() {
+      const wrap = document.getElementById('hero-contador');
+      const numEl = document.getElementById('hero-contador-numero');
+      if (!wrap || !numEl) return;
+      let valorReal = null;
+
+      function formatar(n) {
+        return n.toLocaleString('pt-BR');
+      }
+
+      function buscarValorReal() {
+        fetch(`${AUTH_API_BASE}/api/contador/cartas`)
+          .then(r => r.json())
+          .then(dados => {
+            if (!dados.success) return;
+            valorReal = dados.hoje;
+            numEl.textContent = formatar(valorReal);
+            wrap.style.display = 'flex';
+          })
+          .catch(() => {});
+      }
+
+      // Respiro visual: sobe 1 de vez em quando, nunca abaixo do valor real.
+      setInterval(() => {
+        if (valorReal == null) return;
+        valorReal += 1;
+        numEl.textContent = formatar(valorReal);
+      }, 14000 + Math.random() * 10000);
+
+      // Resincroniza com o servidor periodicamente (corrige qualquer deriva
+      // do respiro visual pro número real).
+      setInterval(buscarValorReal, 45000);
+      buscarValorReal();
+    })();
 
     // Render monthly battle results
     const monthlyBattle = document.getElementById('monthly-battle');

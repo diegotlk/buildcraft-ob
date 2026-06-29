@@ -118,6 +118,36 @@
   margin-bottom: 48px;
 }
 
+.hero-contador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 28px;
+  font-size: .85rem;
+  color: var(--text-muted);
+}
+.hero-contador::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: hero-contador-pulse 1.6s ease-in-out infinite;
+}
+.hero-contador-numero {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--accent-hover);
+  font-size: 1rem;
+  transition: color .2s;
+}
+@keyframes hero-contador-pulse {
+  0%, 100% { opacity: .5; transform: scale(.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
 /* Floating cards in hero */
 .hero-cards {
   display: flex;
