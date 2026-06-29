@@ -1622,6 +1622,7 @@ function trocarGrupoLab(grupo) {
   document.getElementById('lab-grupo-testar').classList.toggle('active', grupo === 'testar');
   document.getElementById('lab-grupo-catalogador')?.classList.toggle('active', grupo === 'catalogador');
   document.getElementById('lab-grupo-refinar')?.classList.toggle('active', grupo === 'refinar');
+  document.getElementById('lab-grupo-personalizar')?.classList.toggle('active', grupo === 'personalizar');
   document.getElementById('lab-subtabs-criar').style.display = grupo === 'criar' ? 'flex' : 'none';
   document.getElementById('lab-subtabs-testar').style.display = grupo === 'testar' ? 'flex' : 'none';
 
@@ -1635,7 +1636,63 @@ function trocarGrupoLab(grupo) {
     if (typeof renderRefinarEstrategias === 'function') renderRefinarEstrategias();
     return;
   }
+  if (grupo === 'personalizar') {
+    goToPhase('personalizar');
+    if (typeof renderPersonalizarCartas === 'function') renderPersonalizarCartas();
+    return;
+  }
   trocarAbaLab(grupo === 'criar' ? 'criar-estrategia' : 'testar-estrategia');
+}
+
+// ── PERSONALIZAR (nome e imagem da carta) ──
+const personalizarState = { cartaId: null };
+
+function renderPersonalizarCartas() {
+  const cont = document.getElementById('personalizar-cartas');
+  if (!cont) return;
+  const cartas = getInventario().filter(e => !e.deletadoEm && !e.arquivadoEm && e.carta);
+  if (personalizarState.cartaId && !cartas.find(e => e.id === personalizarState.cartaId)) {
+    personalizarState.cartaId = null;
+  }
+  cont.innerHTML = cartas.length
+    ? cartas.slice().sort((a, b) => a.carta.numero - b.carta.numero)
+        .map(e => renderBuildCardPick(e, personalizarState.cartaId === e.id, 'setPersonalizarCarta')).join('')
+    : '<p class="ger-empty">Nenhuma carta no inventário ainda. Teste uma estratégia em "Criar" pra ganhar sua primeira.</p>';
+
+  const form = document.getElementById('personalizar-form');
+  if (form) form.style.display = personalizarState.cartaId ? 'block' : 'none';
+}
+
+function setPersonalizarCarta(id) {
+  personalizarState.cartaId = id;
+  const item = getInventario().find(e => e.id === id);
+  const input = document.getElementById('personalizar-nome');
+  if (input) input.value = item?.nome || '';
+  renderPersonalizarCartas();
+}
+
+function salvarNomePersonalizar() {
+  if (!personalizarState.cartaId) return;
+  const novoNome = document.getElementById('personalizar-nome')?.value || '';
+  const r = renomearCarta(personalizarState.cartaId, novoNome);
+  if (!r.ok) {
+    const msgs = {
+      vazio: 'Digite um nome pra carta.',
+      duplicado: 'Você já tem uma carta com esse nome — escolha outro.',
+      naoencontrado: 'Não achei essa carta no seu inventário.',
+    };
+    showToast('⚠️ Não foi possível salvar', msgs[r.motivo] || 'Tenta de novo.', 'default');
+    return;
+  }
+  showToast('✅ Nome atualizado!', 'A carta já aparece com o novo nome no seu Inventário.', 'success');
+  renderPersonalizarCartas();
+}
+
+// Botão "Mudar imagem" — opção já visível, mas a troca em si ainda não foi
+// construída (depende de escolher de onde vêm as imagens novas, pra
+// substituir as peças de xadrez padrão por raridade). Avisa honestamente.
+function trocarImagemPersonalizar() {
+  showToast('🖼️ Em breve', 'Trocar a imagem da carta ainda não está pronto — por enquanto toda carta usa a peça de xadrez padrão da raridade.', 'default');
 }
 
 const LAB_SUBABAS = [
@@ -1654,6 +1711,7 @@ function trocarAbaLab(aba) {
   document.getElementById('lab-grupo-testar').classList.toggle('active', grupo === 'testar');
   document.getElementById('lab-grupo-catalogador')?.classList.remove('active');
   document.getElementById('lab-grupo-refinar')?.classList.remove('active');
+  document.getElementById('lab-grupo-personalizar')?.classList.remove('active');
   document.getElementById('lab-subtabs-criar').style.display = grupo === 'criar' ? 'flex' : 'none';
   document.getElementById('lab-subtabs-testar').style.display = grupo === 'testar' ? 'flex' : 'none';
 

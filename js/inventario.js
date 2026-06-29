@@ -197,6 +197,20 @@ function desarquivarItem(id) {
   salvarInventario(lista);
 }
 
+// ── PERSONALIZAR (nome e, no futuro, imagem da carta) ──
+function renomearCarta(id, novoNome) {
+  novoNome = (novoNome || '').trim();
+  if (!novoNome) return { ok: false, motivo: 'vazio' };
+  const lista = getInventario();
+  const item = lista.find(e => e.id === id);
+  if (!item) return { ok: false, motivo: 'naoencontrado' };
+  const duplicado = lista.some(e => e.id !== id && !e.deletadoEm && e.nome.toLowerCase() === novoNome.toLowerCase());
+  if (duplicado) return { ok: false, motivo: 'duplicado' };
+  item.nome = novoNome;
+  salvarInventario(lista);
+  return { ok: true };
+}
+
 function getArquivados() {
   return getInventario()
     .filter(e => e.arquivadoEm && !e.deletadoEm)

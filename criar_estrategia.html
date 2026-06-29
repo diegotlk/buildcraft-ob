@@ -616,6 +616,9 @@
 
     /* ── Aba Refinar (assertividade por dia da semana / horário) ── */
     #phase-refinar { max-width: 900px; margin: 0 auto 24px; }
+
+    /* ── Aba Personalizar (nome e imagem da carta) ── */
+    #phase-personalizar { max-width: 900px; margin: 0 auto 24px; }
     .refinar-media {
       text-align: center; color: var(--text-secondary); font-size: 13px;
       margin-bottom: 16px;
@@ -697,6 +700,7 @@
           <button class="lab-tab" id="lab-grupo-testar" onclick="trocarGrupoLab('testar')" data-i18n="lab.grupo.testar">♻️ Testar</button>
           <button class="lab-tab" id="lab-grupo-catalogador" onclick="trocarGrupoLab('catalogador')" data-i18n="lab.grupo.catalogador">🔥 Catalogar</button>
           <button class="lab-tab" id="lab-grupo-refinar" onclick="trocarGrupoLab('refinar')" data-i18n="lab.grupo.refinar">🎯 Refinar</button>
+          <button class="lab-tab" id="lab-grupo-personalizar" onclick="trocarGrupoLab('personalizar')" data-i18n="lab.grupo.personalizar">🖌️ Personalizar</button>
         </div>
 
         <!-- ── SUB-ABAS DO GRUPO "CRIAR" ──
@@ -1741,6 +1745,33 @@
           </div>
         </div>
 
+        <!-- ── GRUPO: PERSONALIZAR (nome e imagem da carta) ── -->
+        <div class="phase-section" id="phase-personalizar">
+          <div class="step-counter">🖌️ Personalizar</div>
+          <h2 class="card-box-title">Deixe sua carta com a sua cara</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 8px;">
+            Escolha uma carta do seu inventário pra mudar o nome ou a imagem.
+          </p>
+
+          <div class="ger-section-label" style="margin-top:24px;">1. Escolha a carta</div>
+          <div id="personalizar-cartas" class="build-pick-grid"></div>
+
+          <div id="personalizar-form" style="display:none; max-width:420px; margin:28px auto 0;">
+            <div class="ger-section-label">2. Nome da carta</div>
+            <div class="form-group">
+              <input type="text" id="personalizar-nome" class="form-input" maxlength="40" placeholder="Nome da carta">
+            </div>
+            <button class="btn btn-accent" style="width:100%; margin-bottom:24px;" onclick="salvarNomePersonalizar()">💾 Salvar nome</button>
+
+            <div class="ger-section-label">3. Imagem da carta</div>
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;">
+              Hoje toda carta usa a peça de xadrez padrão da raridade. Em breve você vai poder trocar
+              por outra arte aqui mesmo.
+            </p>
+            <button class="btn btn-outline" style="width:100%;" onclick="trocarImagemPersonalizar()">🖼️ Mudar imagem (em breve)</button>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -1751,11 +1782,11 @@
 
   <script src="js/pares.js?v=10"></script>
   <script src="js/data.js?v=9"></script>
-  <script src="js/inventario.js?v=16"></script>
+  <script src="js/inventario.js?v=17"></script>
   <script src="js/historico.js?v=10"></script>
   <script src="js/gerenciamento.js?v=11"></script>
   <script src="js/build.js?v=10"></script>
-  <script src="js/strategy-builder.js?v=23"></script>
+  <script src="js/strategy-builder.js?v=24"></script>
   <script src="js/catalogador.js?v=12"></script>
   <script src="js/refinar.js?v=1"></script>
   <script src="js/i18n.js?v=4"></script>
