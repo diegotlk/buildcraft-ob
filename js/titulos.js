@@ -225,7 +225,8 @@ function renderTituloAtivoPreview(nomeUsuario) {
   let parteTitulo;
   if (modo === 'emblema') parteTitulo = `<span style="display:inline-flex;vertical-align:middle">${emblema}</span>`;
   else if (modo === 'nome') parteTitulo = nomeTxt;
-  else parteTitulo = `<span style="display:inline-flex;align-items:center;gap:6px;vertical-align:middle">${emblema}${nomeTxt}</span>`;
+  // emblema fica à DIREITA do nome do título
+  else parteTitulo = `<span style="display:inline-flex;align-items:center;gap:6px;vertical-align:middle">${nomeTxt}${emblema}</span>`;
 
   return `${nomeUsuario ? nomeUsuario + ' <span style="color:var(--text-muted)">·</span> ' : ''}${parteTitulo}`;
 }

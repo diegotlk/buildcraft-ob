@@ -272,18 +272,33 @@ function previewFoto(event) {
   const arquivo = event.target.files[0];
   if (!arquivo) return;
 
+  esconderErroConta('pf-erro-foto');
+
   if (arquivo.size > 1500000) {
     mostrarErroConta('Imagem muito grande. Escolha uma foto com menos de 1.5MB.', 'pf-erro-foto');
+    event.target.value = '';
     return;
   }
 
   const leitor = new FileReader();
   leitor.onload = () => {
-    fotoSelecionadaBase64 = leitor.result;
-    const preview = document.getElementById('cf-preview');
-    preview.style.backgroundImage = `url('${fotoSelecionadaBase64}')`;
-    preview.textContent = '';
-    document.getElementById('cf-salvar').disabled = false;
+    // Redimensiona pra no máximo 256×256 antes de enviar — menor payload,
+    // mesma qualidade visual no avatar circular.
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 256;
+      const escala = Math.min(MAX / img.width, MAX / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * escala);
+      canvas.height = Math.round(img.height * escala);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      fotoSelecionadaBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      const preview = document.getElementById('cf-preview');
+      preview.style.backgroundImage = `url('${fotoSelecionadaBase64}')`;
+      preview.textContent = '';
+      document.getElementById('cf-salvar').disabled = false;
+    };
+    img.src = leitor.result;
   };
   leitor.readAsDataURL(arquivo);
 }
