@@ -500,6 +500,7 @@
 
 
   <!-- ==================== SCRIPTS ==================== -->
+  <script src="js/sound.js?v=1"></script>
   <script src="js/data.js?v=11"></script>
   <script src="js/app.js?v=11"></script>
   <script src="js/auth.js?v=7"></script>
@@ -536,6 +537,11 @@
           rankingBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px 0">Não foi possível carregar o ranking agora.</td></tr>`;
         });
     }
+
+    // Música ambiente cyberpunk, só na home — começa no 1º clique/tecla
+    // (autoplay de áudio é bloqueado sem gesto do usuário) e respeita o
+    // mudo configurado em Meu Perfil.
+    ativarMusicaAmbienteNaHome();
 
     // Contador global de cartas caçadas hoje — número REAL vindo do servidor
     // (soma honesta dos inventários sincronizados), com um "respiro" visual

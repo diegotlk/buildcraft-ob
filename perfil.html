@@ -17,6 +17,7 @@
 <body>
 
   <!-- Perfil exige login — manda pra login.html antes de pintar a página. -->
+  <script src="js/sound.js?v=1"></script>
   <script src="js/auth.js?v=7"></script>
   <script>exigirLogin();</script>
 
@@ -77,6 +78,19 @@
           <label class="form-label">E-mail atual</label>
           <input type="text" id="pf-email-atual" class="form-input" disabled>
         </div>
+      </div>
+
+      <!-- Som do site (efeitos de clique/revelação + música ambiente da home) -->
+      <div class="card-box" style="margin-bottom:24px">
+        <h3 style="margin-bottom:6px">🔊 Som do site</h3>
+        <p style="color:var(--text-muted);font-size:.82rem;margin:0 0 16px">
+          Liga/desliga os efeitos sonoros de clique e revelação de cartas, e a
+          música ambiente da página inicial. Vale pro site inteiro.
+        </p>
+        <label class="auth-lembrar" style="cursor:pointer">
+          <input type="checkbox" class="som-toggle-check" onchange="definirSom(this.checked)">
+          <span>Som ativado</span>
+        </label>
       </div>
 
       <!-- Fuso horário (auto-detectado; aqui só pra quem quer trocar) -->
@@ -222,6 +236,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('.som-toggle-check').checked = somAtivo();
       montarSelectFuso();
       // renderNavbarAuth (chamado por auth.js) busca /api/auth/me antes de
       // termos a sessão completa — espera ela terminar pra preencher os campos.
