@@ -215,33 +215,118 @@ async function enviarMudarNome() {
   }
 }
 
+/* ============================================================
+   Código de confirmação por e-mail — segunda camada além da senha atual
+   pra excluir conta / trocar e-mail / trocar senha. Cobre o cenário de
+   sessão sequestrada: mesmo com o token de sessão E a senha em mãos
+   (ex.: sessão esquecida logada, senha salva no navegador), essas 3 ações
+   só completam com um código que só chega na caixa de e-mail cadastrada.
+   Um modal genérico (perfil.html) é reaproveitado pelas 3.
+   ============================================================ */
+const CODIGO_CONFIRMACAO_LABELS = {
+  excluir: 'excluir sua conta',
+  email: 'trocar seu e-mail',
+  senha: 'trocar sua senha',
+};
+let codigoConfirmacaoPendente = null; // { tipo, executar: async (codigo) => {ok, message?} }
+
+async function solicitarCodigoConfirmacao(tipo) {
+  try {
+    const resp = await fetch(`${AUTH_API_BASE}/api/auth/solicitar-codigo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
+      body: JSON.stringify({ tipo }),
+    });
+    const dados = await resp.json();
+    return { ok: resp.ok && dados.success, message: dados.message };
+  } catch (e) {
+    return { ok: false, message: 'Não foi possível conectar à API.' };
+  }
+}
+
+// Pede o código por e-mail e, se enviou com sucesso, abre o modal pra
+// digitar. `executar(codigo)` é chamado quando a pessoa clica Confirmar —
+// deve devolver {ok:true} ou {ok:false, message}.
+async function abrirModalCodigo(tipo, executar) {
+  const { ok, message } = await solicitarCodigoConfirmacao(tipo);
+  if (!ok) return { ok: false, message: message || 'Não foi possível enviar o código.' };
+
+  codigoConfirmacaoPendente = { tipo, executar };
+  document.getElementById('cc-modal-titulo').textContent =
+    `Confirme por e-mail: ${CODIGO_CONFIRMACAO_LABELS[tipo] || 'ação'}`;
+  document.getElementById('cc-modal-erro').textContent = '';
+  document.getElementById('cc-modal-codigo').value = '';
+  document.getElementById('modal-codigo-confirmacao').classList.add('open');
+  document.getElementById('cc-modal-codigo').focus();
+  return { ok: true };
+}
+
+function fecharModalCodigo() {
+  document.getElementById('modal-codigo-confirmacao')?.classList.remove('open');
+  codigoConfirmacaoPendente = null;
+}
+
+async function reenviarCodigoConfirmacao() {
+  if (!codigoConfirmacaoPendente) return;
+  const btn = document.getElementById('cc-modal-reenviar');
+  const erroEl = document.getElementById('cc-modal-erro');
+  if (btn) btn.disabled = true;
+  const { ok, message } = await solicitarCodigoConfirmacao(codigoConfirmacaoPendente.tipo);
+  if (erroEl) erroEl.textContent = ok ? 'Novo código enviado.' : (message || 'Não foi possível reenviar.');
+  setTimeout(() => { if (btn) btn.disabled = false; }, 5000);
+}
+
+async function confirmarCodigoModal() {
+  const codigo = (document.getElementById('cc-modal-codigo')?.value || '').trim();
+  const erroEl = document.getElementById('cc-modal-erro');
+  if (!codigo) { if (erroEl) erroEl.textContent = 'Digite o código recebido por e-mail.'; return; }
+  if (!codigoConfirmacaoPendente) return;
+
+  const btn = document.getElementById('cc-modal-confirmar');
+  if (btn) { btn.disabled = true; btn.textContent = 'Confirmando...'; }
+  try {
+    const resultado = await codigoConfirmacaoPendente.executar(codigo);
+    if (!resultado || !resultado.ok) {
+      if (erroEl) erroEl.textContent = (resultado && resultado.message) || 'Código incorreto.';
+      return;
+    }
+    fecharModalCodigo();
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar'; }
+  }
+}
+
 async function enviarMudarSenha() {
   const senhaAtual = document.getElementById('cs-atual').value;
   const senhaNova = document.getElementById('cs-nova').value;
   esconderErroConta('pf-erro-senha');
 
+  if (!senhaAtual) { mostrarErroConta('Digite sua senha atual.', 'pf-erro-senha'); return; }
   if (!senhaForte(senhaNova)) {
     mostrarErroConta('Sua nova senha ainda não cumpre todos os requisitos acima.', 'pf-erro-senha');
     return;
   }
 
-  try {
-    const resp = await fetch(`${AUTH_API_BASE}/api/auth/senha`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
-      body: JSON.stringify({ senha_atual: senhaAtual, senha_nova: senhaNova }),
-    });
-    const dados = await resp.json();
-    if (!resp.ok || !dados.success) {
-      mostrarErroConta(dados.message || 'Não foi possível trocar a senha.', 'pf-erro-senha');
-      return;
+  const { ok, message } = await abrirModalCodigo('senha', async (codigo) => {
+    try {
+      const resp = await fetch(`${AUTH_API_BASE}/api/auth/senha`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
+        body: JSON.stringify({ senha_atual: senhaAtual, senha_nova: senhaNova, codigo }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok || !dados.success) {
+        return { ok: false, message: dados.message || 'Não foi possível trocar a senha.' };
+      }
+      document.getElementById('cs-atual').value = '';
+      document.getElementById('cs-nova').value = '';
+      avisarConta('Senha atualizada', 'Sua senha foi trocada e as outras sessões abertas foram encerradas.');
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, message: 'Não foi possível conectar à API.' };
     }
-    document.getElementById('cs-atual').value = '';
-    document.getElementById('cs-nova').value = '';
-    avisarConta('Senha atualizada', 'Sua senha foi trocada com sucesso.');
-  } catch (e) {
-    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-senha');
-  }
+  });
+  if (!ok) mostrarErroConta(message, 'pf-erro-senha');
 }
 
 async function enviarMudarEmail() {
@@ -249,23 +334,29 @@ async function enviarMudarEmail() {
   const emailNovo = document.getElementById('ce-email').value.trim();
   esconderErroConta('pf-erro-email');
 
-  try {
-    const resp = await fetch(`${AUTH_API_BASE}/api/auth/email`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
-      body: JSON.stringify({ senha_atual: senhaAtual, email_novo: emailNovo }),
-    });
-    const dados = await resp.json();
-    if (!resp.ok || !dados.success) {
-      mostrarErroConta(dados.message || 'Não foi possível trocar o e-mail.', 'pf-erro-email');
-      return;
+  if (!senhaAtual) { mostrarErroConta('Digite sua senha atual.', 'pf-erro-email'); return; }
+  if (!emailNovo) { mostrarErroConta('Digite o novo e-mail.', 'pf-erro-email'); return; }
+
+  const { ok, message } = await abrirModalCodigo('email', async (codigo) => {
+    try {
+      const resp = await fetch(`${AUTH_API_BASE}/api/auth/email`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
+        body: JSON.stringify({ senha_atual: senhaAtual, email_novo: emailNovo, codigo }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok || !dados.success) {
+        return { ok: false, message: dados.message || 'Não foi possível trocar o e-mail.' };
+      }
+      salvarSessao(getSessao().token, dados.email);
+      avisarConta('E-mail atualizado', 'Seu e-mail foi trocado com sucesso.');
+      renderNavbarAuth();
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, message: 'Não foi possível conectar à API.' };
     }
-    salvarSessao(getSessao().token, dados.email);
-    avisarConta('E-mail atualizado', 'Seu e-mail foi trocado com sucesso.');
-    renderNavbarAuth();
-  } catch (e) {
-    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-email');
-  }
+  });
+  if (!ok) mostrarErroConta(message, 'pf-erro-email');
 }
 
 function previewFoto(event) {
@@ -374,22 +465,26 @@ async function enviarExclusao() {
   const senha = document.getElementById('ex-senha')?.value || '';
   esconderErroConta('pf-erro-excluir');
   if (!senha) { mostrarErroConta('Digite sua senha para confirmar.', 'pf-erro-excluir'); return; }
-  try {
-    const resp = await fetch(`${AUTH_API_BASE}/api/auth/excluir`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
-      body: JSON.stringify({ senha_atual: senha }),
-    });
-    const dados = await resp.json();
-    if (!resp.ok || !dados.success) {
-      mostrarErroConta(dados.message || 'Não foi possível excluir a conta.', 'pf-erro-excluir');
-      return;
+
+  const { ok, message } = await abrirModalCodigo('excluir', async (codigo) => {
+    try {
+      const resp = await fetch(`${AUTH_API_BASE}/api/auth/excluir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
+        body: JSON.stringify({ senha_atual: senha, codigo }),
+      });
+      const dados = await resp.json();
+      if (!resp.ok || !dados.success) {
+        return { ok: false, message: dados.message || 'Não foi possível excluir a conta.' };
+      }
+      limparSessao();
+      window.location.href = 'index.html';
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, message: 'Não foi possível conectar à API.' };
     }
-    limparSessao();
-    window.location.href = 'index.html';
-  } catch (e) {
-    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-excluir');
-  }
+  });
+  if (!ok) mostrarErroConta(message, 'pf-erro-excluir');
 }
 
 // Ajusta a navbar conforme a sessão: troca "Começar Grátis" -> "Sair", troca

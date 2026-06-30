@@ -18,7 +18,7 @@
 
   <!-- Perfil exige login — manda pra login.html antes de pintar a página. -->
   <script src="js/sound.js?v=1"></script>
-  <script src="js/auth.js?v=8"></script>
+  <script src="js/auth.js?v=9"></script>
   <script>exigirLogin();</script>
 
   <!-- ==================== NAVBAR ==================== -->
@@ -201,6 +201,29 @@
 
     </div>
   </main>
+
+  <!-- Modal de código de confirmação por e-mail — reaproveitado por
+       excluir conta / trocar e-mail / trocar senha (ver js/auth.js). -->
+  <div class="modal-overlay" id="modal-codigo-confirmacao">
+    <div class="modal-content" style="max-width:380px">
+      <div class="modal-header">
+        <span class="modal-title" id="cc-modal-titulo">Confirme por e-mail</span>
+        <button class="modal-close" onclick="fecharModalCodigo()" aria-label="Fechar">✕</button>
+      </div>
+      <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 16px">
+        Enviamos um código de 6 dígitos pro seu e-mail cadastrado. Ele vale por 15 minutos.
+      </p>
+      <div id="cc-modal-erro" class="auth-error" style="margin-bottom:12px"></div>
+      <div class="form-group">
+        <label class="form-label">Código</label>
+        <input type="text" id="cc-modal-codigo" class="form-input" inputmode="numeric"
+               maxlength="6" placeholder="000000" style="letter-spacing:4px;font-size:1.2rem;text-align:center"
+               onkeydown="if(event.key==='Enter') confirmarCodigoModal()">
+      </div>
+      <button class="btn btn-primary" id="cc-modal-confirmar" style="width:100%;margin-bottom:10px" onclick="confirmarCodigoModal()">Confirmar</button>
+      <button class="btn btn-outline" id="cc-modal-reenviar" style="width:100%" onclick="reenviarCodigoConfirmacao()">Reenviar código</button>
+    </div>
+  </div>
 
   <script src="js/app.js?v=11"></script>
   <script src="js/inventario.js?v=1"></script>
