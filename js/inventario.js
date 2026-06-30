@@ -588,10 +588,10 @@ function renderSeloEmblemaCarta(item) {
 // ── Carta dupla face (frente / verso) ──
 function renderCartaFront(item) {
   const categoria = categoriaDaEstrategia(item);
+  // Glifo de linha fininha (mesma arte da aba Personalizar) — sem o
+  // degradê/aura de pecaXadrezSVG, que o Diego preferiu não usar.
   const glifo = PECA_POR_RARIDADE[item.teste.rarity] || '♙';
-  const pecaArt = (typeof pecaXadrezSVG === 'function')
-    ? `<span class="carta-art-peca">${pecaXadrezSVG(item.teste.rarity)}</span>`
-    : `<span class="carta-art-glyph">${glifo}</span>`;
+  const pecaArt = `<span class="carta-art-glyph">${glifo}</span>`;
   const t = item.teste;
   const numero = item.carta ? '#' + String(item.carta.numero).padStart(3, '0') : '—';
 
