@@ -211,6 +211,22 @@ function renomearCarta(id, novoNome) {
   return { ok: true };
 }
 
+// Emblema de fundo (aba Personalizar) — só aceita um título que a pessoa já
+// desbloqueou de verdade (ver js/titulos.js); 'null'/'' remove o emblema.
+function definirEmblemaCarta(id, emblemaId) {
+  const lista = getInventario();
+  const item = lista.find(e => e.id === id);
+  if (!item) return { ok: false, motivo: 'naoencontrado' };
+  if (emblemaId) {
+    const desbloqueados = typeof getTitulosDesbloqueados === 'function' ? getTitulosDesbloqueados() : {};
+    if (!desbloqueados[emblemaId]) return { ok: false, motivo: 'bloqueado' };
+  }
+  item.personalizacao = item.personalizacao || {};
+  item.personalizacao.emblema = emblemaId || null;
+  salvarInventario(lista);
+  return { ok: true };
+}
+
 function getArquivados() {
   return getInventario()
     .filter(e => e.arquivadoEm && !e.deletadoEm)
@@ -553,6 +569,35 @@ function renderConfidenceBar(n) {
   `;
 }
 
+// Emblema de título como marca d'água atrás da peça de xadrez (aba
+// Personalizar) — só renderiza se a pessoa escolheu um e ele existe no
+// catálogo (js/titulos.js); some silenciosamente se titulos.js não estiver
+// carregado na página (ex.: não afeta páginas que não usam personalização).
+function renderEmblemaFundoCarta(item) {
+  const emblemaId = item.personalizacao?.emblema;
+  if (!emblemaId || typeof TITULO_ICONES === 'undefined') return '';
+  const src = TITULO_ICONES[emblemaId];
+  const def = typeof getTituloDef === 'function' ? getTituloDef(emblemaId) : null;
+  if (!src || !def) return '';
+  return `<img class="carta-art-emblema" src="${src}" alt="" style="--emblema-cor:${def.cor}">`;
+}
+
+// Selinho "🦉 A Coruja" no verso, perto da autoria — reforça que a carta tem
+// a assinatura de quem a personalizou (mesma cor/ícone do título escolhido).
+function renderSeloEmblemaCarta(item) {
+  const emblemaId = item.personalizacao?.emblema;
+  if (!emblemaId || typeof TITULO_ICONES === 'undefined') return '';
+  const src = TITULO_ICONES[emblemaId];
+  const def = typeof getTituloDef === 'function' ? getTituloDef(emblemaId) : null;
+  if (!src || !def) return '';
+  return `
+    <div class="carta-back-selo" style="--selo-cor:${def.cor}">
+      <img src="${src}" alt="">
+      <span>${def.nome}</span>
+    </div>
+  `;
+}
+
 // ── Carta dupla face (frente / verso) ──
 function renderCartaFront(item) {
   const categoria = categoriaDaEstrategia(item);
@@ -560,6 +605,7 @@ function renderCartaFront(item) {
   const pecaArt = (typeof pecaXadrezSVG === 'function')
     ? `<span class="carta-art-peca">${pecaXadrezSVG(item.teste.rarity)}</span>`
     : `<span class="carta-art-glyph">${glifo}</span>`;
+  const emblemaArt = renderEmblemaFundoCarta(item);
   const t = item.teste;
   const numero = item.carta ? '#' + String(item.carta.numero).padStart(3, '0') : '—';
 
@@ -612,6 +658,7 @@ function renderCartaFront(item) {
         <span class="card-rarity-badge ${t.rarity}">${RARITY_LABEL[t.rarity] || 'Comum'}</span>
       </div>
       <div class="carta-art">
+        ${emblemaArt}
         <span class="carta-art-numero">${numero}</span>
         ${pecaArt}
         <span class="carta-art-categoria">${categoria}</span>
@@ -686,7 +733,10 @@ function renderCartaBack(item) {
         <div class="card-title" style="font-size:1.05rem">${item.nome}</div>
         <span class="card-rarity-badge ${t.rarity}">${RARITY_LABEL[t.rarity] || 'Comum'}</span>
       </div>
-      <div style="font-size:.7rem;color:var(--text-muted);margin-top:2px">por <span style="color:var(--accent-hover);font-weight:600">Você</span> · ${categoria}</div>
+      <div style="font-size:.7rem;color:var(--text-muted);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span>por <span style="color:var(--accent-hover);font-weight:600">Você</span> · ${categoria}</span>
+        ${renderSeloEmblemaCarta(item)}
+      </div>
       ${renderLinhagem(item)}
       ${t.entries != null ? renderConfidenceBar(t.entries) : ''}
 

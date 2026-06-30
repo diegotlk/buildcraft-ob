@@ -1640,6 +1640,7 @@ function trocarGrupoLab(grupo) {
   if (grupo === 'personalizar') {
     goToPhase('personalizar');
     if (typeof renderPersonalizarCartas === 'function') renderPersonalizarCartas();
+    if (typeof renderPersonalizarEmblemas === 'function') renderPersonalizarEmblemas();
     return;
   }
   trocarAbaLab(grupo === 'criar' ? 'criar-estrategia' : 'testar-estrategia');
@@ -1670,6 +1671,62 @@ function setPersonalizarCarta(id) {
   const input = document.getElementById('personalizar-nome');
   if (input) input.value = item?.nome || '';
   renderPersonalizarCartas();
+  renderPersonalizarEmblemas();
+}
+
+// ── PERSONALIZAR · brasão de fundo (emblema de título conquistado) ──
+function renderPersonalizarEmblemas() {
+  const cont = document.getElementById('personalizar-emblemas');
+  if (!cont) return;
+  const item = getInventario().find(e => e.id === personalizarState.cartaId);
+  if (!item || typeof TITULOS_DEFS === 'undefined') { cont.innerHTML = ''; return; }
+
+  const desbloqueados = typeof atualizarTitulosDesbloqueados === 'function' ? atualizarTitulosDesbloqueados() : {};
+  const emblemaAtual = item.personalizacao?.emblema || null;
+
+  const nenhumCard = `
+    <div class="titulo-card titulo-desbloqueado${!emblemaAtual ? ' titulo-ativo' : ''}" onclick="selecionarEmblemaPersonalizar(null)">
+      <div class="titulo-emblema-wrap">🚫</div>
+      <div class="titulo-card-nome">Nenhum</div>
+      <div class="titulo-card-criterio">Só a peça de xadrez padrão</div>
+      ${!emblemaAtual ? '<div class="titulo-card-badge-ativo">✓ Ativo</div>' : ''}
+    </div>
+  `;
+
+  const cards = TITULOS_DEFS.map((def) => {
+    const desbloqueado = !!desbloqueados[def.id];
+    const ativo = emblemaAtual === def.id;
+    if (!desbloqueado) {
+      return `
+        <div class="titulo-card titulo-bloqueado" title="${def.criterioTexto}">
+          <div class="titulo-emblema-wrap">${renderEmblemaSVG(def.icone, '#4a4a55', 40)}</div>
+          <div class="titulo-card-nome">${def.nome}</div>
+          <div class="titulo-card-criterio">🔒 ${def.criterioTexto}</div>
+        </div>
+      `;
+    }
+    return `
+      <div class="titulo-card titulo-desbloqueado${ativo ? ' titulo-ativo' : ''}" style="--titulo-cor:${def.cor}" onclick="selecionarEmblemaPersonalizar('${def.id}')">
+        <div class="titulo-emblema-wrap">${renderEmblemaSVG(def.icone, def.cor, 40)}</div>
+        <div class="titulo-card-nome" style="color:${def.cor}">${def.nome}</div>
+        <div class="titulo-card-criterio">${desbloqueados[def.id].detalhe || ''}</div>
+        ${ativo ? '<div class="titulo-card-badge-ativo">✓ Ativo</div>' : ''}
+      </div>
+    `;
+  }).join('');
+
+  cont.innerHTML = nenhumCard + cards;
+}
+
+function selecionarEmblemaPersonalizar(emblemaId) {
+  if (!personalizarState.cartaId) return;
+  const r = definirEmblemaCarta(personalizarState.cartaId, emblemaId);
+  if (!r.ok) {
+    showToast('⚠️ Não foi possível aplicar', 'Esse título ainda não foi conquistado.', 'default');
+    return;
+  }
+  showToast(emblemaId ? '✅ Brasão aplicado!' : '✅ Brasão removido', 'Confira sua carta no Inventário.', 'success');
+  renderPersonalizarEmblemas();
 }
 
 function salvarNomePersonalizar() {
@@ -1687,13 +1744,6 @@ function salvarNomePersonalizar() {
   }
   showToast('✅ Nome atualizado!', 'A carta já aparece com o novo nome no seu Inventário.', 'success');
   renderPersonalizarCartas();
-}
-
-// Botão "Mudar imagem" — opção já visível, mas a troca em si ainda não foi
-// construída (depende de escolher de onde vêm as imagens novas, pra
-// substituir as peças de xadrez padrão por raridade). Avisa honestamente.
-function trocarImagemPersonalizar() {
-  showToast('🖼️ Em breve', 'Trocar a imagem da carta ainda não está pronto — por enquanto toda carta usa a peça de xadrez padrão da raridade.', 'default');
 }
 
 const LAB_SUBABAS = [
