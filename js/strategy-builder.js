@@ -1597,6 +1597,7 @@ function confirmSaveStrategy() {
     showToast('🃏 Carta criada!', `"${nome}" agora é a carta #${String(item.carta.numero).padStart(3, '0')} do seu inventário.`, 'discovery');
   }
   avisarShinySeAplicavel(item);
+  avisarGenesisSeAplicavel(item);
 }
 
 // ════════════════════════════════════════════════
@@ -2499,6 +2500,10 @@ function garantirRevealStyles() {
   .reveal-nearmiss{max-width:420px;margin:14px auto 0;padding:12px 16px;border-radius:10px;font-size:.86rem;line-height:1.5;
     text-align:left;color:#ffe6a8;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);}
   .reveal-nearmiss b{color:var(--neon-gold);}
+  .reveal-genesis-msg{max-width:420px;margin:14px auto 0;padding:9px 20px;border-radius:999px;font-size:.84rem;
+    font-weight:700;letter-spacing:.03em;text-align:center;color:var(--neon-cyan);
+    background:rgba(0,234,255,.07);border:1px solid rgba(0,234,255,.32);
+    text-shadow:0 0 10px rgba(0,234,255,.4);}
   .reveal-marco{display:inline-block;max-width:420px;margin:12px auto 0;padding:8px 18px;border-radius:999px;
     font-size:.84rem;color:var(--text-primary);background:rgba(255,255,255,.04);border:1px solid var(--rc);
     box-shadow:0 0 16px var(--rg);}
@@ -2641,6 +2646,11 @@ function montarHeroReveal(r) {
       </div>
     </div>` : '';
 
+  const isPrimeiraDescoberta = typeof getInventario === 'function'
+    && getInventario().filter(e => !e.deletadoEm).length === 0;
+  const primeiraHTML = isPrimeiraDescoberta
+    ? '<div class="reveal-genesis-msg">✦ Sua primeira criatura. O início de tudo.</div>' : '';
+
   return `
   <div class="reveal-hero" style="--rc:${cor};--rg:${glow};">
     <div class="reveal-hero-eyebrow">⚡ Descoberta no histórico real</div>
@@ -2655,6 +2665,7 @@ function montarHeroReveal(r) {
         <div class="reveal-ministat"><div class="v">${(r.entries || 0).toLocaleString('pt-BR')}</div><div class="l">Operações</div></div>
       </div>
     </div>
+    ${primeiraHTML}
     ${marcoColecao(r)}
     ${quaseHTML}
     ${otimizarHTML}

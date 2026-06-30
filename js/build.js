@@ -290,4 +290,5 @@ function salvarBuildNoInventario() {
   if (!salvarInventario(lista)) return;
   showToast('🃏 Carta criada!', `"${item.nome}" agora é a carta #${String(item.carta.numero).padStart(3, '0')} do seu inventário.`, 'discovery');
   avisarShinySeAplicavel(item);
+  avisarGenesisSeAplicavel(item);
 }

@@ -303,10 +303,13 @@ function proximoNumeroDescoberta() {
 const CARTA_SHINY_CHANCE = 0.01;
 
 function criarMetaCarta() {
+  const lista = getInventario();
+  const isPrimeira = lista.filter(e => !e.deletadoEm).length === 0;
   return {
     numero: proximoNumeroDescoberta(),
     transformadaEm: new Date().toISOString(),
     shiny: Math.random() < CARTA_SHINY_CHANCE,
+    primeira: isPrimeira,
   };
 }
 
@@ -316,6 +319,13 @@ function criarMetaCarta() {
 function avisarShinySeAplicavel(item) {
   if (!item?.carta?.shiny || typeof showToast !== 'function') return;
   showToast('✨ SHINY!!', `"${item.nome}" nasceu numa versão holográfica raríssima (1 em 100). Mesmos stats, brilho único — flex puro.`, 'success');
+}
+
+// Toast de boas-vindas para a primeira carta da coleção — chamar nos mesmos
+// 3 lugares que chamam avisarShinySeAplicavel.
+function avisarGenesisSeAplicavel(item) {
+  if (!item?.carta?.primeira || typeof showToast !== 'function') return;
+  showToast('✦ Primeira Descoberta', `"${item.nome}" é o início de tudo — carta #001 da sua coleção, pra sempre.`, 'success');
 }
 
 function transformarEmCarta(id) {
@@ -644,10 +654,12 @@ function renderCartaFront(item) {
   const tipoTag = isBuild ? 'BUILD' : (isGerenciamento ? 'GERENCIAMENTO' : 'ESTRATÉGIA');
   const tipoTagClasse = isBuild ? 'card-type-tag-build' : (isGerenciamento ? 'card-type-tag-gerenciamento' : 'card-type-tag-estrategia');
   const isShiny = !!item.carta?.shiny;
+  const isGenesis = !!item.carta?.primeira;
 
   return `
-    <div class="carta-face carta-face-front rarity-${t.rarity}${isShiny ? ' carta-shiny' : ''}">
+    <div class="carta-face carta-face-front rarity-${t.rarity}${isShiny ? ' carta-shiny' : ''}${isGenesis ? ' carta-genesis' : ''}">
       ${isShiny ? '<div class="carta-shiny-badge">✨ SHINY</div>' : ''}
+      ${isGenesis && !isShiny ? '<div class="carta-genesis-badge">✦ Gênesis</div>' : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px 8px">
         <span class="card-type-tag ${tipoTagClasse}">${tipoTag} <span style="opacity:.55;font-weight:600">${numero}</span></span>
         <span class="card-rarity-badge ${t.rarity}">${RARITY_LABEL[t.rarity] || 'Comum'}</span>
@@ -716,9 +728,11 @@ function renderCartaBack(item) {
   }
 
   const isShinyBack = !!item.carta?.shiny;
+  const isGenesisBack = !!item.carta?.primeira;
   return `
-    <div class="carta-face carta-face-back rarity-${t.rarity}${isShinyBack ? ' carta-shiny' : ''}">
+    <div class="carta-face carta-face-back rarity-${t.rarity}${isShinyBack ? ' carta-shiny' : ''}${isGenesisBack ? ' carta-genesis' : ''}">
       ${isShinyBack ? '<div class="carta-shiny-badge">✨ SHINY</div>' : ''}
+      ${isGenesisBack && !isShinyBack ? '<div class="carta-genesis-badge">✦ Gênesis</div>' : ''}
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="card-title" style="font-size:1.05rem">${item.nome}</div>
         <span class="card-rarity-badge ${t.rarity}">${RARITY_LABEL[t.rarity] || 'Comum'}</span>
