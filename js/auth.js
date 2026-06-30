@@ -274,16 +274,18 @@ function previewFoto(event) {
 
   esconderErroConta('pf-erro-foto');
 
-  if (arquivo.size > 1500000) {
-    mostrarErroConta('Imagem muito grande. Escolha uma foto com menos de 1.5MB.', 'pf-erro-foto');
+  // Aceita QUALQUER tamanho de imagem: a gente redimensiona pra 256×256 e
+  // recomprime em JPEG aqui no navegador, então o que sai sempre cabe (uns
+  // poucos KB), não importa quão grande seja o arquivo original.
+  if (!arquivo.type.startsWith('image/')) {
+    mostrarErroConta('Escolha um arquivo de imagem (jpg, png, etc).', 'pf-erro-foto');
     event.target.value = '';
     return;
   }
 
+  const preview = document.getElementById('cf-preview');
   const leitor = new FileReader();
   leitor.onload = () => {
-    // Redimensiona pra no máximo 256×256 antes de enviar — menor payload,
-    // mesma qualidade visual no avatar circular.
     const img = new Image();
     img.onload = () => {
       const MAX = 256;
@@ -293,12 +295,19 @@ function previewFoto(event) {
       canvas.height = Math.round(img.height * escala);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       fotoSelecionadaBase64 = canvas.toDataURL('image/jpeg', 0.85);
-      const preview = document.getElementById('cf-preview');
       preview.style.backgroundImage = `url('${fotoSelecionadaBase64}')`;
       preview.textContent = '';
       document.getElementById('cf-salvar').disabled = false;
     };
+    img.onerror = () => {
+      mostrarErroConta('Não consegui ler essa imagem. Tente outra (jpg ou png).', 'pf-erro-foto');
+      event.target.value = '';
+    };
     img.src = leitor.result;
+  };
+  leitor.onerror = () => {
+    mostrarErroConta('Não consegui ler esse arquivo. Tente outro.', 'pf-erro-foto');
+    event.target.value = '';
   };
   leitor.readAsDataURL(arquivo);
 }
