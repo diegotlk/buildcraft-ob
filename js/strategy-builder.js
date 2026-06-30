@@ -1231,6 +1231,7 @@ function renderResult(r) {
         <ul style="list-style:none; padding:0; margin:0; font-size:13px;">${insightsHTML}</ul>
       </div>
     </div>
+    ${montarPainelSimulacaoHTML(r)}
   `;
 
   // Guarda o último resultado para poder salvar junto com a estratégia
@@ -2800,4 +2801,152 @@ function sortearCenario() {
   strategyState.cenarioSorteado = `${par} · ${sess.nome} (${sess.ini.slice(0, 2)}h–${fimH})`;
 
   testStrategy(); // dispara suspense → backtest real → revelação da carta
+}
+
+// ════════════════════════════════════════════════
+// SIMULAÇÃO FINANCEIRA EDUCACIONAL
+// Painel rápido abaixo do resultado do backtest: usuário informa banca,
+// payout e entrada, clica num preset (Mão Fixa / Soros / Soros Agressivo)
+// e vê o resultado simulado. Usa simularGerenciamentoComHistorico() de
+// gerenciamento.js, que já está carregado na mesma página.
+// Só aparece quando o backtest gerou uma sequência cronológica (r.sequencia).
+// ════════════════════════════════════════════════
+
+function montarPainelSimulacaoHTML(r) {
+  if (!Array.isArray(r.sequencia) || !r.sequencia.length) return '';
+  return `
+    <div id="sim-financeira" style="margin-top:16px; border:2px solid var(--border); border-radius:12px; padding:24px;">
+      <div style="font-size:15px; font-weight:700; margin-bottom:4px;">💰 Simulação Financeira</div>
+      <div style="font-size:12px; color:var(--text-secondary); margin-bottom:18px;">Quanto teria resultado se você tivesse operado com esse histórico real de ${r.sequencia.length.toLocaleString('pt-BR')} entradas?</div>
+
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; align-items:flex-end;">
+        <div>
+          <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em;">Banca (R$)</label>
+          <input id="sim-banca" type="number" value="100" min="1" step="10"
+            style="width:90px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text-primary); font-size:14px;">
+        </div>
+        <div>
+          <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em;">Payout (%)</label>
+          <input id="sim-payout" type="number" value="85" min="1" max="100"
+            style="width:72px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text-primary); font-size:14px;">
+        </div>
+        <div>
+          <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em;">Entrada (R$)</label>
+          <input id="sim-entrada" type="number" value="10" min="0.5" step="1"
+            style="width:72px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text-primary); font-size:14px;">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+        <button onclick="rodarSimulacaoPreset('fixo')"
+          style="padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text-primary); cursor:pointer; font-size:13px; font-weight:600; transition:border-color .2s;"
+          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          ✋ Mão Fixa
+        </button>
+        <button onclick="rodarSimulacaoPreset('soros2')"
+          style="padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text-primary); cursor:pointer; font-size:13px; font-weight:600; transition:border-color .2s;"
+          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          📈 Soros Simples
+        </button>
+        <button onclick="rodarSimulacaoPreset('soros3')"
+          style="padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text-primary); cursor:pointer; font-size:13px; font-weight:600; transition:border-color .2s;"
+          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          🚀 Soros Agressivo
+        </button>
+      </div>
+
+      <div id="sim-resultado" style="display:none; margin-bottom:16px;"></div>
+
+      <div style="font-size:11px; color:var(--text-muted); padding:10px 14px; background:rgba(224,78,74,.06); border:1px solid rgba(224,78,74,.25); border-radius:8px; line-height:1.55;">
+        ⚠️ <strong>Simulação educacional</strong> com dados históricos. Não é recomendação de investimento e não garante resultados futuros. Opções binárias têm alto risco de perda total.
+      </div>
+    </div>
+  `;
+}
+
+function rodarSimulacaoPreset(presetNome) {
+  const r = strategyState.lastResult;
+  if (!r || !Array.isArray(r.sequencia) || !r.sequencia.length) return;
+
+  const bancaDisponivel = parseFloat(document.getElementById('sim-banca').value) || 100;
+  const payout = parseFloat(document.getElementById('sim-payout').value) || 85;
+  const valorEntrada = parseFloat(document.getElementById('sim-entrada').value) || 10;
+
+  if (valorEntrada > bancaDisponivel) {
+    const cont = document.getElementById('sim-resultado');
+    if (cont) {
+      cont.style.display = 'block';
+      cont.innerHTML = '<div style="padding:12px; background:rgba(224,78,74,.1); border-radius:8px; color:var(--danger); font-size:13px;">⚠️ A entrada não pode ser maior que a banca disponível.</div>';
+    }
+    return;
+  }
+
+  const presets = {
+    fixo:   { resultado: 'fixo',    valorEntrada, niveis: 0, momento: 'vela', nome: 'Mão Fixa',         icone: '✋' },
+    soros2: { resultado: 'vitoria', valorEntrada, niveis: 2, baseSoros: 'lucro_total', percentualSoros: 100, momento: 'vela', nome: 'Soros Simples',    icone: '📈' },
+    soros3: { resultado: 'vitoria', valorEntrada, niveis: 3, baseSoros: 'lucro_total', percentualSoros: 100, momento: 'vela', nome: 'Soros Agressivo', icone: '🚀' },
+  };
+  const g = presets[presetNome];
+  if (!g) return;
+
+  // Destaca botão ativo
+  ['fixo', 'soros2', 'soros3'].forEach(k => {
+    const presetLabels = { fixo: '✋ Mão Fixa', soros2: '📈 Soros Simples', soros3: '🚀 Soros Agressivo' };
+    document.querySelectorAll('#sim-financeira button').forEach(btn => {
+      const ativo = btn.textContent.trim() === presetLabels[presetNome];
+      btn.style.borderColor = ativo ? 'var(--accent)' : 'var(--border)';
+      btn.style.color = ativo ? 'var(--accent)' : 'var(--text-primary)';
+    });
+  });
+
+  const sim = simularGerenciamentoComHistorico(g, r.sequencia, { bancaDisponivel, payout });
+  renderSimulacaoResultado(sim, g.nome, g.icone, bancaDisponivel);
+}
+
+function renderSimulacaoResultado(sim, nomePreset, icone, bancaInicial) {
+  const cont = document.getElementById('sim-resultado');
+  if (!cont) return;
+
+  const positivo = sim.lucroFinal >= 0;
+  const corLucro = positivo ? 'var(--success)' : 'var(--danger)';
+  const sinal = positivo ? '+' : '';
+  const fmt = (n) => Math.abs(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const zeruHTML = sim.zerou
+    ? `<div style="grid-column:1/-1; margin-top:4px; padding:10px 14px; background:rgba(224,78,74,.1); border-radius:8px; color:var(--danger); font-size:13px; font-weight:600;">
+        ⚠️ Banca zerou na entrada ${sim.zerouNoIndex + 1} — a entrada pedida era maior que o saldo restante.
+       </div>`
+    : '';
+
+  cont.style.display = 'block';
+  cont.innerHTML = `
+    <div style="border-radius:10px; padding:18px; background:var(--bg); border:1px solid var(--border);">
+      <div style="font-size:12px; color:var(--text-secondary); margin-bottom:14px; text-transform:uppercase; letter-spacing:.05em;">
+        ${icone} ${nomePreset} · ${sim.entradasTestadas.toLocaleString('pt-BR')} operações simuladas
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)); gap:12px; text-align:center;">
+        <div style="padding:12px; background:var(--bg-secondary, var(--bg)); border-radius:8px;">
+          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px;">Banca inicial</div>
+          <div style="font-size:22px; font-weight:800;">R$ ${fmt(bancaInicial)}</div>
+        </div>
+        <div style="padding:12px; background:var(--bg-secondary, var(--bg)); border-radius:8px;">
+          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px;">Banca final</div>
+          <div style="font-size:22px; font-weight:800; color:${corLucro};">R$ ${fmt(sim.bancaFinal)}</div>
+        </div>
+        <div style="padding:12px; background:var(--bg-secondary, var(--bg)); border-radius:8px;">
+          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px;">Resultado</div>
+          <div style="font-size:22px; font-weight:800; color:${corLucro};">${sinal}R$ ${fmt(sim.lucroFinal)}</div>
+        </div>
+        <div style="padding:12px; background:var(--bg-secondary, var(--bg)); border-radius:8px;">
+          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px;">ROI</div>
+          <div style="font-size:22px; font-weight:800; color:${corLucro};">${sinal}${Math.abs(sim.roiPct).toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1})}%</div>
+        </div>
+        <div style="padding:12px; background:var(--bg-secondary, var(--bg)); border-radius:8px;">
+          <div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px;">Drawdown máx.</div>
+          <div style="font-size:22px; font-weight:800; color:var(--warning);">${sim.drawdownPct}%</div>
+        </div>
+        ${zeruHTML}
+      </div>
+    </div>
+  `;
 }
