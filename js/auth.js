@@ -169,6 +169,10 @@ function aplicarChecklistSenha(senha, idPara) {
   }
 }
 
+// Ícones de olho (SVG simples, sem emoji) pro botão de mostrar/ocultar senha.
+const ICONE_OLHO_ABERTO = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>';
+const ICONE_OLHO_FECHADO = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A9.26 9.26 0 0 1 12 20c-7 0-11-8-11-8a18.42 18.42 0 0 1 4.16-5.42M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
 // Olho de mostrar/ocultar senha — reutilizável em QUALQUER campo de senha do
 // site (login, cadastro, perfil, redefinir-senha). Passa o id do input e o
 // próprio botão clicado, então a mesma função serve pra vários campos na
@@ -179,7 +183,7 @@ function alternarVisibilidadeSenha(inputId, btn) {
   const oculta = input.type === 'password';
   input.type = oculta ? 'text' : 'password';
   if (btn) {
-    btn.textContent = oculta ? '🙈' : '👁';
+    btn.innerHTML = oculta ? ICONE_OLHO_FECHADO : ICONE_OLHO_ABERTO;
     btn.title = oculta ? 'Ocultar senha' : 'Mostrar senha';
     btn.setAttribute('aria-label', btn.title);
   }

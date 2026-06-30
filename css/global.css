@@ -266,8 +266,9 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
 .auth-senha-wrap .form-input{ padding-right:44px; }
 .auth-senha-toggle{
   position:absolute; right:4px; top:50%; transform:translateY(-50%);
-  background:none; border:none; cursor:pointer; font-size:1.1rem;
+  background:none; border:none; cursor:pointer;
   padding:6px 8px; line-height:1; color:var(--text-secondary);
+  display:flex; align-items:center; justify-content:center;
 }
 .auth-senha-toggle:hover{ color:var(--text-primary); }
 
