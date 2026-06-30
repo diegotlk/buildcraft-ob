@@ -13,6 +13,18 @@
   <link rel="stylesheet" href="css/cards.css?v=8">
   <link rel="stylesheet" href="css/components.css?v=5">
   <link rel="stylesheet" href="css/pages.css?v=6">
+  <style>
+    /* Título de seção (Conta / Personalização / Segurança / Assinatura /
+       Zona de perigo) — separa visualmente os grupos de cards, que antes
+       vinham todos soltos em sequência sem nenhuma hierarquia. */
+    .pf-secao-titulo {
+      font-size: .75rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--text-muted);
+      margin: 40px 0 14px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pf-secao-titulo:first-of-type { margin-top: 0; }
+  </style>
 </head>
 <body>
 
@@ -56,9 +68,11 @@
         <p class="page-subtitle">Seus dados, segurança e assinatura — tudo num só lugar.</p>
       </div>
 
-      <!-- Dados básicos: foto, nome, e-mail (exibição) -->
-      <div class="card-box" style="margin-bottom:24px">
-        <h3 style="margin-bottom:18px">Dados da conta</h3>
+      <!-- ============ CONTA (identidade: foto, nome, e-mail, fuso) ============ -->
+      <div class="pf-secao-titulo">👤 Conta</div>
+
+      <div class="card-box" style="margin-bottom:16px">
+        <h3 style="margin-bottom:18px">Foto e nome</h3>
 
         <div class="foto-preview-wrap" style="margin-bottom:8px">
           <div class="foto-preview" id="cf-preview"></div>
@@ -80,30 +94,6 @@
         </div>
       </div>
 
-      <!-- Título (emerge do seu comportamento real ao testar estratégias) -->
-      <div class="card-box" style="margin-bottom:24px">
-        <h3 style="margin-bottom:6px">🎭 Seu Título</h3>
-        <p style="color:var(--text-muted);font-size:.82rem;margin:0 0 16px">
-          Apelidos que nascem do seu jeito de caçar — sem sorteio, sem escolher em menu.
-          Toda estratégia que você salva conta pra desbloquear um novo.
-        </p>
-        <div id="secao-titulos"></div>
-      </div>
-
-      <!-- Som do site (efeitos de clique/revelação + música ambiente da home) -->
-      <div class="card-box" style="margin-bottom:24px">
-        <h3 style="margin-bottom:6px">🔊 Som do site</h3>
-        <p style="color:var(--text-muted);font-size:.82rem;margin:0 0 16px">
-          Liga/desliga os efeitos sonoros de clique e revelação de cartas, e a
-          música ambiente da página inicial. Vale pro site inteiro.
-        </p>
-        <label class="auth-lembrar" style="cursor:pointer">
-          <input type="checkbox" class="som-toggle-check" onchange="definirSom(this.checked)">
-          <span>Som ativado</span>
-        </label>
-      </div>
-
-      <!-- Fuso horário (auto-detectado; aqui só pra quem quer trocar) -->
       <div class="card-box" style="margin-bottom:24px">
         <h3 style="margin-bottom:6px">Fuso horário</h3>
         <p style="color:var(--text-muted);font-size:.82rem;margin:0 0 16px">
@@ -114,33 +104,69 @@
         </div>
       </div>
 
-      <!-- Mudar e-mail -->
+      <!-- ============ PERSONALIZAÇÃO (título, som) ============ -->
+      <div class="pf-secao-titulo">🎨 Personalização</div>
+
+      <div class="card-box" style="margin-bottom:16px">
+        <h3 style="margin-bottom:6px">🎭 Seu Título</h3>
+        <p style="color:var(--text-muted);font-size:.82rem;margin:0 0 16px">
+          Apelidos que nascem do seu jeito de caçar — sem sorteio, sem escolher em menu.
+          Toda estratégia que você salva conta pra desbloquear um novo.
+        </p>
+        <div id="secao-titulos"></div>
+      </div>
+
       <div class="card-box" style="margin-bottom:24px">
+        <h3 style="margin-bottom:6px">🔊 Som do site</h3>
+        <p style="color:var(--text-muted);font-size:.82rem;margin:0 0 16px">
+          Liga/desliga os efeitos sonoros de clique e revelação de cartas. Vale pro site inteiro.
+        </p>
+        <label class="auth-lembrar" style="cursor:pointer">
+          <input type="checkbox" class="som-toggle-check" onchange="definirSom(this.checked)">
+          <span>Som ativado</span>
+        </label>
+      </div>
+
+      <!-- ============ SEGURANÇA (e-mail, senha — ambos pedem senha atual + código) ============ -->
+      <div class="pf-secao-titulo">🔐 Segurança</div>
+
+      <div class="card-box" style="margin-bottom:16px">
         <h3 style="margin-bottom:18px">📧 Mudar e-mail</h3>
         <div id="pf-erro-email" class="auth-error"></div>
         <div class="form-group">
           <label class="form-label">Senha atual</label>
-          <input type="password" id="ce-senha" class="form-input" autocomplete="current-password">
+          <div class="auth-senha-wrap">
+            <input type="password" id="ce-senha" class="form-input" autocomplete="current-password">
+            <button type="button" class="auth-senha-toggle" onclick="alternarVisibilidadeSenha('ce-senha', this)" aria-label="Mostrar senha" title="Mostrar senha">👁</button>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Novo e-mail</label>
           <input type="email" id="ce-email" class="form-input" autocomplete="email">
         </div>
         <button class="btn btn-primary" style="width:100%" onclick="enviarMudarEmail()">Salvar novo e-mail</button>
+        <p style="color:var(--text-muted);font-size:.75rem;margin:10px 0 0">
+          Vamos pedir um código de confirmação no seu e-mail atual.
+        </p>
       </div>
 
-      <!-- Mudar senha -->
       <div class="card-box" style="margin-bottom:24px">
         <h3 style="margin-bottom:18px">🔒 Mudar senha</h3>
         <div id="pf-erro-senha" class="auth-error"></div>
         <div class="form-group">
           <label class="form-label">Senha atual</label>
-          <input type="password" id="cs-atual" class="form-input" autocomplete="current-password">
+          <div class="auth-senha-wrap">
+            <input type="password" id="cs-atual" class="form-input" autocomplete="current-password">
+            <button type="button" class="auth-senha-toggle" onclick="alternarVisibilidadeSenha('cs-atual', this)" aria-label="Mostrar senha" title="Mostrar senha">👁</button>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Nova senha</label>
-          <input type="password" id="cs-nova" class="form-input" autocomplete="new-password"
-                 oninput="aplicarChecklistSenha(this.value, c => 'cs-req-' + c)">
+          <div class="auth-senha-wrap">
+            <input type="password" id="cs-nova" class="form-input" autocomplete="new-password"
+                   oninput="aplicarChecklistSenha(this.value, c => 'cs-req-' + c)">
+            <button type="button" class="auth-senha-toggle" onclick="alternarVisibilidadeSenha('cs-nova', this)" aria-label="Mostrar senha" title="Mostrar senha">👁</button>
+          </div>
         </div>
         <div class="auth-reqs show">
           <div class="auth-reqs-titulo">Sua nova senha precisa ter:</div>
@@ -151,11 +177,15 @@
           <div class="auth-req" id="cs-req-especial"><span class="icone">○</span> Um caractere especial (!@#$%...)</div>
         </div>
         <button class="btn btn-primary" style="width:100%" onclick="enviarMudarSenha()">Salvar nova senha</button>
+        <p style="color:var(--text-muted);font-size:.75rem;margin:10px 0 0">
+          Vamos pedir um código de confirmação no seu e-mail. Outras sessões abertas serão encerradas.
+        </p>
       </div>
 
-      <!-- Assinatura / Premium -->
+      <!-- ============ ASSINATURA ============ -->
+      <div class="pf-secao-titulo">💎 Assinatura</div>
+
       <div class="card-box" id="premium" style="margin-bottom:24px">
-        <h3 style="margin-bottom:18px">💎 Assinatura</h3>
         <div id="pf-erro-cancelar" class="auth-error"></div>
 
         <div id="pf-plano-free">
@@ -184,17 +214,23 @@
         </div>
       </div>
 
-      <!-- Excluir conta -->
+      <!-- ============ ZONA DE PERIGO ============ -->
+      <div class="pf-secao-titulo" style="color:var(--danger,#e04e4a)">⚠️ Zona de perigo</div>
+
       <div class="card-box" style="margin-bottom:48px;border-color:rgba(224,78,74,.35)">
         <h3 style="margin-bottom:18px;color:var(--danger,#e04e4a)">🗑️ Excluir minha conta</h3>
         <div id="pf-erro-excluir" class="auth-error"></div>
         <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px">
           Essa ação é <strong>permanente</strong>: sua conta, estratégias e cartas serão apagadas
-          e a assinatura (se houver) é cancelada. Confirme sua senha para continuar.
+          e a assinatura (se houver) é cancelada. Confirme sua senha e o código enviado por e-mail
+          para continuar.
         </p>
         <div class="form-group">
           <label class="form-label">Senha</label>
-          <input type="password" id="ex-senha" class="form-input" autocomplete="current-password">
+          <div class="auth-senha-wrap">
+            <input type="password" id="ex-senha" class="form-input" autocomplete="current-password">
+            <button type="button" class="auth-senha-toggle" onclick="alternarVisibilidadeSenha('ex-senha', this)" aria-label="Mostrar senha" title="Mostrar senha">👁</button>
+          </div>
         </div>
         <button class="btn btn-primary" style="width:100%;background:var(--danger,#e04e4a);border-color:var(--danger,#e04e4a)" onclick="enviarExclusao()">Excluir para sempre</button>
       </div>

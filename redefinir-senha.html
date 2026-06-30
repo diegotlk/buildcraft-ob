@@ -51,8 +51,12 @@
       <form id="rs-form" onsubmit="enviarRedefinir(event)">
         <div class="form-group">
           <label class="form-label" for="rs-senha">Nova senha</label>
-          <input type="password" id="rs-senha" class="form-input" placeholder="••••••••"
-                 autocomplete="new-password" minlength="8" required oninput="atualizarReqsRS()">
+          <div class="auth-senha-wrap">
+            <input type="password" id="rs-senha" class="form-input" placeholder="••••••••"
+                   autocomplete="new-password" minlength="8" required oninput="atualizarReqsRS()">
+            <button type="button" class="auth-senha-toggle"
+                    onclick="alternarVisibilidadeSenha('rs-senha', this)" aria-label="Mostrar senha" title="Mostrar senha">👁</button>
+          </div>
         </div>
 
         <div class="auth-reqs show" id="rs-reqs">

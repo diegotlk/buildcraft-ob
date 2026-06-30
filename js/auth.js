@@ -169,6 +169,22 @@ function aplicarChecklistSenha(senha, idPara) {
   }
 }
 
+// Olho de mostrar/ocultar senha — reutilizável em QUALQUER campo de senha do
+// site (login, cadastro, perfil, redefinir-senha). Passa o id do input e o
+// próprio botão clicado, então a mesma função serve pra vários campos na
+// mesma página (ex.: perfil.html tem 4 campos de senha diferentes).
+function alternarVisibilidadeSenha(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const oculta = input.type === 'password';
+  input.type = oculta ? 'text' : 'password';
+  if (btn) {
+    btn.textContent = oculta ? '🙈' : '👁';
+    btn.title = oculta ? 'Ocultar senha' : 'Mostrar senha';
+    btn.setAttribute('aria-label', btn.title);
+  }
+}
+
 /* ============================================================
    Conta: mudar nome, senha, e-mail, foto — agora tudo em perfil.html
    (não mais num dropdown/modal). Estas funções são chamadas pelos
