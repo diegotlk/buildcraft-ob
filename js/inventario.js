@@ -585,13 +585,22 @@ function renderSeloEmblemaCarta(item) {
   `;
 }
 
+// Ícone da categoria — mesmo mapa do app.js (getClassIcon), duplicado aqui
+// porque criar_estrategia.html (aba Personalizar) não carrega app.js.
+const ICONE_CATEGORIA = {
+  'Tendência': '📈', 'Reversão': '📉', 'Anti-meta': '⚡', 'Padrão': '🔷',
+  'Conservador': '🛡️', 'Agressivo': '⚔️', 'Progressivo': '📊', 'Proteção': '🔒', 'Híbrido': '🔄',
+};
+function iconeDaCategoria(categoria) {
+  return ICONE_CATEGORIA[categoria] || '🎯';
+}
+
 // ── Carta dupla face (frente / verso) ──
+// Visual igual ao das cartas da página inicial (card-collectible): sem caixa
+// de arte/peça de xadrez, só selo de categoria com ícone — o Diego achou
+// mais bonito e mais limpo.
 function renderCartaFront(item) {
   const categoria = categoriaDaEstrategia(item);
-  // Glifo de linha fininha (mesma arte da aba Personalizar) — sem o
-  // degradê/aura de pecaXadrezSVG, que o Diego preferiu não usar.
-  const glifo = PECA_POR_RARIDADE[item.teste.rarity] || '♙';
-  const pecaArt = `<span class="carta-art-glyph">${glifo}</span>`;
   const t = item.teste;
   const numero = item.carta ? '#' + String(item.carta.numero).padStart(3, '0') : '—';
 
@@ -640,22 +649,18 @@ function renderCartaFront(item) {
     <div class="carta-face carta-face-front rarity-${t.rarity}${isShiny ? ' carta-shiny' : ''}">
       ${isShiny ? '<div class="carta-shiny-badge">✨ SHINY</div>' : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px 8px">
-        <span class="card-type-tag ${tipoTagClasse}">${tipoTag}</span>
+        <span class="card-type-tag ${tipoTagClasse}">${tipoTag} <span style="opacity:.55;font-weight:600">${numero}</span></span>
         <span class="card-rarity-badge ${t.rarity}">${RARITY_LABEL[t.rarity] || 'Comum'}</span>
       </div>
-      <div class="carta-art">
-        <span class="carta-art-numero">${numero}</span>
-        ${pecaArt}
-        <span class="carta-art-categoria">${categoria}</span>
-      </div>
-      <div style="padding:10px 14px 0">
+      <div style="padding:6px 14px 0">
         <div class="card-title">${item.nome}</div>
         <div class="card-creator">por <span>Você</span></div>
       </div>
       <div class="card-stats" style="padding:10px 14px 0;margin-bottom:0">
         ${statsHTML}
       </div>
-      <div style="padding:0 14px;font-size:.85rem;letter-spacing:1px;display:flex;align-items:center;gap:8px">
+      <div class="card-class-icon" style="margin:8px 14px 0"><span class="icon">${iconeDaCategoria(categoria)}</span> ${categoria}</div>
+      <div style="padding:6px 14px 0;font-size:.85rem;letter-spacing:1px;display:flex;align-items:center;gap:8px">
         ${renderEstrelas(item.estrelas)} ${renderSetaPerformance(item)}
       </div>
       <div class="carta-footer">

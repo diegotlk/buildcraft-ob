@@ -651,56 +651,6 @@
   animation: carta-pulso 0.7s ease-in-out 2;
 }
 
-.carta-art {
-  position: relative;
-  margin: 4px 14px 0;
-  height: 150px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: rgba(255,255,255,.02);
-}
-.carta-art-glyph {
-  font-size: 84px;
-  line-height: 1;
-}
-/* Peça de xadrez em SVG (substitui o glifo flat — Fase 1 cartas neon) */
-.carta-art-peca {
-  display: block;
-  width: 128px;
-  height: 128px;
-  line-height: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.carta-art-peca svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.carta-art-numero {
-  position: absolute;
-  top: 6px;
-  left: 8px;
-  font-size: .65rem;
-  color: var(--text-muted);
-  letter-spacing: .08em;
-}
-.carta-art-categoria {
-  position: absolute;
-  bottom: 8px;
-  right: 10px;
-  font-size: .65rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-  background: rgba(0,0,0,.45);
-  border: 1px solid var(--border-light);
-}
 
 .carta-back-selo {
   display: inline-flex;
