@@ -30,7 +30,7 @@
 
   <!-- Perfil exige login — manda pra login.html antes de pintar a página. -->
   <script src="js/sound.js?v=1"></script>
-  <script src="js/auth.js?v=9"></script>
+  <script src="js/auth.js?v=10"></script>
   <script>exigirLogin();</script>
 
   <!-- ==================== NAVBAR ==================== -->
@@ -72,14 +72,12 @@
       <div class="pf-secao-titulo">👤 Conta</div>
 
       <div class="card-box" style="margin-bottom:16px">
-        <h3 style="margin-bottom:18px">Foto e nome</h3>
+        <h3 style="margin-bottom:6px">Avatar e nome</h3>
+        <p style="color:var(--text-muted);font-size:.82rem;margin:0 0 16px">
+          Escolha o emblema que vai aparecer como sua imagem no site.
+        </p>
 
-        <div class="foto-preview-wrap" style="margin-bottom:8px">
-          <div class="foto-preview" id="cf-preview"></div>
-        </div>
-        <div id="pf-erro-foto" class="auth-error"></div>
-        <input type="file" id="cf-arquivo" accept="image/*" class="form-input" style="margin-bottom:16px" onchange="previewFoto(event)">
-        <button class="btn btn-outline" style="width:100%;margin-bottom:24px" id="cf-salvar" onclick="enviarMudarFoto()" disabled>Salvar foto</button>
+        <div id="avatar-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px"></div>
 
         <div id="pf-erro-nome" class="auth-error"></div>
         <div class="form-group">
@@ -287,30 +285,45 @@
       document.getElementById('pf-plano-premium').style.display = ehPremium() ? 'block' : 'none';
     }
 
+    function renderAvatarGrid() {
+      const atual = getAvatar();
+      const grid = document.getElementById('avatar-grid');
+      if (!grid) return;
+      grid.innerHTML = AVATAR_OPCOES.map(o => {
+        const sel = o.id === atual;
+        return `<div onclick="selecionarAvatar('${o.id}')" style="
+          cursor:pointer;border-radius:12px;padding:10px 6px 8px;text-align:center;
+          border:2px solid ${sel ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
+          background:${sel ? 'rgba(0,234,255,.07)' : 'transparent'};
+          transition:border-color .15s,background .15s;">
+          <img src="${o.src}" width="52" height="52" style="border-radius:50%;display:block;margin:0 auto;
+            ${sel ? 'filter:drop-shadow(0 0 8px #00eaff88)' : ''}">
+        </div>`;
+      }).join('');
+    }
+
+    function selecionarAvatar(id) {
+      localStorage.setItem(AVATAR_KEY, id);
+      aplicarAvatarNoNavbar();
+      renderAvatarGrid();
+    }
+
     function preencherDadosPerfil() {
       const sessao = getSessao();
       if (!sessao) return;
       document.getElementById('pf-nome').value = sessao.nome || '';
       document.getElementById('pf-email-atual').value = sessao.email || '';
       document.getElementById('ce-email').placeholder = sessao.email || 'novo@email.com';
-
-      const avatar = document.querySelector('.navbar-actions .navbar-avatar');
-      const fotoAtual = avatar?.style.backgroundImage;
-      const preview = document.getElementById('cf-preview');
-      if (fotoAtual && fotoAtual !== 'none') {
-        preview.style.backgroundImage = fotoAtual;
-      } else {
-        preview.textContent = (sessao.email || '?').charAt(0).toUpperCase();
-      }
-
       atualizarSecaoPlano();
       montarESalvarSecaoTitulos();
+      renderAvatarGrid();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('.som-toggle-check').checked = somAtivo();
       montarSelectFuso();
       montarESalvarSecaoTitulos();
+      renderAvatarGrid();
       // renderNavbarAuth (chamado por auth.js) busca /api/auth/me antes de
       // termos a sessão completa — espera ela terminar pra preencher os campos.
       renderNavbarAuth().then(preencherDadosPerfil).catch(preencherDadosPerfil);

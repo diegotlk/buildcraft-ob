@@ -190,12 +190,40 @@ function alternarVisibilidadeSenha(inputId, btn) {
 }
 
 /* ============================================================
-   Conta: mudar nome, senha, e-mail, foto — agora tudo em perfil.html
-   (não mais num dropdown/modal). Estas funções são chamadas pelos
-   formulários inline daquela página.
+   Avatar — emblemas dos títulos como imagem de perfil
    ============================================================ */
-let fotoSelecionadaBase64 = null;
+const AVATAR_KEY = 'binaryzando_avatar';
+const AVATAR_OPCOES = [
+  { id: 'genesis',         src: 'titulos_emblemas/genesis.svg'  },
+  { id: 'explorador',      src: 'titulos_emblemas/bussola.png'  },
+  { id: 'cacador_lendas',  src: 'titulos_emblemas/coroa.png'    },
+  { id: 'fiel',            src: 'titulos_emblemas/escudo.png'   },
+  { id: 'coruja',          src: 'titulos_emblemas/coruja.png'   },
+  { id: 'lobo',            src: 'titulos_emblemas/lobo.png'     },
+  { id: 'falcao',          src: 'titulos_emblemas/falcao.png'   },
+  { id: 'galo',            src: 'titulos_emblemas/galo.png'     },
+];
 
+function getAvatar() {
+  return localStorage.getItem(AVATAR_KEY) || null;
+}
+
+function aplicarAvatarNoNavbar() {
+  const avatar = document.querySelector('.navbar-actions .navbar-avatar');
+  if (!avatar) return;
+  const id = getAvatar();
+  const opcao = id ? AVATAR_OPCOES.find(o => o.id === id) : null;
+  if (opcao) {
+    avatar.style.backgroundImage = `url('${opcao.src}')`;
+    avatar.style.backgroundSize = 'cover';
+    avatar.style.backgroundPosition = 'center';
+    avatar.textContent = '';
+  }
+}
+
+/* ============================================================
+   Conta: mudar nome, senha, e-mail — tudo em perfil.html.
+   ============================================================ */
 function erroContaHtml(elId) {
   return `<div class="auth-error" id="${elId || 'conta-erro'}"></div>`;
 }
@@ -379,81 +407,6 @@ async function enviarMudarEmail() {
   if (!ok) mostrarErroConta(message, 'pf-erro-email');
 }
 
-function previewFoto(event) {
-  const arquivo = event.target.files[0];
-  if (!arquivo) return;
-
-  esconderErroConta('pf-erro-foto');
-
-  // Aceita QUALQUER tamanho de imagem: a gente redimensiona pra 256×256 e
-  // recomprime em JPEG aqui no navegador, então o que sai sempre cabe (uns
-  // poucos KB), não importa quão grande seja o arquivo original.
-  if (!arquivo.type.startsWith('image/')) {
-    mostrarErroConta('Escolha um arquivo de imagem (jpg, png, etc).', 'pf-erro-foto');
-    event.target.value = '';
-    return;
-  }
-
-  const preview = document.getElementById('cf-preview');
-  const leitor = new FileReader();
-  leitor.onload = () => {
-    const img = new Image();
-    img.onload = () => {
-      const MAX = 256;
-      const escala = Math.min(MAX / img.width, MAX / img.height, 1);
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(img.width * escala);
-      canvas.height = Math.round(img.height * escala);
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      fotoSelecionadaBase64 = canvas.toDataURL('image/jpeg', 0.85);
-      preview.style.backgroundImage = `url('${fotoSelecionadaBase64}')`;
-      preview.textContent = '';
-      document.getElementById('cf-salvar').disabled = false;
-    };
-    img.onerror = () => {
-      mostrarErroConta('Não consegui ler essa imagem. Tente outra (jpg ou png).', 'pf-erro-foto');
-      event.target.value = '';
-    };
-    img.src = leitor.result;
-  };
-  leitor.onerror = () => {
-    mostrarErroConta('Não consegui ler esse arquivo. Tente outro.', 'pf-erro-foto');
-    event.target.value = '';
-  };
-  leitor.readAsDataURL(arquivo);
-}
-
-async function enviarMudarFoto() {
-  if (!fotoSelecionadaBase64) return;
-  esconderErroConta('pf-erro-foto');
-
-  try {
-    const resp = await fetch(`${AUTH_API_BASE}/api/auth/foto`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSessao()?.token },
-      body: JSON.stringify({ foto_base64: fotoSelecionadaBase64 }),
-    });
-    const dados = await resp.json();
-    if (!resp.ok || !dados.success) {
-      mostrarErroConta(dados.message || 'Não foi possível salvar a foto.', 'pf-erro-foto');
-      return;
-    }
-    aplicarFotoNoAvatar(dados.foto_url);
-    avisarConta('Foto atualizada', 'Sua nova foto de perfil foi salva.');
-  } catch (e) {
-    mostrarErroConta('Não foi possível conectar à API.', 'pf-erro-foto');
-  }
-}
-
-function aplicarFotoNoAvatar(fotoUrl) {
-  const avatar = document.querySelector('.navbar-actions .navbar-avatar');
-  if (!avatar || !fotoUrl) return;
-  avatar.style.backgroundImage = `url('${fotoUrl}')`;
-  avatar.style.backgroundSize = 'cover';
-  avatar.style.backgroundPosition = 'center';
-  avatar.textContent = '';
-}
-
 /* ============================================================
    Cancelar assinatura e excluir conta (formulários inline em perfil.html).
    ============================================================ */
@@ -532,6 +485,7 @@ async function renderNavbarAuth() {
       avatar.title = sessao.email;
       avatar.href = 'perfil.html';
       avatar.onclick = null;
+      aplicarAvatarNoNavbar();
 
       try {
         const resp = await fetch(`${AUTH_API_BASE}/api/auth/me`, {
@@ -542,7 +496,6 @@ async function renderNavbarAuth() {
           // Reflete o plano/nome atuais do servidor (pode ter virado premium
           // após uma compra, ou o nome ter sido salvo em outra sessão).
           salvarSessao(sessao.token, sessao.email, dados.plano || 'free', undefined, dados.nome);
-          if (dados.foto_url) aplicarFotoNoAvatar(dados.foto_url);
         }
       } catch (e) {
         // API fora do ar: mantém a inicial no avatar, sem travar a página.
