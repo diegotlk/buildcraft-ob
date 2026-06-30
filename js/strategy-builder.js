@@ -439,12 +439,10 @@ function setSchedulePeriodoRapido(dias, el) {
 // nenhum ficava marcado — o usuário não via qual período tinha escolhido.
 function marcarAtalhoPeriodo(el) {
   if (!el || !el.parentElement) return;
-  el.parentElement.querySelectorAll('button').forEach(b => {
-    b.classList.remove('btn-accent');
-    b.classList.add('btn-outline');
-  });
-  el.classList.remove('btn-outline');
-  el.classList.add('btn-accent');
+  // Mesmo padrão "✓ + ciano preenchido" dos outros filtros do site
+  // (raridade no Inventário/Ranking) — ver .btn-outline.active em global.css.
+  el.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
 }
 
 // Quando o usuário edita a data na mão, o atalho marcado deixa de valer: limpa
@@ -453,10 +451,7 @@ function marcarAtalhoPeriodo(el) {
 function limparAtalhosPeriodo(prefixo) {
   const datas = document.getElementById(prefixo + '-periodo-datas');
   if (!datas) return;
-  datas.querySelectorAll('.btn-sm').forEach(b => {
-    b.classList.remove('btn-accent');
-    b.classList.add('btn-outline');
-  });
+  datas.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
 }
 
 // ── DIAS DA SEMANA (filtro por cima do período) ──
