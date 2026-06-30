@@ -1314,6 +1314,7 @@ function salvarHistoricoDoTeste() {
     periodoAte: r.periodo_ate,
     velasUsadas: r.velas_usadas,
     sequencia: r.sequencia,
+    sequencia_rica: r.sequencia_rica || null,
     criadoEm: new Date().toISOString(),
   });
   if (!salvarHistoricos(historicos)) return;
