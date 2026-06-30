@@ -658,12 +658,12 @@ function renderCartaFront(item) {
 
   return `
     <div class="carta-face carta-face-front rarity-${t.rarity}${isShiny ? ' carta-shiny' : ''}${isGenesis ? ' carta-genesis' : ''}">
-      ${isShiny ? '<div class="carta-shiny-badge">✨ SHINY</div>' : ''}
-      ${isGenesis && !isShiny ? '<div class="carta-genesis-badge">✦ Gênesis</div>' : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px 8px">
         <span class="card-type-tag ${tipoTagClasse}">${tipoTag} <span style="opacity:.55;font-weight:600">${numero}</span></span>
         <span class="card-rarity-badge ${t.rarity}">${RARITY_LABEL[t.rarity] || 'Comum'}</span>
       </div>
+      ${isShiny ? '<div class="carta-shiny-badge">✨ SHINY</div>' : ''}
+      ${isGenesis && !isShiny ? '<div class="carta-genesis-badge">✦ Gênesis</div>' : ''}
       <div style="padding:6px 14px 0">
         <div class="card-title">${item.nome}</div>
         <div class="card-creator">por <span>Você</span></div>
