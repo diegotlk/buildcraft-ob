@@ -619,6 +619,27 @@
 
     /* ── Aba Personalizar (nome e imagem da carta) ── */
     #phase-personalizar { max-width: 900px; margin: 0 auto 24px; }
+
+    /* ── Aba Simulação Financeira ── */
+    #phase-simulacao { max-width: 900px; margin: 0 auto 24px; }
+    .simf-config-box {
+      background: var(--bg-card, var(--bg));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .simf-radio-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; }
+    .simf-radio-label {
+      display: flex; align-items: center; gap: 7px;
+      cursor: pointer; font-size: 14px; color: var(--text-primary);
+    }
+    .simf-radio-label input[type="radio"] { accent-color: var(--accent); width: 16px; height: 16px; }
+    .simf-field { margin-bottom: 14px; }
+    .simf-field label { display: block; font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+    .simf-input { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-size: 14px; }
+    .simf-input:focus { outline: none; border-color: var(--accent); }
+    .simf-sub-label { font-weight: 700; font-size: 13px; margin-bottom: 10px; color: var(--text-primary); }
     .refinar-media {
       text-align: center; color: var(--text-secondary); font-size: 13px;
       margin-bottom: 16px;
@@ -700,6 +721,7 @@
           <button class="lab-tab" id="lab-grupo-testar" onclick="trocarGrupoLab('testar')" data-i18n="lab.grupo.testar">♻️ Testar</button>
           <button class="lab-tab" id="lab-grupo-catalogador" onclick="trocarGrupoLab('catalogador')" data-i18n="lab.grupo.catalogador">🔥 Catalogar</button>
           <button class="lab-tab" id="lab-grupo-refinar" onclick="trocarGrupoLab('refinar')" data-i18n="lab.grupo.refinar">🎯 Refinar</button>
+          <button class="lab-tab" id="lab-grupo-simulacao" onclick="trocarGrupoLab('simulacao')">💰 Simulação</button>
           <button class="lab-tab" id="lab-grupo-personalizar" onclick="trocarGrupoLab('personalizar')" data-i18n="lab.grupo.personalizar">🖌️ Personalizar</button>
         </div>
 
@@ -1745,6 +1767,176 @@
           </div>
         </div>
 
+        <!-- ── GRUPO: SIMULAÇÃO FINANCEIRA ── -->
+        <div class="phase-section" id="phase-simulacao">
+          <div class="step-counter">💰 Simulação Financeira</div>
+          <h2 class="card-box-title">Simule seu gerenciamento operação por operação</h2>
+          <p style="text-align:center; color:var(--text-secondary); margin-bottom:24px;">
+            Escolha um histórico, configure o gerenciamento e veja o resultado de cada entrada — com tabela completa de W/L, valor e saldo.
+          </p>
+
+          <!-- 1. Fonte + banca/payout -->
+          <div class="simf-config-box">
+            <div class="simf-sub-label" style="margin-bottom:14px;">1. Fonte e banca</div>
+            <div class="simf-field">
+              <label>Histórico de entradas</label>
+              <select id="simf-historico-select" class="simf-input" style="width:100%; max-width:480px;">
+                <!-- populado por JS ao abrir a aba -->
+              </select>
+            </div>
+            <div style="display:flex; gap:14px; flex-wrap:wrap;">
+              <div class="simf-field">
+                <label>Banca inicial (R$)</label>
+                <input id="simf-banca" type="number" value="100" min="1" step="10" class="simf-input" style="width:110px;">
+              </div>
+              <div class="simf-field">
+                <label>Payout (%)</label>
+                <input id="simf-payout" type="number" value="85" min="1" max="100" class="simf-input" style="width:80px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Tipo de gerenciamento -->
+          <div class="simf-config-box">
+            <div class="simf-sub-label" style="margin-bottom:12px;">2. Gerenciamento</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+              <button class="lab-tab active" id="simf-tab-mf"    onclick="simfTipo('mf')">✋ Mão Fixa</button>
+              <button class="lab-tab"        id="simf-tab-soros" onclick="simfTipo('soros')">📈 Soros</button>
+              <button class="lab-tab"        id="simf-tab-mg"    onclick="simfTipo('mg')">♻️ Martingale</button>
+            </div>
+
+            <!-- Config Mão Fixa -->
+            <div id="simf-config-mf">
+              <div class="simf-sub-label">Tipo de entrada</div>
+              <div class="simf-radio-row">
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-mf-modo" value="valor" checked onchange="simfToggleMfModo()">
+                  Valor fixo (R$)
+                </label>
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-mf-modo" value="porcentagem" onchange="simfToggleMfModo()">
+                  Porcentagem da banca (%)
+                </label>
+              </div>
+              <div id="simf-mf-c-valor" class="simf-field">
+                <label>Valor de entrada (R$)</label>
+                <input id="simf-mf-valor" type="number" value="10" min="1" step="1" class="simf-input" style="width:100px;">
+              </div>
+              <div id="simf-mf-c-pct" class="simf-field" style="display:none;">
+                <label>Porcentagem da banca (%)</label>
+                <input id="simf-mf-pct" type="number" value="5" min="0.1" max="100" step="0.1" class="simf-input" style="width:90px;">
+              </div>
+            </div>
+
+            <!-- Config Soros -->
+            <div id="simf-config-soros" style="display:none;">
+              <div class="simf-sub-label">Entrada base</div>
+              <div class="simf-radio-row">
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-soros-base-modo" value="valor" checked onchange="simfToggleSorosBaseModo()">
+                  Valor fixo (R$)
+                </label>
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-soros-base-modo" value="porcentagem" onchange="simfToggleSorosBaseModo()">
+                  Porcentagem da banca (%)
+                </label>
+              </div>
+              <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px;">
+                <div id="simf-soros-c-bvalor" class="simf-field" style="margin-bottom:0;">
+                  <label>Valor base (R$)</label>
+                  <input id="simf-soros-base-valor" type="number" value="10" min="1" step="1" class="simf-input" style="width:100px;">
+                </div>
+                <div id="simf-soros-c-bpct" class="simf-field" style="display:none; margin-bottom:0;">
+                  <label>Porcentagem da banca (%)</label>
+                  <input id="simf-soros-base-pct" type="number" value="5" min="0.1" max="100" step="0.1" class="simf-input" style="width:90px;">
+                </div>
+                <div class="simf-field" style="margin-bottom:0;">
+                  <label>Níveis de Soros (1–10)</label>
+                  <input id="simf-soros-niveis" type="number" value="3" min="1" max="10" step="1" class="simf-input" style="width:70px;">
+                </div>
+              </div>
+              <div class="simf-sub-label">Progressão do lucro</div>
+              <div class="simf-radio-row">
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-soros-lucro-modo" value="total" checked onchange="simfToggleSorosLucroModo()">
+                  100% do lucro acumulado
+                </label>
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-soros-lucro-modo" value="porcentagem" onchange="simfToggleSorosLucroModo()">
+                  Porcentagem do lucro acumulado
+                </label>
+              </div>
+              <div id="simf-soros-c-hidden" style="display:none;"></div><!-- placeholder pra toggle -->
+              <div id="simf-soros-c-lucropct" class="simf-field" style="display:none;">
+                <label>Porcentagem do lucro acumulado (%)</label>
+                <input id="simf-soros-lucro-pct" type="number" value="50" min="1" max="100" step="1" class="simf-input" style="width:80px;">
+                <span style="font-size:12px; color:var(--text-secondary); margin-left:8px;">ex: 50% = metade do lucro vai pra próxima entrada</span>
+              </div>
+            </div>
+
+            <!-- Config Martingale -->
+            <div id="simf-config-mg" style="display:none;">
+              <div class="simf-sub-label">Entrada base</div>
+              <div class="simf-radio-row">
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-mg-base-modo" value="valor" checked onchange="simfToggleMgBaseModo()">
+                  Valor fixo (R$)
+                </label>
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-mg-base-modo" value="porcentagem" onchange="simfToggleMgBaseModo()">
+                  Porcentagem da banca (%)
+                </label>
+              </div>
+              <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px;">
+                <div id="simf-mg-c-bvalor" class="simf-field" style="margin-bottom:0;">
+                  <label>Valor base (R$)</label>
+                  <input id="simf-mg-base-valor" type="number" value="10" min="1" step="1" class="simf-input" style="width:100px;">
+                </div>
+                <div id="simf-mg-c-bpct" class="simf-field" style="display:none; margin-bottom:0;">
+                  <label>Porcentagem da banca (%)</label>
+                  <input id="simf-mg-base-pct" type="number" value="5" min="0.1" max="100" step="0.1" class="simf-input" style="width:90px;">
+                </div>
+                <div class="simf-field" style="margin-bottom:0;">
+                  <label>Níveis de Martingale (1–10)</label>
+                  <input id="simf-mg-niveis" type="number" value="3" min="1" max="10" step="1" class="simf-input" style="width:70px;">
+                </div>
+              </div>
+              <div class="simf-sub-label">Progressão na derrota</div>
+              <div class="simf-radio-row">
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-mg-modo" value="dobrar" checked onchange="simfToggleMgModo()">
+                  Dobrar (×2)
+                </label>
+                <label class="simf-radio-label">
+                  <input type="radio" name="simf-mg-modo" value="porcentagem" onchange="simfToggleMgModo()">
+                  Multiplicador personalizado
+                </label>
+              </div>
+              <div id="simf-mg-c-hidden" style="display:none;"></div><!-- placeholder pra toggle -->
+              <div id="simf-mg-c-multpct" class="simf-field" style="display:none;">
+                <label>Multiplicador (%)</label>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <input id="simf-mg-pct" type="number" value="200" min="101" step="10" class="simf-input" style="width:90px;">
+                  <span style="font-size:12px; color:var(--text-secondary);">200% = dobrar · 300% = triplicar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botão simular -->
+          <button class="btn btn-primary" onclick="rodarSimulacaoCompleta()" style="width:100%; margin-bottom:16px; font-size:15px; padding:14px;">
+            🚀 Simular
+          </button>
+
+          <!-- Disclaimer -->
+          <div style="font-size:11px; color:var(--text-muted); padding:12px 16px; background:rgba(224,78,74,.06); border:1px solid rgba(224,78,74,.25); border-radius:8px; line-height:1.6; margin-bottom:20px;">
+            ⚠️ <strong>Simulação educacional</strong> baseada em dados históricos reais. Não é recomendação de investimento e não garante resultados futuros. Opções binárias têm alto risco de perda total do capital investido.
+          </div>
+
+          <!-- Resultado -->
+          <div id="simf-resultado" style="display:none;"></div>
+        </div>
+
         <!-- ── GRUPO: PERSONALIZAR (nome e imagem da carta) ── -->
         <div class="phase-section" id="phase-personalizar">
           <div class="step-counter">🖌️ Personalizar</div>
@@ -1790,6 +1982,7 @@
   <script src="js/strategy-builder.js?v=26"></script>
   <script src="js/catalogador.js?v=12"></script>
   <script src="js/refinar.js?v=1"></script>
+  <script src="js/simulacao.js?v=1"></script>
   <script src="js/i18n.js?v=4"></script>
   <script>
     // Esta página não carrega js/app.js (ela já define seu próprio showToast,

@@ -1620,6 +1620,7 @@ function trocarGrupoLab(grupo) {
   document.getElementById('lab-grupo-testar').classList.toggle('active', grupo === 'testar');
   document.getElementById('lab-grupo-catalogador')?.classList.toggle('active', grupo === 'catalogador');
   document.getElementById('lab-grupo-refinar')?.classList.toggle('active', grupo === 'refinar');
+  document.getElementById('lab-grupo-simulacao')?.classList.toggle('active', grupo === 'simulacao');
   document.getElementById('lab-grupo-personalizar')?.classList.toggle('active', grupo === 'personalizar');
   document.getElementById('lab-subtabs-criar').style.display = grupo === 'criar' ? 'flex' : 'none';
   document.getElementById('lab-subtabs-testar').style.display = grupo === 'testar' ? 'flex' : 'none';
@@ -1632,6 +1633,11 @@ function trocarGrupoLab(grupo) {
   if (grupo === 'refinar') {
     goToPhase('refinar');
     if (typeof renderRefinarEstrategias === 'function') renderRefinarEstrategias();
+    return;
+  }
+  if (grupo === 'simulacao') {
+    goToPhase('simulacao');
+    if (typeof renderSimulacaoFinanceira === 'function') renderSimulacaoFinanceira();
     return;
   }
   if (grupo === 'personalizar') {
