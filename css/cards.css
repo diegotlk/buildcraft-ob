@@ -504,12 +504,11 @@
   width: 100%;
   max-width: 250px;
   margin: 0 auto;
-  aspect-ratio: 25 / 37;
-  /* Altura mínima fixa, independente da largura: o texto tem tamanho fixo
-     (não acompanha a largura do card), então em colunas estreitas no
-     celular a altura proporcional ao aspect-ratio ficava menor que o
-     conteúdo e cortava o rodapé (overflow:hidden escondia o resto). */
-  min-height: 350px;
+  /* Altura fixa (não aspect-ratio): como o texto tem tamanho fixo e não
+     quebra linha, o conteúdo sempre ocupa a mesma altura não importa a
+     largura do card — aspect-ratio ficava ora curto demais (cortava o
+     rodapé), ora alto demais (sobrava vazio embaixo). */
+  height: 334px;
   -webkit-perspective: 1200px;
   perspective: 1200px;
   cursor: pointer;
