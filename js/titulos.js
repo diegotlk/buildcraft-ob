@@ -38,36 +38,6 @@ const TITULOS_DEFS = [
     },
   },
   {
-    id: 'coruja', nome: 'A Coruja', cor: '#818cf8', icone: 'coruja',
-    criterioTexto: 'Teste pelo menos 3 estratégias com horário entre 00h e 05h59, sendo 60% ou mais dos seus testes nessa faixa.',
-    condicao: (s) => avaliarHorario(s, 'madrugada', 'entre 00h e 05h59'),
-  },
-  {
-    id: 'galo', nome: 'O Galo', cor: '#fb923c', icone: 'galo',
-    criterioTexto: 'Teste pelo menos 3 estratégias com horário entre 06h e 11h59, sendo 60% ou mais dos seus testes nessa faixa.',
-    condicao: (s) => avaliarHorario(s, 'manha', 'entre 06h e 11h59'),
-  },
-  {
-    id: 'falcao', nome: 'O Falcão', cor: '#f43f5e', icone: 'falcao',
-    criterioTexto: 'Teste pelo menos 3 estratégias com horário entre 12h e 17h59, sendo 60% ou mais dos seus testes nessa faixa.',
-    condicao: (s) => avaliarHorario(s, 'tarde', 'entre 12h e 17h59'),
-  },
-  {
-    id: 'lobo', nome: 'O Lobo', cor: '#38bdf8', icone: 'lobo',
-    criterioTexto: 'Teste pelo menos 3 estratégias com horário entre 18h e 23h59, sendo 60% ou mais dos seus testes nessa faixa.',
-    condicao: (s) => avaliarHorario(s, 'noite', 'entre 18h e 23h59'),
-  },
-  {
-    id: 'fiel', nome: 'O Fiel', cor: '#34d399', icone: 'fiel',
-    criterioTexto: 'Tenha pelo menos 5 estratégias salvas com par definido, sendo 70% ou mais delas no mesmo par.',
-    condicao: (s) => {
-      if (s.comPar < 5 || !s.parDominante) return { desbloqueado: false };
-      const frac = s.parDominante[1] / s.comPar;
-      if (frac < 0.7) return { desbloqueado: false };
-      return { desbloqueado: true, detalhe: `${Math.round(frac * 100)}% das suas estratégias usam ${s.parDominante[0]}`, par: s.parDominante[0] };
-    },
-  },
-  {
     id: 'explorador', nome: 'O Explorador', cor: '#2dd4bf', icone: 'explorador',
     criterioTexto: 'Teste estratégias em pelo menos 5 pares diferentes (mínimo de 8 estratégias salvas no total).',
     condicao: (s) => {
@@ -82,6 +52,36 @@ const TITULOS_DEFS = [
       if (s.legendarias < 3) return { desbloqueado: false };
       return { desbloqueado: true, detalhe: `Você já caçou ${s.legendarias} cartas Lendárias` };
     },
+  },
+  {
+    id: 'fiel', nome: 'O Fiel', cor: '#34d399', icone: 'fiel',
+    criterioTexto: 'Tenha pelo menos 5 estratégias salvas com par definido, sendo 70% ou mais delas no mesmo par.',
+    condicao: (s) => {
+      if (s.comPar < 5 || !s.parDominante) return { desbloqueado: false };
+      const frac = s.parDominante[1] / s.comPar;
+      if (frac < 0.7) return { desbloqueado: false };
+      return { desbloqueado: true, detalhe: `${Math.round(frac * 100)}% das suas estratégias usam ${s.parDominante[0]}`, par: s.parDominante[0] };
+    },
+  },
+  {
+    id: 'coruja', nome: 'A Coruja', cor: '#818cf8', icone: 'coruja',
+    criterioTexto: 'Teste pelo menos 3 estratégias com horário entre 00h e 05h59, sendo 60% ou mais dos seus testes nessa faixa.',
+    condicao: (s) => avaliarHorario(s, 'madrugada', 'entre 00h e 05h59'),
+  },
+  {
+    id: 'lobo', nome: 'O Lobo', cor: '#38bdf8', icone: 'lobo',
+    criterioTexto: 'Teste pelo menos 3 estratégias com horário entre 18h e 23h59, sendo 60% ou mais dos seus testes nessa faixa.',
+    condicao: (s) => avaliarHorario(s, 'noite', 'entre 18h e 23h59'),
+  },
+  {
+    id: 'falcao', nome: 'O Falcão', cor: '#f43f5e', icone: 'falcao',
+    criterioTexto: 'Teste pelo menos 3 estratégias com horário entre 12h e 17h59, sendo 60% ou mais dos seus testes nessa faixa.',
+    condicao: (s) => avaliarHorario(s, 'tarde', 'entre 12h e 17h59'),
+  },
+  {
+    id: 'galo', nome: 'O Galo', cor: '#fb923c', icone: 'galo',
+    criterioTexto: 'Teste pelo menos 3 estratégias com horário entre 06h e 11h59, sendo 60% ou mais dos seus testes nessa faixa.',
+    condicao: (s) => avaliarHorario(s, 'manha', 'entre 06h e 11h59'),
   },
 ];
 
