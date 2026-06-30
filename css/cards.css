@@ -499,7 +499,7 @@
   width: 100%;
   max-width: 250px;
   margin: 0 auto;
-  aspect-ratio: 25 / 42;
+  aspect-ratio: 25 / 33;
   -webkit-perspective: 1200px;
   perspective: 1200px;
   cursor: pointer;
@@ -685,7 +685,6 @@
 }
 
 .carta-footer {
-  margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;

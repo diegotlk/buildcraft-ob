@@ -664,7 +664,7 @@ function renderCartaFront(item) {
         ${renderEstrelas(item.estrelas)} ${renderSetaPerformance(item)}
       </div>
       <div class="carta-footer">
-        <div class="card-footer-stat"><strong>1</strong> usuário</div>
+        <div class="card-footer-stat"><strong>1</strong> usuário · <strong>0</strong> vendas</div>
         <div class="grade ${getGradeClass(t.grade)}">${t.grade}</div>
       </div>
     </div>
