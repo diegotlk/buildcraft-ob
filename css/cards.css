@@ -585,6 +585,20 @@
   overflow-y: auto;
 }
 
+/* Mesmo texto centralizado dos cards da home (herdam text-align:center
+   da seção hero) — replica aqui pra ficarem idênticos. Linhas em flex
+   (selo de categoria, estrelas) não são afetadas por text-align. */
+.carta-face-front {
+  text-align: center;
+}
+
+/* No card flip (com botões de excluir/arquivar sobrepostos no topo), dá
+   mais respiro pro cabeçalho não ficar embaixo dos botões. Não afeta os
+   cards de seleção (build-pick), que não têm esses botões. */
+.carta-flip-wrap .carta-face-front > div:first-child {
+  padding-top: 32px !important;
+}
+
 .carta-face.rarity-common    { border-color: var(--rarity-common); }
 .carta-face.rarity-rare      { border-color: var(--rarity-rare); box-shadow: 0 0 24px var(--rarity-rare-glow); }
 .carta-face.rarity-epic      { border-color: var(--rarity-epic); box-shadow: 0 0 28px var(--rarity-epic-glow); }
