@@ -763,13 +763,6 @@ function renderCartaBack(item) {
 // (tem pair/timeframeOperado/grade/rarity no formato que o ranking espera).
 // Build/gerenciamento ficam de fora por enquanto (formato de teste diferente).
 function renderBotaoRanking(item) {
-  if (typeof ehPremium !== 'function' || !ehPremium()) {
-    return `
-      <button class="btn btn-sm btn-outline" style="width:100%;margin-top:8px" onclick="event.stopPropagation(); window.location.href='planos.html';">
-        🏆 Publicar no Ranking (Premium)
-      </button>
-    `;
-  }
   return `
     <button class="btn btn-sm btn-outline" id="btn-rank-${item.id}" style="width:100%;margin-top:8px"
             onclick="event.stopPropagation(); publicarNoRanking('${item.id}')">

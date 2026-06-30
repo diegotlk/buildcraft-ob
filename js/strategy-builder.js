@@ -112,7 +112,7 @@ const PRESETS_QUADRANTE = [
 const PRESETS_FREE = ['MHI 1', 'Milhão'];
 
 function presetBloqueado(nome) {
-  return !ehPremium() && !PRESETS_FREE.includes(nome);
+  return false;
 }
 
 // Aviso amigável quando um free toca em algo Premium (preset trancado ou o
@@ -2095,11 +2095,6 @@ function proximoMontador() {
 
 // ── Q1: presets ou custom ──
 function setQApproach(approach, el) {
-  // Montar do zero é Premium — no Free só dá pra usar os presets liberados.
-  if (approach === 'custom' && !ehPremium()) {
-    upsellPremium('Montar estratégia do zero');
-    return;
-  }
 
   // Os presets clássicos (MHI, Milhão, Torres Gêmeas...) são todos baseados
   // em velas M1 — só fazem sentido se o timeframe global escolhido for M1.

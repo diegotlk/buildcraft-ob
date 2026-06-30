@@ -76,10 +76,8 @@ function popularSelectParRefinar() {
 }
 
 function aoTrocarPeriodoRefinar() {
-  const periodo = document.getElementById('refinar-periodo')?.value;
   const aviso = document.getElementById('refinar-aviso-premium');
-  const souPremium = typeof ehPremium === 'function' && ehPremium();
-  if (aviso) aviso.style.display = (periodo === 'mes' && !souPremium) ? 'block' : 'none';
+  if (aviso) aviso.style.display = 'none';
 }
 
 function renderRefinarDiasChips() {

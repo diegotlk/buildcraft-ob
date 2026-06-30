@@ -15,8 +15,9 @@ const TITULO_ATIVO_KEY = 'buildcraft_titulo_ativo';
 const TITULO_DISPLAY_MODO_KEY = 'buildcraft_titulo_display_modo'; // 'nome' | 'emblema' | 'ambos'
 const TITULO_RANKING_KEY = 'buildcraft_titulo_mostrar_ranking';
 
-// ── ÍCONES (PNGs em titulos_emblemas/) ──
+// ── ÍCONES (PNGs / SVGs em titulos_emblemas/) ──
 const TITULO_ICONES = {
+  genesis:       'titulos_emblemas/genesis.svg',
   coruja:        'titulos_emblemas/coruja.png',
   galo:          'titulos_emblemas/galo.png',
   falcao:        'titulos_emblemas/falcao.png',
@@ -28,6 +29,14 @@ const TITULO_ICONES = {
 
 // ── DEFINIÇÕES (regra fixa por comportamento real, sem sorteio) ──
 const TITULOS_DEFS = [
+  {
+    id: 'genesis', nome: 'Gênesis', cor: '#f0c040', icone: 'genesis',
+    criterioTexto: 'Sua primeira carta de todos os tempos já era Lendária (S+). O começo de uma lenda.',
+    condicao: (s) => {
+      if (!s.primeiraCartaLendaria) return { desbloqueado: false };
+      return { desbloqueado: true, detalhe: 'Primeira carta criada já era Lendária — o começo de uma lenda' };
+    },
+  },
   {
     id: 'coruja', nome: 'A Coruja', cor: '#818cf8', icone: 'coruja',
     criterioTexto: 'Teste pelo menos 3 estratégias com horário entre 00h e 05h59, sendo 60% ou mais dos seus testes nessa faixa.',
@@ -116,6 +125,11 @@ function calcularStatsComportamento() {
 
   const legendarias = itens.filter((it) => it.teste.rarity === 'legendary' && it.carta).length;
 
+  // Gênesis: primeira carta criada (menor criadoEm) deve ser lendária
+  const comCarta = itens.filter(it => it.carta);
+  comCarta.sort((a, b) => new Date(a.criadoEm || 0) - new Date(b.criadoEm || 0));
+  const primeiraCartaLendaria = comCarta.length > 0 && comCarta[0].teste?.rarity === 'legendary';
+
   return {
     totalItens: itens.length,
     buckets,
@@ -124,6 +138,7 @@ function calcularStatsComportamento() {
     paresDiferentes: paresOrdenados.length,
     parDominante: paresOrdenados[0] || null,
     legendarias,
+    primeiraCartaLendaria,
   };
 }
 

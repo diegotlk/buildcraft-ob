@@ -29,10 +29,8 @@ function popularSelectParesCatalogador() {
 }
 
 function aoTrocarPeriodoCatalogador() {
-  const periodo = document.getElementById('cat-periodo')?.value;
   const aviso = document.getElementById('cat-aviso-premium');
-  const souPremium = typeof ehPremium === 'function' && ehPremium();
-  if (aviso) aviso.style.display = (periodo === 'mes' && !souPremium) ? 'block' : 'none';
+  if (aviso) aviso.style.display = 'none';
 }
 
 function renderTotaisCatalogador(totais) {

@@ -1704,12 +1704,11 @@
             <select id="cat-periodo" onchange="aoTrocarPeriodoCatalogador()">
               <option value="dia" selected>1 dia</option>
               <option value="semana">1 semana</option>
-              <option value="mes">1 mês 🔒</option>
+              <option value="mes">1 mês</option>
             </select>
             <input type="date" id="cat-data">
             <button class="btn btn-sm btn-accent" onclick="carregarCatalogador()">🔄 Atualizar</button>
           </div>
-          <p id="cat-aviso-premium" class="cat-aviso-premium" style="display:none">🔒 Período de 1 mês é exclusivo Premium.</p>
 
           <div class="ger-section-label" style="margin-top:16px;">Testar uma carta salva (opcional)</div>
           <div id="cat-estrategias" class="build-pick-grid" style="margin-bottom:20px;"></div>
@@ -1742,12 +1741,11 @@
             <select id="refinar-periodo" onchange="aoTrocarPeriodoRefinar()">
               <option value="dia">1 dia</option>
               <option value="semana" selected>1 semana</option>
-              <option value="mes">1 mês 🔒</option>
+              <option value="mes">1 mês</option>
             </select>
             <input type="date" id="refinar-data">
             <button class="btn btn-sm btn-accent" id="refinar-btn-rodar" onclick="rodarRefinar()" disabled>🎯 Rodar Análise</button>
           </div>
-          <p id="refinar-aviso-premium" class="cat-aviso-premium" style="display:none">🔒 Período de 1 mês é exclusivo Premium.</p>
           <div id="refinar-estado" class="cat-estado"></div>
 
           <div id="refinar-resultado" style="display:none; margin-top:24px;">

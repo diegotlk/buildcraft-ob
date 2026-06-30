@@ -26,5 +26,5 @@ const TODOS_OS_PARES = [...PARES_OTC, ...PARES_OP].sort();
 const PARES_FREE = [...PARES_OTC.slice(0, 3), ...PARES_OP.slice(0, 3)];
 
 function parBloqueado(par) {
-  return !ehPremium() && !PARES_FREE.includes(par);
+  return false;
 }
