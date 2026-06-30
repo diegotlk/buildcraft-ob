@@ -439,10 +439,10 @@ function setSchedulePeriodoRapido(dias, el) {
 // nenhum ficava marcado — o usuário não via qual período tinha escolhido.
 function marcarAtalhoPeriodo(el) {
   if (!el || !el.parentElement) return;
-  // Mesmo padrão "✓ + ciano preenchido" dos outros filtros do site
-  // (raridade no Inventário/Ranking) — ver .btn-outline.active em global.css.
-  el.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+  // Anel ciano + ✓, igual à seleção de carta na aba Personalizar — mas sem
+  // preencher o fundo do botão (ver .btn-outline.periodo-ativo em global.css).
+  el.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('periodo-ativo'));
+  el.classList.add('periodo-ativo');
 }
 
 // Quando o usuário edita a data na mão, o atalho marcado deixa de valer: limpa
@@ -451,7 +451,7 @@ function marcarAtalhoPeriodo(el) {
 function limparAtalhosPeriodo(prefixo) {
   const datas = document.getElementById(prefixo + '-periodo-datas');
   if (!datas) return;
-  datas.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active'));
+  datas.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('periodo-ativo'));
 }
 
 // ── DIAS DA SEMANA (filtro por cima do período) ──

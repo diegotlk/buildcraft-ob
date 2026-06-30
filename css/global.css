@@ -246,6 +246,19 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
   content:'✓ ';
 }
 
+/* Atalho de período (Ontem/Última semana/Último mês) — mesmo efeito das
+   cartas selecionadas na aba Personalizar (anel ciano + ✓), mas SEM
+   preencher o fundo do botão; a cor do centro continua igual. */
+.btn-outline.periodo-ativo{
+  border-color:var(--neon-cyan);
+  box-shadow:0 0 0 2px var(--accent), 0 0 16px rgba(0,234,255,.5);
+}
+.btn-outline.periodo-ativo::before{
+  content:'✓ ';
+  color:var(--accent);
+  font-weight:800;
+}
+
 .btn-ghost{
   color:var(--text-secondary);
   padding:8px 16px;
