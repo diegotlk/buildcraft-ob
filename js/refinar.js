@@ -220,8 +220,13 @@ function renderRefinarPorDia() {
 function renderRefinarPorHora() {
   const { seq, tz } = refinarState.resultado;
   const seqFiltrada = seq.filter(([ts]) => refinarState.diasSemanaFiltro.has(refinarDiaSemanaTZ(ts, tz)));
+  // Cada linha mostra a taxa REAL daquela hora (não filtrada por hora — só
+  // por dia), mas a média geral reflete só as horas MANTIDAS: excluir uma
+  // hora precisa mexer na média, senão o usuário não vê o efeito do que
+  // acabou de desmarcar (só o filtro de dia mexia nisso antes).
   const buckets = refinarAgrupar(seqFiltrada, ts => refinarHoraTZ(ts, tz));
-  const geral = refinarWinrateGeral(seqFiltrada);
+  const seqHorasKeep = seqFiltrada.filter(([ts]) => !refinarState.horasExcluidas.has(refinarHoraTZ(ts, tz)));
+  const geral = refinarWinrateGeral(seqHorasKeep);
   const linhas = [];
   for (let h = 0; h < 24; h++) {
     const b = buckets.get(h) || { wins: 0, losses: 0, empates: 0 };
