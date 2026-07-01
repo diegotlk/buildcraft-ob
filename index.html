@@ -611,6 +611,10 @@
       buscarValorReal();
     })();
 
+    // Música ambiente cyberpunk — começa no 1º clique/toque do usuário
+    // (restrição do navegador: autoplay só após gesto).
+    ativarMusicaAmbienteNaHome();
+
     // Render monthly battle results
     const monthlyBattle = document.getElementById('monthly-battle');
     if (monthlyBattle) {
