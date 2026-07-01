@@ -226,15 +226,19 @@ function aplicarAvatarNoNavbar() {
    Bordas de avatar
    ============================================================ */
 const BORDA_KEY = 'binaryzando_borda';
+// hole = geometria do buraco central de cada arte (medida por script):
+//   cx,cy = centro do buraco (fração 0..1 da imagem) — várias artes têm o buraco
+//   ACIMA do centro (ornamento embaixo), por isso precisam subir pra encaixar;
+//   r = raio do buraco (fração da largura). Usados pra alinhar o avatar sem sobra.
 const BORDA_OPCOES = [
-  { id: 'f1', src: 'bordas_avatar/f1.png' },
-  { id: 'f2', src: 'bordas_avatar/f2.png' },
-  { id: 'f3', src: 'bordas_avatar/f3.png' },
-  { id: 'f4', src: 'bordas_avatar/f4.png' },
-  { id: 'm1', src: 'bordas_avatar/m1.png' },
-  { id: 'm2', src: 'bordas_avatar/m2.png' },
-  { id: 'm3', src: 'bordas_avatar/m3.png' },
-  { id: 'm4', src: 'bordas_avatar/m4.png' },
+  { id: 'f1', src: 'bordas_avatar/f1.png', hole: { cx: 0.501, cy: 0.483, r: 0.271 } },
+  { id: 'f2', src: 'bordas_avatar/f2.png', hole: { cx: 0.496, cy: 0.484, r: 0.239 } },
+  { id: 'f3', src: 'bordas_avatar/f3.png', hole: { cx: 0.502, cy: 0.488, r: 0.254 } },
+  { id: 'f4', src: 'bordas_avatar/f4.png', hole: { cx: 0.501, cy: 0.481, r: 0.219 } },
+  { id: 'm1', src: 'bordas_avatar/m1.png', hole: { cx: 0.500, cy: 0.466, r: 0.185 } },
+  { id: 'm2', src: 'bordas_avatar/m2.png', hole: { cx: 0.499, cy: 0.485, r: 0.247 } },
+  { id: 'm3', src: 'bordas_avatar/m3.png', hole: { cx: 0.500, cy: 0.474, r: 0.161 } },
+  { id: 'm4', src: 'bordas_avatar/m4.png', hole: { cx: 0.501, cy: 0.490, r: 0.209 } },
 ];
 
 function getBorda() {
@@ -249,15 +253,21 @@ function aplicarBordaNoNavbar() {
   const id = getBorda();
   const opcao = id ? BORDA_OPCOES.find(o => o.id === id) : null;
   if (!opcao) return;
-  // A borda tem o miolo transparente: o avatar (36px) aparece pelo buraco e a
-  // borda forma o anel ao redor. O buraco das artes ocupa ~0.59 da imagem, então
-  // 62px de borda deixam o buraco (~36px) alinhado ao avatar, com o anel sobrando.
+  // Alinha o buraco da arte ao avatar (36px, centro em 18,18) usando a geometria
+  // medida: escala a borda pra que o buraco fique um pouco menor que o avatar
+  // (ele "entra" por baixo do anel, sem sobra) e posiciona pelo centro do buraco
+  // — isso corrige as artes com buraco deslocado pra cima (ex.: bengala doce).
+  const AV = 36, R_AV = 18;
+  const h = opcao.hole || { cx: 0.5, cy: 0.5, r: 0.29 };
+  const S = Math.min(17 / h.r, 62); // 17 (< raio 18) garante o encaixe por baixo
+  const left = R_AV - h.cx * S;
+  const top = R_AV - h.cy * S;
   avatar.style.position = 'relative';
   avatar.style.overflow = 'visible';
   const img = document.createElement('img');
   img.className = 'navbar-borda-img';
   img.src = opcao.src;
-  img.style.cssText = 'position:absolute;top:-13px;left:-13px;width:62px;height:62px;pointer-events:none;z-index:2;display:block';
+  img.style.cssText = `position:absolute;top:${top.toFixed(1)}px;left:${left.toFixed(1)}px;width:${S.toFixed(1)}px;height:${S.toFixed(1)}px;pointer-events:none;z-index:2;display:block`;
   avatar.appendChild(img);
 }
 

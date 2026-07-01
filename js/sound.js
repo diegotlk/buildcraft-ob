@@ -111,13 +111,24 @@ document.addEventListener('click', (e) => {
 
 // ── MÚSICA AMBIENTE (só na home) ──
 // Faixa cyberpunk real (Pixabay Content License — livre para uso comercial,
-// sem exigência de atribuição), tocando em loop com fade suave. O arquivo só
-// é baixado quando a música começa (1º gesto do usuário), nunca no load da
-// página, e nunca se o som estiver mudo.
-const MUSICA_HOME_SRC = 'audio/cyberpunk-home.mp3';
+// sem exigência de atribuição), tocando em loop com fade suave. Já começa a
+// BAIXAR no load da home (se o som estiver ligado), pra tocar sem atraso no 1º
+// gesto do usuário — o navegador exige um clique/toque antes de tocar áudio.
+const MUSICA_HOME_SRC = 'audio/cyberpunk-trailer.mp3';
 const MUSICA_HOME_VOL = 0.32; // volume de fundo (0..1) — discreto, sem estourar
 let _musicaEl = null;
 let _musicaFadeRAF = null;
+
+// Cria o <audio> e já dispara o download (buffer pronto antes do 1º clique).
+function _prepararMusica() {
+  if (_musicaEl) return _musicaEl;
+  _musicaEl = new Audio(MUSICA_HOME_SRC);
+  _musicaEl.loop = true;
+  _musicaEl.preload = 'auto';
+  _musicaEl.volume = 0;
+  try { _musicaEl.load(); } catch (e) {}
+  return _musicaEl;
+}
 
 function _fadeMusica(alvo, ms, aoTerminar) {
   if (!_musicaEl) return;
@@ -136,17 +147,12 @@ function _fadeMusica(alvo, ms, aoTerminar) {
 
 function iniciarMusicaAmbiente() {
   if (!somAtivo()) return;
-  if (!_musicaEl) {
-    _musicaEl = new Audio(MUSICA_HOME_SRC);
-    _musicaEl.loop = true;
-    _musicaEl.preload = 'auto';
-    _musicaEl.volume = 0;
-  }
+  _prepararMusica();
   const p = _musicaEl.play();
   // Navegador bloqueia autoplay sem gesto — silenciamos a rejeição (a função
   // é rearmada no 1º clique/toque via ativarMusicaAmbienteNaHome).
   if (p && p.catch) p.catch(() => {});
-  _fadeMusica(MUSICA_HOME_VOL, 1800);
+  _fadeMusica(MUSICA_HOME_VOL, 1200);
 }
 
 function pararMusicaAmbiente() {
@@ -154,16 +160,19 @@ function pararMusicaAmbiente() {
   _fadeMusica(0, 600, () => { try { _musicaEl.pause(); } catch (e) {} });
 }
 
-// Marca a home e arma o início no 1º gesto do usuário.
+// Marca a home, começa a baixar a faixa já e arma o início no 1º gesto —
+// escuta vários tipos de gesto (pointerdown/touchstart disparam antes do click)
+// pra tocar o mais cedo possível.
 function ativarMusicaAmbienteNaHome() {
   document.body.dataset.musicaAmbiente = 'home';
+  if (somAtivo()) _prepararMusica(); // buffer pronto antes do usuário clicar
+
+  const EVENTOS = ['pointerdown', 'touchstart', 'click', 'keydown'];
   const iniciarUmaVez = () => {
     iniciarMusicaAmbiente();
-    document.removeEventListener('click', iniciarUmaVez);
-    document.removeEventListener('keydown', iniciarUmaVez);
+    EVENTOS.forEach(ev => document.removeEventListener(ev, iniciarUmaVez));
   };
-  document.addEventListener('click', iniciarUmaVez);
-  document.addEventListener('keydown', iniciarUmaVez);
+  EVENTOS.forEach(ev => document.addEventListener(ev, iniciarUmaVez, { passive: true }));
 }
 
 // ── WIDGET DE MUDO REUTILIZÁVEL ──

@@ -29,8 +29,8 @@
 <body>
 
   <!-- Perfil exige login — manda pra login.html antes de pintar a página. -->
-  <script src="js/sound.js?v=2"></script>
-  <script src="js/auth.js?v=11"></script>
+  <script src="js/sound.js?v=3"></script>
+  <script src="js/auth.js?v=12"></script>
   <script>exigirLogin();</script>
 
   <!-- ==================== NAVBAR ==================== -->
@@ -368,17 +368,23 @@
           </div>
         </div>`;
 
-      // Cada borda: avatar no miolo (buraco ~59% -> avatar 58% = inset 21%) e a
-      // arte (miolo transparente) por cima, formando o anel ao redor.
+      // Cada borda: o avatar é posicionado EXATAMENTE no buraco da arte (usando
+      // a geometria cx/cy/r medida por borda), um pouco maior que o buraco pra
+      // "entrar" por baixo do anel — sem sobra nem descentralização.
       const bordas = BORDA_OPCOES.map(o => {
         const sel = o.id === atual;
+        const h = o.hole || { cx: 0.5, cy: 0.5, r: 0.29 };
+        const rr = h.r * 1.10;            // 10% maior que o buraco -> encaixa por baixo
+        const size = (2 * rr * 100).toFixed(1);
+        const left = ((h.cx - rr) * 100).toFixed(1);
+        const top = ((h.cy - rr) * 100).toFixed(1);
         return `<div onclick="selecionarBorda('${o.id}')" style="
             cursor:pointer;border-radius:12px;padding:8px;text-align:center;
             border:2px solid ${sel ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
             background:${sel ? 'rgba(0,234,255,.07)' : 'transparent'};
             transition:border-color .15s,background .15s;">
             <div style="position:relative;width:100%;aspect-ratio:1">
-              <div style="position:absolute;top:21%;left:21%;right:21%;bottom:21%;
+              <div style="position:absolute;top:${top}%;left:${left}%;width:${size}%;height:${size}%;
                 border-radius:50%;background:${fundoCenter}"></div>
               <img src="${o.src}"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block">
