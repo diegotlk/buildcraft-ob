@@ -325,35 +325,54 @@
       renderAvatarGrid();
     }
 
+    function _avatarSrcAtual() {
+      const id = getAvatar();
+      const op = id ? AVATAR_OPCOES.find(o => o.id === id) : null;
+      return op ? op.src : null;
+    }
+
     function renderBordaGrid() {
       const atual = getBorda();
+      const avatarSrc = _avatarSrcAtual();
+      // Fundo central do preview: avatar selecionado ou gradiente padrão
+      const fundoCenter = avatarSrc
+        ? `url('${avatarSrc}') center/cover`
+        : 'linear-gradient(135deg,#18a0fb,#22d3ee)';
+
       const grid = document.getElementById('borda-grid');
       if (!grid) return;
+
+      // "Sem borda" — mostra só o avatar sem frame
       const semBorda = `<div onclick="selecionarBorda(null)" style="
-        cursor:pointer;border-radius:12px;padding:8px;text-align:center;
-        border:2px solid ${!atual ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
-        background:${!atual ? 'rgba(0,234,255,.07)' : 'transparent'};
-        transition:border-color .15s,background .15s;">
-        <div style="width:52px;height:52px;margin:0 auto;border-radius:50%;
-          border:2px dashed rgba(255,255,255,.2);
-          display:flex;align-items:center;justify-content:center;
-          font-size:.6rem;color:var(--text-muted);line-height:1.3;text-align:center">
-          Sem<br>borda
-        </div>
-      </div>`;
+          cursor:pointer;border-radius:12px;padding:8px;text-align:center;
+          border:2px solid ${!atual ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
+          background:${!atual ? 'rgba(0,234,255,.07)' : 'transparent'};
+          transition:border-color .15s,background .15s;">
+          <div style="position:relative;width:100%;aspect-ratio:1">
+            <div style="position:absolute;top:16%;left:16%;right:16%;bottom:16%;
+              border-radius:50%;background:${fundoCenter};
+              box-shadow:0 0 8px rgba(0,234,255,.25)"></div>
+          </div>
+          <div style="font-size:.6rem;color:var(--text-muted);margin-top:4px">Sem borda</div>
+        </div>`;
+
+      // Cada borda: avatar no centro (67% do quadrado) + frame por cima (100%)
       const bordas = BORDA_OPCOES.map(o => {
         const sel = o.id === atual;
         return `<div onclick="selecionarBorda('${o.id}')" style="
-          cursor:pointer;border-radius:12px;padding:8px;text-align:center;
-          border:2px solid ${sel ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
-          background:${sel ? 'rgba(0,234,255,.07)' : 'transparent'};
-          transition:border-color .15s,background .15s;">
-          <div style="position:relative;width:52px;height:52px;margin:0 auto">
-            <div style="position:absolute;inset:7px;border-radius:50%;background:#07070f"></div>
-            <img src="${o.src}" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block">
-          </div>
-        </div>`;
+            cursor:pointer;border-radius:12px;padding:8px;text-align:center;
+            border:2px solid ${sel ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
+            background:${sel ? 'rgba(0,234,255,.07)' : 'transparent'};
+            transition:border-color .15s,background .15s;">
+            <div style="position:relative;width:100%;aspect-ratio:1">
+              <div style="position:absolute;top:16%;left:16%;right:16%;bottom:16%;
+                border-radius:50%;background:${fundoCenter}"></div>
+              <img src="${o.src}"
+                style="position:absolute;top:0;left:0;width:100%;height:100%;display:block">
+            </div>
+          </div>`;
       }).join('');
+
       grid.innerHTML = semBorda + bordas;
     }
 

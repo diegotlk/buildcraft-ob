@@ -248,12 +248,15 @@ function aplicarBordaNoNavbar() {
   const id = getBorda();
   const opcao = id ? BORDA_OPCOES.find(o => o.id === id) : null;
   if (!opcao) return;
+  // A borda precisa ser maior que o avatar para ficar AO REDOR dele.
+  // O avatar tem 36px; a borda fica em 72px total (18px de margem em cada lado).
+  // Os 18px de "sobra" formam o anel visível ao redor do círculo do avatar.
   avatar.style.position = 'relative';
   avatar.style.overflow = 'visible';
   const img = document.createElement('img');
   img.className = 'navbar-borda-img';
   img.src = opcao.src;
-  img.style.cssText = 'position:absolute;top:-6px;left:-6px;width:calc(100% + 12px);height:calc(100% + 12px);pointer-events:none;z-index:2;display:block';
+  img.style.cssText = 'position:absolute;top:-18px;left:-18px;width:72px;height:72px;pointer-events:none;z-index:2;display:block';
   avatar.appendChild(img);
 }
 
