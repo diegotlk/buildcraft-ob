@@ -24,3 +24,11 @@
 
 /*
   Cache-Control: no-cache
+
+# EXCEÇÃO: áudio é pesado e nunca muda sem trocar de nome (…-v2, -v3…),
+# então pode ficar salvo pra sempre no navegador. Assim a música da home
+# baixa UMA vez (1ª visita) e nas próximas toca na hora, sem rebaixar.
+# Como o nome é versionado, "immutable" é seguro — pra trocar a faixa,
+# basta subir com um nome novo e apontar o MUSICA_HOME_SRC pra ele.
+/audio/*
+  Cache-Control: public, max-age=31536000, immutable

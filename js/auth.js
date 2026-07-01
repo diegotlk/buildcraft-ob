@@ -268,7 +268,9 @@ function aplicarBordaNoNavbar() {
   const img = document.createElement('img');
   img.className = 'navbar-borda-img';
   img.src = opcao.src;
-  img.style.cssText = `position:absolute;top:${top.toFixed(1)}px;left:${left.toFixed(1)}px;width:${S.toFixed(1)}px;height:${S.toFixed(1)}px;pointer-events:none;z-index:2;display:block`;
+  // max-width/height:none é ESSENCIAL: a regra global `img{max-width:100%}`
+  // espremia a borda (57px) pra 36px, deixando-a oval e deslocada pra esquerda.
+  img.style.cssText = `position:absolute;top:${top.toFixed(1)}px;left:${left.toFixed(1)}px;width:${S.toFixed(1)}px;height:${S.toFixed(1)}px;max-width:none;max-height:none;pointer-events:none;z-index:2;display:block`;
   avatar.appendChild(img);
 }
 
