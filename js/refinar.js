@@ -18,6 +18,7 @@ const refinarState = {
   estrategiaId: null,
   visao: 'dia',           // 'dia' | 'hora'
   diasSemanaFiltro: new Set([0, 1, 2, 3, 4, 5, 6]),
+  horasExcluidas: new Set(), // horas (0-23) que o usuário desmarcou na visão "Por Horário"
   resultado: null,        // { seq, tz } depois de rodar
 };
 
@@ -155,6 +156,7 @@ async function rodarRefinar() {
 
     refinarState.resultado = { seq, tz };
     refinarState.diasSemanaFiltro = new Set([0, 1, 2, 3, 4, 5, 6]);
+    refinarState.horasExcluidas = new Set();
     if (estado) estado.textContent = '';
     if (resultadoBox) resultadoBox.style.display = 'block';
     renderRefinarDiasChips();
@@ -223,24 +225,39 @@ function renderRefinarPorHora() {
   const linhas = [];
   for (let h = 0; h < 24; h++) {
     const b = buckets.get(h) || { wins: 0, losses: 0, empates: 0 };
-    linhas.push({ label: `${String(h).padStart(2, '0')}h`, wr: refinarWinrateBucket(b), n: b.wins + b.losses, total: b.wins + b.losses + b.empates });
+    linhas.push({ label: `${String(h).padStart(2, '0')}h`, chave: h, wr: refinarWinrateBucket(b), n: b.wins + b.losses, total: b.wins + b.losses + b.empates });
   }
-  renderRefinarLista(linhas, geral);
+  // Por horário, a ordem certa é cronológica (00h → 23h) — ordenar por
+  // assertividade aqui embaralha a leitura de "quando" a estratégia funciona.
+  renderRefinarLista(linhas, geral, { ordenarPorChave: true, toggleable: true, excluidas: refinarState.horasExcluidas, onToggle: 'toggleRefinarHora' });
 }
 
-function renderRefinarLista(linhas, geral) {
+function renderRefinarLista(linhas, geral, opts = {}) {
   const cont = document.getElementById('refinar-lista');
   if (!cont) return;
-  const ordenadas = [...linhas].sort((a, b) => (b.wr ?? -1) - (a.wr ?? -1));
+  const ordenadas = opts.ordenarPorChave
+    ? [...linhas].sort((a, b) => a.chave - b.chave)
+    : [...linhas].sort((a, b) => (b.wr ?? -1) - (a.wr ?? -1));
   const linhasHtml = ordenadas.map(l => {
+    const excluida = opts.toggleable && opts.excluidas?.has(l.chave);
+    const classesRow = ['refinar-row'];
+    if (opts.toggleable) classesRow.push('refinar-row-com-check');
+    if (excluida) classesRow.push('refinar-row-excluida');
+    const checkHTML = opts.toggleable
+      ? `<span class="refinar-row-check">${excluida ? '' : '✓'}</span>`
+      : '';
+    const onclickAttr = opts.toggleable ? ` onclick="${opts.onToggle}(${l.chave})"` : '';
+
     if (l.n === 0) {
-      return `<div class="refinar-row refinar-row-vazia"><span class="refinar-row-label">${l.label}</span><span class="refinar-row-vazio">sem entradas</span></div>`;
+      return `<div class="${classesRow.join(' ')}"${onclickAttr}>${checkHTML}<span class="refinar-row-label">${l.label}</span><span class="refinar-row-vazio">sem entradas</span></div>`;
     }
     const pequena = l.n < REFINAR_MIN_AMOSTRA;
     const acima = l.wr > geral;
     const classeCor = pequena ? 'neutro' : (acima ? 'acima' : 'abaixo');
+    classesRow.push(`refinar-row-${classeCor}`);
     return `
-      <div class="refinar-row refinar-row-${classeCor}">
+      <div class="${classesRow.join(' ')}"${onclickAttr}>
+        ${checkHTML}
         <span class="refinar-row-label">${l.label}</span>
         <span class="refinar-row-bar"><span class="refinar-row-fill" style="width:${Math.min(100, l.wr)}%"></span></span>
         <span class="refinar-row-wr">${l.wr.toFixed(1)}%</span>
@@ -248,6 +265,68 @@ function renderRefinarLista(linhas, geral) {
       </div>`;
   }).join('');
   cont.innerHTML = `<div class="refinar-media">Média geral da estratégia nesse período: <strong>${geral.toFixed(1)}%</strong></div>${linhasHtml}`;
+}
+
+// Desmarca/remarca uma hora específica na visão "Por Horário" — mesmo
+// espírito do toggle de dia da semana (fundo cinza + riscado quando fora).
+function toggleRefinarHora(h) {
+  if (refinarState.horasExcluidas.has(h)) refinarState.horasExcluidas.delete(h);
+  else refinarState.horasExcluidas.add(h);
+  renderRefinarPorHora();
+}
+
+// ── CRIAR NOVA CARTA A PARTIR DO REFINO ──
+// Carrega a definição da estratégia-base na aba Criar, já com os dias da
+// semana refinados aqui aplicados (isso o backend respeita de verdade —
+// ver dias_semana em rodar_backtest/rodar_quadrante). O horário (Das/Até)
+// vem pré-preenchido com o intervalo das horas mantidas, mas é só ponto de
+// partida: o backend ainda não filtra por hora individual (schedule_start/
+// schedule_end não são lidos hoje), só o recorte contínuo Das–Até quando
+// isso for implementado. Revise o horário antes de testar.
+function criarCartaRefinada() {
+  const carta = getInventario().find(e => e.id === refinarState.estrategiaId);
+  if (!carta) {
+    showToast('⚠️ Escolha uma estratégia', 'Selecione e rode uma análise antes de criar a nova carta.', 'default');
+    return;
+  }
+  if (typeof carregarDefinicaoExistente !== 'function') return;
+  carregarDefinicaoExistente(carta.id);
+
+  // Dias da semana: os que o usuário manteve marcados na visão "Por Horário".
+  const diasKeep = [...refinarState.diasSemanaFiltro];
+  if (typeof aplicarDiasSemanaUI === 'function') aplicarDiasSemanaUI(diasKeep);
+
+  // Horário: envelope (min–max) das horas não excluídas.
+  const horasKeep = Array.from({ length: 24 }, (_, h) => h).filter(h => !refinarState.horasExcluidas.has(h));
+  let avisoHorario = '';
+  if (horasKeep.length && horasKeep.length < 24) {
+    const min = Math.min(...horasKeep);
+    const max = Math.max(...horasKeep);
+    const startInput = document.getElementById('schedule-start');
+    const endInput = document.getElementById('schedule-end');
+    const de = `${String(min).padStart(2, '0')}:00`;
+    const ate = `${String(max).padStart(2, '0')}:59`;
+    if (startInput) startInput.value = de;
+    if (endInput) endInput.value = ate;
+    strategyState.scheduleStart = de;
+    strategyState.scheduleEnd = ate;
+    avisoHorario = ` Horário pré-preenchido ${de}–${ate} (revise antes de testar).`;
+  }
+
+  // Troca pro grupo "Criar" sem passar por trocarAbaLab/trocarGrupoLab —
+  // aquelas funções zeram strategyState.testandoExistente, que a gente
+  // PRECISA manter (é o vínculo de linhagem "baseada em X" da nova carta).
+  document.getElementById('lab-grupo-criar')?.classList.add('active');
+  document.getElementById('lab-grupo-testar')?.classList.remove('active');
+  document.getElementById('lab-grupo-catalogador')?.classList.remove('active');
+  document.getElementById('lab-grupo-refinar')?.classList.remove('active');
+  document.getElementById('lab-grupo-simulacao')?.classList.remove('active');
+  document.getElementById('lab-grupo-personalizar')?.classList.remove('active');
+  document.getElementById('lab-subtabs-criar').style.display = 'flex';
+  document.getElementById('lab-subtabs-testar').style.display = 'none';
+  document.getElementById('lab-tab-criar-estrategia')?.classList.add('active');
+
+  showToast('➕ Nova carta a partir do refino', `"${carta.nome}" carregada com os dias refinados.${avisoHorario}`, 'default');
 }
 
 document.addEventListener('DOMContentLoaded', () => {

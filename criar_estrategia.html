@@ -675,6 +675,21 @@
     .refinar-row-n { font-size: 11.5px; color: var(--text-muted); text-align: right; }
     .refinar-row-vazia { opacity: .5; }
     .refinar-row-vazio { grid-column: 2 / -1; font-size: 12px; color: var(--text-muted); text-align: center; }
+    /* Linhas da visão "Por Horário" ganham uma caixinha marcável (igual aos
+       chips de dia da semana) pra excluir horas específicas — mesmo padrão
+       visual: cinza + riscado quando desmarcada. */
+    .refinar-row-com-check { grid-template-columns: 26px 100px 1fr 64px minmax(110px, auto); cursor: pointer; }
+    .refinar-row-check {
+      width: 18px; height: 18px; border: 2px solid var(--border-color); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: transparent; transition: all .15s ease; flex-shrink: 0;
+    }
+    .refinar-row-com-check.refinar-row-excluida .refinar-row-check { color: transparent; }
+    .refinar-row-com-check:not(.refinar-row-excluida) .refinar-row-check {
+      background: var(--accent); border-color: var(--accent); color: #04121a;
+    }
+    .refinar-row-excluida { opacity: .45; }
+    .refinar-row-excluida .refinar-row-label { text-decoration: line-through; }
   </style>
 </head>
 <body>
@@ -1851,6 +1866,10 @@
             </div>
 
             <div id="refinar-lista"></div>
+
+            <div class="pattern-controls" style="margin-top:20px;">
+              <button class="btn btn-lg btn-accent" id="refinar-btn-criar-carta" onclick="criarCartaRefinada()">➕ Criar Nova Carta</button>
+            </div>
           </div>
         </div>
 
@@ -2068,7 +2087,7 @@
   <script src="js/titulos.js?v=1"></script>
   <script src="js/strategy-builder.js?v=31"></script>
   <script src="js/catalogador.js?v=12"></script>
-  <script src="js/refinar.js?v=1"></script>
+  <script src="js/refinar.js?v=2"></script>
   <script src="js/simulacao.js?v=1"></script>
   <script src="js/i18n.js?v=6"></script>
   <script>
