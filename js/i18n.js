@@ -36,7 +36,7 @@ const I18N_DICT = {
 
     'hero.eyebrow': '🎮 Backtest gamificado de opções binárias',
     'hero.title': 'Monte sua <span class="hl">estratégia</span>, teste contra o histórico real e <span class="hl">ganhe cartas</span>.',
-    'hero.subtitle': 'Sem operar dinheiro real só pra "ver se funciona". Teste primeiro, valide com dados.',
+    'hero.subtitle': 'Sem operar dinheiro real só pra "ver se funciona".<br>Teste primeiro e valide com dados.',
     'hero.criarbuild': '🎨 Criar Estratégia',
     'hero.comofunciona': 'Como funciona ➜',
     'how.titulo': 'Como funciona', 'how.subtitulo': 'Quatro passos entre a ideia e a carta na sua coleção.',
@@ -282,19 +282,19 @@ const I18N_DICT = {
     'mir.original': 'Padrão Original', 'mir.espelho': 'Padrão Espelho',
     'mir.somente': '❌ Só o Meu', 'mir.osdois': '✅ Os Dois', 'mir.qualdirecao': '📊 Qual direção para o espelho?',
 
-    'par.passo5': 'Passo 5 de 6: Escolha o par', 'par.titulo': '💱 Qual par você quer testar?',
+    'par.passo5': 'Passo 4 de 6: Escolha o par', 'par.titulo': '💱 Qual par você quer testar?',
     'par.mercadoaberto': 'Mercado Aberto', 'par.buscar': '🔍 Buscar par (ex: USD, EUR)...',
 
-    'hor.passo6': 'Passo 6 de 6: Escolha o horário', 'hor.titulo': '🕐 Qual horário você quer testar?',
+    'hor.passo6': 'Passo 5 de 6: Escolha o horário', 'hor.titulo': '🕐 Qual horário você quer testar?',
     'hor.desc': 'Escolha a hora de início e fim da sessão que deseja testar',
     'hor.inicio': 'Início', 'hor.fim': 'Fim', 'hor.qualperiodo': '📅 Qual período do histórico testar?',
     'hor.avisofiltro': '⚠️ Filtros de período e dias da semana disponíveis apenas para estratégias de padrão de velas ("Pintar velas") por enquanto.',
     'hor.diassemana': '📆 Em quais dias da semana operar?',
-    'hor.diassemana.desc': 'Clique pra <b>tirar</b> um dia. Aceso = entra · riscado = fora. (É a base pro bot sugerir "tira a sexta" depois.)',
+    'hor.diassemana.desc': 'Clique pra <b>tirar</b> um dia.',
 
     'dia.seg': 'Seg', 'dia.ter': 'Ter', 'dia.qua': 'Qua', 'dia.qui': 'Qui', 'dia.sex': 'Sex', 'dia.sab': 'Sáb', 'dia.dom': 'Dom',
 
-    'rev.passo7': 'Passo 7 de 7: Revisão Final', 'rev.titulo': '✅ Resumo da sua estratégia',
+    'rev.passo7': 'Passo 6 de 6: Revisão Final', 'rev.titulo': '✅ Resumo da sua estratégia',
     'rev.deenome': '💾 Dê um nome para esta estratégia', 'rev.nomeplaceholder': 'Ex: Reversão 3 velas',
     'rev.testarestrategia': '⚡ Testar Estratégia', 'rev.salvarestrategia': '💾 Salvar Estratégia',
     'rev.salvarhistorico': '📊 Salvar Histórico', 'rev.novaestrategia': '🔄 Criar Nova Estratégia',
@@ -322,7 +322,7 @@ const I18N_DICT = {
 
     'hero.eyebrow': '🎮 Gamified backtesting for binary options',
     'hero.title': 'Build your <span class="hl">strategy</span>, test it against real history, and <span class="hl">earn cards</span>.',
-    'hero.subtitle': 'No guessing. No risking real money just to "see if it works." Test first, validate with data, then decide.',
+    'hero.subtitle': 'No risking real money just to "see if it works."<br>Test first and validate with data.',
     'hero.criarbuild': '🎨 Create Strategy',
     'hero.comofunciona': 'How it works ➜',
     'how.titulo': 'How it works', 'how.subtitulo': 'Four steps between the idea and the card in your collection.',
@@ -568,19 +568,19 @@ const I18N_DICT = {
     'mir.original': 'Original Pattern', 'mir.espelho': 'Mirror Pattern',
     'mir.somente': '❌ Just Mine', 'mir.osdois': '✅ Both', 'mir.qualdirecao': '📊 Which direction for the mirror?',
 
-    'par.passo5': 'Step 5 of 6: Choose the pair', 'par.titulo': '💱 Which pair do you want to test?',
+    'par.passo5': 'Step 4 of 6: Choose the pair', 'par.titulo': '💱 Which pair do you want to test?',
     'par.mercadoaberto': 'Open Market', 'par.buscar': '🔍 Search pair (e.g. USD, EUR)...',
 
-    'hor.passo6': 'Step 6 of 6: Choose the time', 'hor.titulo': '🕐 Which time do you want to test?',
+    'hor.passo6': 'Step 5 of 6: Choose the time', 'hor.titulo': '🕐 Which time do you want to test?',
     'hor.desc': 'Choose the start and end time of the session you want to test',
     'hor.inicio': 'Start', 'hor.fim': 'End', 'hor.qualperiodo': '📅 Which period of the history to test?',
     'hor.avisofiltro': '⚠️ Period and day-of-week filters are only available for candle pattern strategies ("Paint candles") for now.',
     'hor.diassemana': '📆 Which days of the week to trade?',
-    'hor.diassemana.desc': 'Click to <b>remove</b> a day. Lit = included · crossed out = excluded. (This is the basis for the bot to later suggest "remove Friday".)',
+    'hor.diassemana.desc': 'Click to <b>remove</b> a day.',
 
     'dia.seg': 'Mon', 'dia.ter': 'Tue', 'dia.qua': 'Wed', 'dia.qui': 'Thu', 'dia.sex': 'Fri', 'dia.sab': 'Sat', 'dia.dom': 'Sun',
 
-    'rev.passo7': 'Step 7 of 7: Final Review', 'rev.titulo': '✅ Summary of your strategy',
+    'rev.passo7': 'Step 6 of 6: Final Review', 'rev.titulo': '✅ Summary of your strategy',
     'rev.deenome': '💾 Give this strategy a name', 'rev.nomeplaceholder': 'E.g.: 3-candle reversal',
     'rev.testarestrategia': '⚡ Test Strategy', 'rev.salvarestrategia': '💾 Save Strategy',
     'rev.salvarhistorico': '📊 Save History', 'rev.novaestrategia': '🔄 Create New Strategy',

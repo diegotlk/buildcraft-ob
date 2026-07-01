@@ -709,7 +709,7 @@ function updateReviewContent() {
   };
 
   let content = `
-    <div style="margin-bottom: 20px;">
+    <div style="margin-bottom: 20px; text-align: center;">
       <p style="margin-bottom: 12px;"><strong>🎯 Padrão:</strong></p>
       <div style="display: flex; gap: 4px; justify-content: center; font-size: 28px; margin-bottom: 16px;">
         ${strategyState.pattern.join('')}
@@ -752,7 +752,7 @@ function updateReviewContent() {
     };
 
     content += `
-      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center;">
         <p style="margin-bottom: 12px;"><strong>🔀 Padrão Espelho:</strong></p>
         <div style="display: flex; gap: 4px; justify-content: center; font-size: 28px; margin-bottom: 12px;">
           ${mirrorPattern.join('')}
