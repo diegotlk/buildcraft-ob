@@ -589,7 +589,7 @@ function getGradeClass(grade) {
     'B': 'grade-b',
     'A': 'grade-a',
     'S': 'grade-s',
-    'S+': 'grade-s-plus',
+    'S+': 'grade-sp',
   };
   return classMap[grade] || 'grade-b';
 }

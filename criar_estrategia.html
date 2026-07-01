@@ -719,7 +719,7 @@
         <div class="lab-tabs" id="lab-grupo-tabs">
           <button class="lab-tab active" id="lab-grupo-criar" onclick="trocarGrupoLab('criar')" data-i18n="lab.grupo.criar">🎨 Criar</button>
           <button class="lab-tab" id="lab-grupo-testar" onclick="trocarGrupoLab('testar')" data-i18n="lab.grupo.testar">♻️ Testar</button>
-          <button class="lab-tab" id="lab-grupo-catalogador" onclick="trocarGrupoLab('catalogador')" data-i18n="lab.grupo.catalogador">🔥 Catalogar</button>
+          <button class="lab-tab" id="lab-grupo-catalogador" onclick="trocarGrupoLab('catalogador')" data-i18n="lab.grupo.catalogador" style="display:none">🔥 Catalogar</button>
           <button class="lab-tab" id="lab-grupo-refinar" onclick="trocarGrupoLab('refinar')" data-i18n="lab.grupo.refinar">🎯 Refinar</button>
           <button class="lab-tab" id="lab-grupo-simulacao" onclick="trocarGrupoLab('simulacao')">💰 Simulação</button>
           <button class="lab-tab" id="lab-grupo-personalizar" onclick="trocarGrupoLab('personalizar')" data-i18n="lab.grupo.personalizar">🖌️ Personalizar</button>
@@ -750,12 +750,10 @@
             Define o intervalo de tempo de cada vela (M1, M5 ou M15). Pode mudar depois se quiser testar outro.
           </p>
 
-          <!-- MVP: só temos estratégias/dados de M1 por enquanto — M5 e M15
-               ficam DESATIVADOS (não remover; reabilitar quando houver dados). -->
           <div class="direction-grid" id="global-tf-grid" style="grid-template-columns: 1fr 1fr 1fr; max-width: 460px; margin: 24px auto;">
             <button class="direction-btn selected" data-tf="M1" onclick="setTimeframeGlobal('M1', this)">M1</button>
-            <button class="direction-btn tf-desativado" data-tf="M5" data-i18n-title="lab.embreve" title="Em breve" onclick="avisarTimeframeIndisponivel()">M5 🔒</button>
-            <button class="direction-btn tf-desativado" data-tf="M15" data-i18n-title="lab.embreve" title="Em breve" onclick="avisarTimeframeIndisponivel()">M15 🔒</button>
+            <button class="direction-btn" data-tf="M5" onclick="setTimeframeGlobal('M5', this)">M5</button>
+            <button class="direction-btn" data-tf="M15" onclick="setTimeframeGlobal('M15', this)">M15</button>
           </div>
 
           <div class="pattern-controls">
@@ -1570,7 +1568,7 @@
 
           <div class="pattern-controls">
             <button class="btn btn-sm btn-outline" onclick="goToPhase('direction')"><span data-i18n="lab.voltar">⬅ Voltar</span></button>
-            <button class="btn btn-sm btn-accent" onclick="goToPhase('mirror')"><span data-i18n="lab.proximo">Próximo ➜</span></button>
+            <button class="btn btn-sm btn-accent" onclick="pularEspelho()"><span data-i18n="lab.proximo">Próximo ➜</span></button>
           </div>
         </div>
 
@@ -1713,9 +1711,6 @@
                 </div>
               </div>
             </div>
-            <p style="text-align:center; color: var(--text-secondary); font-size: 12px; margin-top: 10px;" data-i18n="hor.avisofiltro">
-              ⚠️ Filtros de período e dias da semana disponíveis apenas para estratégias de padrão de velas ("Pintar velas") por enquanto.
-            </p>
           </div>
 
           <!-- Dias da semana: filtro POR CIMA do período (ex.: "mês inteiro, mas tira sexta/fim de semana") -->
@@ -2074,7 +2069,7 @@
   <script src="js/catalogador.js?v=12"></script>
   <script src="js/refinar.js?v=1"></script>
   <script src="js/simulacao.js?v=1"></script>
-  <script src="js/i18n.js?v=4"></script>
+  <script src="js/i18n.js?v=5"></script>
   <script>
     // Esta página não carrega js/app.js (ela já define seu próprio showToast,
     // entre outras coisas) — só o pedacinho do menu mobile (☰) é replicado aqui.

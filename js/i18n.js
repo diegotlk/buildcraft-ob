@@ -36,7 +36,7 @@ const I18N_DICT = {
 
     'hero.eyebrow': '🎮 Backtest gamificado de opções binárias',
     'hero.title': 'Monte sua <span class="hl">estratégia</span>, teste contra o histórico real e <span class="hl">ganhe cartas</span>.',
-    'hero.subtitle': 'Sem achismo. Sem operar dinheiro real só pra "ver se funciona". Teste primeiro, valide com dados, depois decida.',
+    'hero.subtitle': 'Sem operar dinheiro real só pra "ver se funciona". Teste primeiro, valide com dados.',
     'hero.criarbuild': '🎨 Criar Estratégia',
     'hero.comofunciona': 'Como funciona ➜',
     'how.titulo': 'Como funciona', 'how.subtitulo': 'Quatro passos entre a ideia e a carta na sua coleção.',

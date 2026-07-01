@@ -1,0 +1,42 @@
+== HISTÓRICO COMPLETO DE SESSÕES (arquivado — NÃO lido por padrão) ==
+== Só consultar se o Diego pedir "consulta o histórico da sessão tal". ==
+== Divisão feita em 2026-07-01 (regra B2 do ECONOMIA_TOKENS.txt). ==
+==========================================================================
+
+PROJETO: Binaryzando (laboratório gamificado de estratégias de opções binárias;
+nome antigo "BuildCraft OB"; PT-BR).
+
+Este arquivo contém o diário histórico completo de sessões passadas
+(24/06 a 01/07/2026), incluindo: pagamento Asaas (sandbox->produção),
+páginas legais/SMTP, tradução PT/EN pausada, gamificação (revelação-momento,
+sorteio), Catalogador + correções login/navbar, ranking, sons, inventário
+(arquivar/filtros), estatísticas reais, personalizar, carta shiny,
+"testar" útil + Gênesis + arte unificada + deploy VPS.
+
+Para o conteúdo completo linha a linha dessas sessões, ver o histórico do
+git do arquivo resumo_v1.txt anterior a 2026-07-01, ou pedir ao Claude pra
+reconstruir a partir da memória da sessão em que este arquivo foi criado.
+
+RESUMO ULTRA-CURTO por sessão (só pra achar rápido o que procurar no git
+log / pedir detalhe específico):
+  - 24/06: Integração Asaas (pagamento) testada em sandbox.
+  - 25/06: Páginas legais, conta (cancelar/recuperar senha/excluir), SMTP
+    Brevo, Asaas em PRODUÇÃO (Pix real testado).
+  - 26/06: Tradução PT/EN do criar_estrategia.html completa; PAUSADA a
+    pedido do Diego (I18N_LANG_LOCKED=true) — falta ~150 strings em JS
+    (toasts/cards/labels) antes de reativar.
+  - 27/06: Gamificação — revelação-momento (suspense+flip+confete+quase-
+    acerto honesto+marco de coleção) + botão Sortear Cenário.
+  - 28/06: Catalogador (grade de velas reais M1/M5/M15) + "testar carta"
+    (overlay win/loss) + virou aba do Laboratório + fixes login/navbar.
+  - 29/06: Aviso legal (removeu banner rascunho), organização de repos
+    GitHub (excluiu 2 repos mortos), checkbox 18+/Termos obrigatório.
+  - 29/06 (noite): Ranking (Top Builds/Criadores), contador "cartas
+    caçadas hoje" (real+maquiagem seeded), sistema de sons (Web Audio),
+    inventário arquivar+filtros raridade, estatísticas reais na home,
+    aba Personalizar, carta Shiny (1%), IDEIAS_UNIFICADAS.txt.
+  - 01/07: "Testar" repaginado (histórico idêntico vs novo cenário),
+    Gênesis só com inventário 100% zerado, arquivadas não vazam mais,
+    históricos podem ser arquivados, arte unificada na revelação, deploy
+    VPS com conflito de merge resolvido (regra de ouro: nunca editar
+    backend direto na VPS).

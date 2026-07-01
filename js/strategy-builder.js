@@ -297,6 +297,15 @@ function updateMirrorPreview() {
   });
 }
 
+// MVP: passo de padrão espelho desativado por enquanto — sempre "Só o Meu",
+// pula direto pra fase de par (reabilitar trocando o onclick do botão de volta
+// pra goToPhase('mirror') no criar_estrategia.html).
+function pularEspelho() {
+  strategyState.mirror = false;
+  strategyState.mirrorChosen = true;
+  goToPhase('pair');
+}
+
 function setMirror(enabled) {
   strategyState.mirror = enabled;
   strategyState.mirrorChosen = true;
@@ -1005,6 +1014,11 @@ function testStrategy() {
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
+      periodo_modo: strategyState.periodoModo,
+      data_de: strategyState.periodoDataDe,
+      data_ate: strategyState.periodoDataAte,
+      dias_semana: getDiasSemanaSelecionados(),
+      timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
     };
   } else {
     payload = {
@@ -2117,7 +2131,10 @@ function renderPresets() {
     lista.forEach(render);
   };
 
-  addGrupo('Maioria / Minoria', PRESETS_QUADRANTE, p => {
+  // MVP: só MHI 1 e Milhão habilitados por enquanto (demais comentados na
+  // lista PRESETS_QUADRANTE seriam prematuros — reabilitar removendo este filtro).
+  const presetsQuadranteAtivos = PRESETS_QUADRANTE.filter(p => PRESETS_FREE.includes(p.nome));
+  addGrupo('Maioria / Minoria', presetsQuadranteAtivos, p => {
     const locked = presetBloqueado(p.nome);
     const card = document.createElement('div');
     card.className = 'anchoring-card' + (locked ? ' preset-locked' : '');
@@ -2148,8 +2165,11 @@ function renderPresets() {
     container.appendChild(card);
   };
 
-  addGrupo('Repetição de posição', refRepete, renderRef);
-  addGrupo('Reversão / Flip', refFlip, renderRef);
+  // MVP: famílias de referência (Repetição de posição / Reversão-Flip)
+  // temporariamente DESATIVADAS — só MHI 1 e Milhão liberados por enquanto
+  // (não remover; reabilitar descomentando as duas linhas abaixo).
+  // addGrupo('Repetição de posição', refRepete, renderRef);
+  // addGrupo('Reversão / Flip', refFlip, renderRef);
 
   // MVP: estratégias de Confluência (duas concordam) temporariamente DESATIVADAS
   // (não remover — os dados em PRESETS_CONFLUENCIA e a lógica em loadPreset
@@ -2385,7 +2405,7 @@ function voltarDoPair() {
     return;
   }
   if (strategyState.mode !== 'quadrante') {
-    goToPhase('mirror');
+    goToPhase('anchoring'); // passo de espelho desativado (MVP) — volta pra ancoragem
     return;
   }
   const q = strategyState.q;
