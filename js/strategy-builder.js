@@ -796,10 +796,11 @@ function updateReviewQuadrante() {
         <p style="margin-bottom: 8px;"><strong>🔗 Confluência — ${q.conf.nome}</strong></p>
         <p style="color: var(--text-secondary); font-size: 14px;">Só entra quando as duas estratégias apontam a mesma direção.</p>
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; margin-bottom: 16px;">
         <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
         <div><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
       </div>
+      <div style="font-size: 14px;"><p><strong>Dias da semana:</strong></p><p>${textoDiasSemana()}</p></div>
     `;
     return;
   }
@@ -825,7 +826,10 @@ function updateReviewQuadrante() {
         <div><p><strong>Vela de entrada:</strong></p><p>${ordinais[ref.entryPos]} vela do ciclo</p></div>
         <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
       </div>
-      <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+        <div><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+        <div><p><strong>Dias da semana:</strong></p><p>${textoDiasSemana()}</p></div>
+      </div>
     `;
     return;
   }
@@ -857,9 +861,9 @@ function updateReviewQuadrante() {
       <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
     </div>
 
-    <div style="font-size: 14px;">
-      <p><strong>Horário:</strong></p>
-      <p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+      <div><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+      <div><p><strong>Dias da semana:</strong></p><p>${textoDiasSemana()}</p></div>
     </div>
   `;
 
@@ -878,7 +882,10 @@ function updateReviewFigura() {
       <div><p><strong>Timeframe:</strong></p><p>${strategyState.timeframe}</p></div>
       <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
     </div>
-    <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+      <div><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+      <div><p><strong>Dias da semana:</strong></p><p>${textoDiasSemana()}</p></div>
+    </div>
   `;
 }
 
@@ -912,7 +919,10 @@ function updateReviewIndicador() {
         <div><p><strong>Timeframe:</strong></p><p>${strategyState.timeframe}</p></div>
         <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
       </div>
-      <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+        <div><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+        <div><p><strong>Dias da semana:</strong></p><p>${textoDiasSemana()}</p></div>
+      </div>
     `;
     return;
   }
@@ -931,7 +941,10 @@ function updateReviewIndicador() {
       <div><p><strong>Timeframe:</strong></p><p>${strategyState.timeframe}</p></div>
       <div><p><strong>Par:</strong></p><p><code style="background: rgba(99,102,241,0.1); padding: 4px 8px; border-radius: 4px;">${strategyState.pair}</code></p></div>
     </div>
-    <div style="font-size: 14px;"><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+      <div><p><strong>Horário:</strong></p><p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p></div>
+      <div><p><strong>Dias da semana:</strong></p><p>${textoDiasSemana()}</p></div>
+    </div>
   `;
 }
 
@@ -958,6 +971,19 @@ function testStrategy() {
   const emojiParaNum = (c) => (c === '🟩' ? 1 : c === '🟥' ? -1 : null);
   let payload;
 
+  // Recorte de período/dias da semana/fuso — mesma convenção em TODOS os
+  // modos (pintar, quadrante, referência, confluência, figura, indicador):
+  // é tudo "Criar Estratégia", só muda a FORMA; o que existe num tem que
+  // existir no outro (backend já suporta isso em qualquer modo via
+  // extrair_filtros_periodo()).
+  const filtrosPeriodo = {
+    periodo_modo: strategyState.periodoModo,
+    data_de: strategyState.periodoDataDe,
+    data_ate: strategyState.periodoDataAte,
+    dias_semana: getDiasSemanaSelecionados(),
+    timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
+  };
+
   if (strategyState.mode === 'figura') {
     payload = {
       mode: 'figura',
@@ -966,6 +992,7 @@ function testStrategy() {
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
+      ...filtrosPeriodo,
     };
   } else if (strategyState.mode === 'indicador' && strategyState.ind.tipo === 'montador') {
     const m = strategyState.mont;
@@ -978,6 +1005,7 @@ function testStrategy() {
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
+      ...filtrosPeriodo,
     };
   } else if (strategyState.mode === 'indicador') {
     const ind = strategyState.ind;
@@ -989,6 +1017,7 @@ function testStrategy() {
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
+      ...filtrosPeriodo,
     };
   } else if (strategyState.mode === 'quadrante' && strategyState.q.tipo === 'confluencia') {
     const conf = strategyState.q.conf;
@@ -1001,6 +1030,7 @@ function testStrategy() {
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
+      ...filtrosPeriodo,
     };
   } else if (strategyState.mode === 'quadrante' && strategyState.q.tipo === 'referencia') {
     const ref = strategyState.q.ref;
@@ -1017,6 +1047,7 @@ function testStrategy() {
       pair: strategyState.pair,
       schedule_start: strategyState.scheduleStart,
       schedule_end: strategyState.scheduleEnd,
+      ...filtrosPeriodo,
     };
   } else if (strategyState.mode === 'quadrante') {
     const q = strategyState.q;
