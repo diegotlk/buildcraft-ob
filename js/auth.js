@@ -193,6 +193,7 @@ function alternarVisibilidadeSenha(inputId, btn) {
    Avatar — emblemas dos títulos como imagem de perfil
    ============================================================ */
 const AVATAR_KEY = 'binaryzando_avatar';
+const AVATAR_PADRAO_SRC = 'img/avatar-padrao.svg'; // "sem avatar" = pessoinha cinza
 const AVATAR_OPCOES = [
   { id: 'genesis',         src: 'titulos_emblemas/genesis.svg'  },
   { id: 'explorador',      src: 'titulos_emblemas/bussola.png'  },
@@ -213,12 +214,12 @@ function aplicarAvatarNoNavbar() {
   if (!avatar) return;
   const id = getAvatar();
   const opcao = id ? AVATAR_OPCOES.find(o => o.id === id) : null;
-  if (opcao) {
-    avatar.style.backgroundImage = `url('${opcao.src}')`;
-    avatar.style.backgroundSize = 'cover';
-    avatar.style.backgroundPosition = 'center';
-    avatar.textContent = '';
-  }
+  // Sem avatar selecionado (ou id inválido) -> pessoinha cinza padrão.
+  const src = opcao ? opcao.src : AVATAR_PADRAO_SRC;
+  avatar.style.backgroundImage = `url('${src}')`;
+  avatar.style.backgroundSize = 'cover';
+  avatar.style.backgroundPosition = 'center';
+  avatar.textContent = '';
 }
 
 /* ============================================================
@@ -248,15 +249,15 @@ function aplicarBordaNoNavbar() {
   const id = getBorda();
   const opcao = id ? BORDA_OPCOES.find(o => o.id === id) : null;
   if (!opcao) return;
-  // A borda precisa ser maior que o avatar para ficar AO REDOR dele.
-  // O avatar tem 36px; a borda fica em 72px total (18px de margem em cada lado).
-  // Os 18px de "sobra" formam o anel visível ao redor do círculo do avatar.
+  // A borda tem o miolo transparente: o avatar (36px) aparece pelo buraco e a
+  // borda forma o anel ao redor. O buraco das artes ocupa ~0.59 da imagem, então
+  // 62px de borda deixam o buraco (~36px) alinhado ao avatar, com o anel sobrando.
   avatar.style.position = 'relative';
   avatar.style.overflow = 'visible';
   const img = document.createElement('img');
   img.className = 'navbar-borda-img';
   img.src = opcao.src;
-  img.style.cssText = 'position:absolute;top:-18px;left:-18px;width:72px;height:72px;pointer-events:none;z-index:2;display:block';
+  img.style.cssText = 'position:absolute;top:-13px;left:-13px;width:62px;height:62px;pointer-events:none;z-index:2;display:block';
   avatar.appendChild(img);
 }
 

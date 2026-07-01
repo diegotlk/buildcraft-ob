@@ -30,7 +30,7 @@
 
   <!-- Perfil exige login — manda pra login.html antes de pintar a página. -->
   <script src="js/sound.js?v=1"></script>
-  <script src="js/auth.js?v=10"></script>
+  <script src="js/auth.js?v=11"></script>
   <script>exigirLogin();</script>
 
   <!-- ==================== NAVBAR ==================== -->
@@ -288,75 +288,88 @@
       document.getElementById('pf-plano-premium').style.display = ehPremium() ? 'block' : 'none';
     }
 
+    // Célula do grid de avatar. `badge`: '✓' (selecionado), '🔒' (bloqueado) ou ''.
+    function _avatarCell(onclick, src, sel, bloqueado, badge, cursor) {
+      const filtro = bloqueado ? 'filter:grayscale(1) brightness(.4);'
+                   : (sel ? 'filter:drop-shadow(0 0 8px #00eaff88);' : '');
+      const corBadge = sel ? 'var(--accent)' : 'var(--text-muted)';
+      return `<div ${onclick} style="
+          border-radius:12px;padding:10px 6px 6px;text-align:center;
+          border:2px solid ${sel ? 'var(--accent)' : (bloqueado ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.08)')};
+          background:${sel ? 'rgba(0,234,255,.07)' : 'transparent'};
+          cursor:${cursor};transition:border-color .15s,background .15s;">
+          <img src="${src}" width="52" height="52" style="border-radius:50%;display:block;margin:0 auto;${filtro}">
+          <span style="font-size:.72rem;line-height:1.4;color:${corBadge};margin-top:3px;display:block;min-height:16px">${badge || ''}</span>
+        </div>`;
+    }
+
     function renderAvatarGrid() {
-      const atual = getAvatar();
+      const atual = getAvatar(); // null = sem avatar (padrão)
       const desbloqueados = typeof getTitulosDesbloqueados === 'function' ? getTitulosDesbloqueados() : {};
       const grid = document.getElementById('avatar-grid');
       if (!grid) return;
-      grid.innerHTML = AVATAR_OPCOES.map(o => {
+
+      // 1ª opção: "Sem avatar" (pessoinha cinza) — sempre disponível, é o padrão.
+      const selSem = !atual;
+      const semAvatar = _avatarCell(
+        'onclick="selecionarAvatar(null)"', AVATAR_PADRAO_SRC, selSem, false,
+        selSem ? '✓' : 'Padrão', 'pointer');
+
+      const outros = AVATAR_OPCOES.map(o => {
         const sel = o.id === atual;
         const livre = !!desbloqueados[o.id];
         if (!livre) {
-          return `<div style="
-            border-radius:12px;padding:10px 6px 8px;text-align:center;
-            border:2px solid rgba(255,255,255,.05);
-            background:transparent;cursor:not-allowed;">
-            <img src="${o.src}" width="52" height="52" style="border-radius:50%;display:block;margin:0 auto;
-              filter:grayscale(1) brightness(.4);">
-            <span style="font-size:.65rem;color:var(--text-muted);margin-top:4px;display:block">🔒</span>
-          </div>`;
+          return _avatarCell('', o.src, false, true, '🔒', 'not-allowed');
         }
-        return `<div onclick="selecionarAvatar('${o.id}')" style="
-          cursor:pointer;border-radius:12px;padding:10px 6px 8px;text-align:center;
-          border:2px solid ${sel ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
-          background:${sel ? 'rgba(0,234,255,.07)' : 'transparent'};
-          transition:border-color .15s,background .15s;">
-          <img src="${o.src}" width="52" height="52" style="border-radius:50%;display:block;margin:0 auto;
-            ${sel ? 'filter:drop-shadow(0 0 8px #00eaff88)' : ''}">
-        </div>`;
+        return _avatarCell(`onclick="selecionarAvatar('${o.id}')"`, o.src, sel, false, sel ? '✓' : '', 'pointer');
       }).join('');
+
+      grid.innerHTML = semAvatar + outros;
     }
 
     function selecionarAvatar(id) {
-      const desbloqueados = typeof getTitulosDesbloqueados === 'function' ? getTitulosDesbloqueados() : {};
-      if (!desbloqueados[id]) return;
-      localStorage.setItem(AVATAR_KEY, id);
+      if (id === null) {
+        localStorage.removeItem(AVATAR_KEY); // volta pro padrão (sem avatar)
+      } else {
+        const desbloqueados = typeof getTitulosDesbloqueados === 'function' ? getTitulosDesbloqueados() : {};
+        if (!desbloqueados[id]) return; // só usa o que já desbloqueou
+        localStorage.setItem(AVATAR_KEY, id);
+      }
       aplicarAvatarNoNavbar();
       renderAvatarGrid();
+      renderBordaGrid(); // o preview central da borda usa o avatar atual
     }
 
     function _avatarSrcAtual() {
       const id = getAvatar();
       const op = id ? AVATAR_OPCOES.find(o => o.id === id) : null;
-      return op ? op.src : null;
+      return op ? op.src : AVATAR_PADRAO_SRC; // sem avatar -> pessoinha cinza
     }
 
     function renderBordaGrid() {
       const atual = getBorda();
       const avatarSrc = _avatarSrcAtual();
-      // Fundo central do preview: avatar selecionado ou gradiente padrão
-      const fundoCenter = avatarSrc
-        ? `url('${avatarSrc}') center/cover`
-        : 'linear-gradient(135deg,#18a0fb,#22d3ee)';
+      const fundoCenter = `url('${avatarSrc}') center/cover`;
 
       const grid = document.getElementById('borda-grid');
       if (!grid) return;
 
-      // "Sem borda" — mostra só o avatar sem frame
+      // "Sem borda" — vazio, só o texto (nada aplicado no avatar).
       const semBorda = `<div onclick="selecionarBorda(null)" style="
           cursor:pointer;border-radius:12px;padding:8px;text-align:center;
           border:2px solid ${!atual ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
           background:${!atual ? 'rgba(0,234,255,.07)' : 'transparent'};
           transition:border-color .15s,background .15s;">
-          <div style="position:relative;width:100%;aspect-ratio:1">
-            <div style="position:absolute;top:16%;left:16%;right:16%;bottom:16%;
-              border-radius:50%;background:${fundoCenter};
-              box-shadow:0 0 8px rgba(0,234,255,.25)"></div>
+          <div style="width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center">
+            <div style="width:70%;aspect-ratio:1;border-radius:50%;
+              border:2px dashed rgba(255,255,255,.18);
+              display:flex;align-items:center;justify-content:center;
+              font-size:.58rem;color:var(--text-muted);text-align:center;line-height:1.2">Sem<br>borda</div>
           </div>
-          <div style="font-size:.6rem;color:var(--text-muted);margin-top:4px">Sem borda</div>
         </div>`;
 
-      // Cada borda: avatar no centro (67% do quadrado) + frame por cima (100%)
+      // Cada borda: avatar no miolo (buraco ~59% -> avatar 58% = inset 21%) e a
+      // arte (miolo transparente) por cima, formando o anel ao redor.
       const bordas = BORDA_OPCOES.map(o => {
         const sel = o.id === atual;
         return `<div onclick="selecionarBorda('${o.id}')" style="
@@ -365,7 +378,7 @@
             background:${sel ? 'rgba(0,234,255,.07)' : 'transparent'};
             transition:border-color .15s,background .15s;">
             <div style="position:relative;width:100%;aspect-ratio:1">
-              <div style="position:absolute;top:16%;left:16%;right:16%;bottom:16%;
+              <div style="position:absolute;top:21%;left:21%;right:21%;bottom:21%;
                 border-radius:50%;background:${fundoCenter}"></div>
               <img src="${o.src}"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block">
