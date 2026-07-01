@@ -364,6 +364,17 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font-display);line-height:1.2;font-weight:70
   max-width:600px;
 }
 
+/* Cabeçalho de página (Laboratório, Inventário, Perfil) — padrão do site é
+   tudo centralizado, igual ao cabeçalho de Rankings/Planos (que já usava
+   text-align:center inline). */
+.lab-header{
+  text-align:center;
+}
+.lab-header .page-subtitle{
+  max-width:600px;
+  margin:0 auto;
+}
+
 /* ---------- Glow text ---------- */
 .glow-text{
   background:linear-gradient(135deg,#eafdff,#00eaff,#9d4edd);

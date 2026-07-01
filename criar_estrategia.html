@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" href="img/favicon-512.png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 
-  <link rel="stylesheet" href="css/global.css?v=7">
+  <link rel="stylesheet" href="css/global.css?v=8">
   <link rel="stylesheet" href="css/cards.css?v=9">
   <link rel="stylesheet" href="css/components.css?v=6">
   <link rel="stylesheet" href="css/pages.css?v=6">
@@ -18,6 +18,14 @@
     .strategy-builder {
       max-width: 900px;
       margin: 0 auto;
+    }
+
+    /* Padrão do site: tudo no Laboratório fica centralizado (título, subtítulo,
+       contador de passo). Nada de título à esquerda misturado com texto
+       centralizado embaixo dele — isso inclui os h2 sem style inline. */
+    .strategy-builder h2.card-box-title,
+    .strategy-builder .step-counter {
+      text-align: center;
     }
 
 
