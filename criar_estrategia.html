@@ -822,14 +822,36 @@
           <div class="step-counter">Testar Estratégia · Criar Histórico</div>
           <h2 class="card-box-title">📊 Criar Histórico de uma Estratégia</h2>
           <p class="ger-intro">
-            Rode uma estratégia salva num <strong>par</strong> e <strong>período</strong> à sua escolha
-            pra gerar uma sequência real de entradas (ganhou/perdeu). O histórico fica salvo pra você
-            usar em <strong>Gerenciamentos</strong> — mesmo que tenha perdido, excluído ou comprado a
-            carta. Pode gerar quantos históricos quiser, em pares e horários diferentes.
+            Escolha uma estratégia salva e gere uma sequência real de entradas (ganhou/perdeu) pra
+            usar em <strong>Gerenciamentos</strong>. Duas opções: reproduzir <strong>exatamente</strong>
+            o cenário da carta (mesmo resultado) — útil se você perdeu, excluiu ou comprou a carta — ou
+            testar em um <strong>par/período novo</strong>, livre.
           </p>
 
           <div class="ger-section-label">1. Escolha a estratégia</div>
           <div id="ch-estrategia-lista" class="build-pick-grid"></div>
+
+          <!-- Opção A: reproduzir a carta EXATAMENTE (mesmo par/horário/período
+               salvos nela) — garante o MESMO resultado que a carta já mostra.
+               Só aparece depois de escolher a estratégia acima. -->
+          <div id="ch-carta-exata" style="display:none; max-width:560px; margin:24px auto 0;">
+            <div class="glass-card" style="padding:20px; border:1px solid var(--accent);">
+              <div style="font-weight:800; margin-bottom:4px;">🔁 Histórico desta carta (mesmo resultado)</div>
+              <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:14px;">
+                Roda exatamente o mesmo par, horário e período que geraram essa carta — o resultado
+                é idêntico ao que ela já mostra. Use quando quiser recuperar o histórico de uma carta
+                comprada, excluída ou que perdeu o histórico original.
+              </div>
+              <div id="ch-carta-exata-resumo" style="font-size:13px; margin-bottom:16px; padding:12px; background:var(--bg); border-radius:8px;"></div>
+              <button class="btn btn-accent" style="width:100%" id="ch-btn-gerar-exato" onclick="gerarHistoricoDaCarta()">🔬 Gerar Histórico Idêntico</button>
+            </div>
+          </div>
+
+          <div class="ger-section-label" style="margin-top:36px;">— ou crie um histórico novo, em outro cenário —</div>
+          <p style="text-align:center; color:var(--text-muted); font-size:12.5px; margin-top:-8px; margin-bottom:16px;">
+            Escolha livremente o par e o período pra testar a mesma estratégia numa situação diferente.
+            O resultado pode ser diferente do da carta original — é esperado, é outro cenário.
+          </p>
 
           <div class="ger-section-label">2. Escolha o par</div>
           <div class="direction-grid" style="grid-template-columns:1fr 1fr; max-width:320px; margin:0 auto 12px;">
@@ -880,7 +902,7 @@
           </div>
 
           <div class="pattern-controls" style="margin-top:24px;">
-            <button class="btn btn-lg btn-accent" id="ch-btn-gerar" onclick="gerarHistoricoCriar()" disabled>🔬 Gerar Histórico</button>
+            <button class="btn btn-lg btn-accent" id="ch-btn-gerar" onclick="gerarHistoricoCriar()" disabled>🔬 Gerar Histórico (novo cenário)</button>
           </div>
 
           <div id="ch-resultado" style="display:none; max-width:560px; margin:20px auto 0;"></div>
@@ -2045,7 +2067,7 @@
   <script src="js/pares.js?v=10"></script>
   <script src="js/data.js?v=9"></script>
   <script src="js/inventario.js?v=20"></script>
-  <script src="js/historico.js?v=11"></script>
+  <script src="js/historico.js?v=12"></script>
   <script src="js/gerenciamento.js?v=13"></script>
   <script src="js/build.js?v=12"></script>
   <script src="js/titulos.js?v=1"></script>

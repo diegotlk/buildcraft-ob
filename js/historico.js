@@ -263,6 +263,7 @@ function abrirCriarHistorico() {
   renderCriarHistEstrategias();
   renderCriarHistPares();
   renderHistoricosCriados();
+  renderCriarHistCartaExata(getInventario().find(e => e.id === criarHistState.estrategiaId));
   atualizarBtnGerarHistorico();
 }
 
@@ -290,7 +291,7 @@ function renderCriarHistEstrategias() {
 function setCriarHistEstrategia(id) {
   criarHistState.estrategiaId = id;
   // Pré-preenche o par com o que a carta já usou (só se o usuário ainda não
-  // escolheu um) — ele pode trocar à vontade.
+  // escolheu um) — ele pode trocar à vontade no fluxo de "novo cenário".
   const item = getInventario().find(e => e.id === id);
   if (item && item.teste && item.teste.pair && !criarHistState.pair) {
     criarHistState.pair = item.teste.pair;
@@ -300,7 +301,145 @@ function setCriarHistEstrategia(id) {
   }
   renderCriarHistEstrategias();
   renderCriarHistPares();
+  renderCriarHistCartaExata(item);
   atualizarBtnGerarHistorico();
+}
+
+// Bloco "🔁 Histórico desta carta" — mostra o cenário EXATO salvo na carta
+// (par, timeframe, horário, período) e habilita o botão de gerar idêntico.
+// Sem periodoDe salvo (carta antiga ou vinda de outro fluxo), não dá pra
+// travar num período exato — some o bloco e sobra só o "novo cenário".
+function renderCriarHistCartaExata(item) {
+  const bloco = document.getElementById('ch-carta-exata');
+  const resumo = document.getElementById('ch-carta-exata-resumo');
+  if (!bloco || !resumo) return;
+
+  const t = item?.teste;
+  const temPeriodoExato = t && t.periodoDe && t.periodoDe !== '—' && t.periodoAte && t.periodoAte !== '—';
+  if (!item || !temPeriodoExato) {
+    bloco.style.display = 'none';
+    return;
+  }
+
+  bloco.style.display = 'block';
+  resumo.innerHTML = `
+    <div><strong>Par:</strong> ${t.pair}</div>
+    <div><strong>Timeframe:</strong> ${t.timeframeOperado || 'M1'}</div>
+    <div><strong>Horário:</strong> ${t.scheduleStart}–${t.scheduleEnd}</div>
+    <div><strong>Período:</strong> ${t.periodoDe} a ${t.periodoAte}</div>
+    <div style="margin-top:6px; color:var(--text-secondary);">Resultado salvo na carta: <strong>${t.winrate}%</strong> · ${(t.entries || 0).toLocaleString('pt-BR')} entradas</div>
+  `;
+}
+
+function gerarHistoricoDaCarta() {
+  const item = getInventario().find(e => e.id === criarHistState.estrategiaId);
+  if (!item) { showToast('⚠️ Escolha a estratégia', 'Selecione uma estratégia salva primeiro.', 'default'); return; }
+  const t = item.teste;
+  if (!t || !t.periodoDe || t.periodoDe === '—' || !t.periodoAte || t.periodoAte === '—') {
+    showToast('⚠️ Sem período salvo', 'Essa carta não tem um período exato salvo pra reproduzir. Use "criar um histórico novo" abaixo.', 'default');
+    return;
+  }
+
+  const d = item.definicao || {};
+  const emojiParaNum = (c) => (c === '🟩' ? 1 : c === '🟥' ? -1 : null);
+  const payload = {
+    pattern: (d.pattern || []).map(emojiParaNum),
+    anchoring: d.anchoring,
+    direction: d.direction,
+    mirror: d.mirror,
+    mirror_direction: d.mirrorDirection,
+    timeframe: t.timeframeOperado || 'M1',
+    pair: t.pair,
+    schedule_start: t.scheduleStart,
+    schedule_end: t.scheduleEnd,
+    periodo_modo: 'personalizado',
+    data_de: t.periodoDe,
+    data_ate: t.periodoAte,
+    dias_semana: (Array.isArray(d.diasSemana) && d.diasSemana.length && d.diasSemana.length < 7) ? d.diasSemana : null,
+    timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
+  };
+
+  const btn = document.getElementById('ch-btn-gerar-exato');
+  const txtOriginal = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;"></span> Gerando...';
+  }
+  showToast('🔬 Gerando histórico', `Reproduzindo "${item.nome}" exatamente como foi salva...`, 'default');
+
+  fetch(`${HISTORICO_API_URL}/api/test-build`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+    .then(response => response.json().then(data => ({ ok: response.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok || !data.success) {
+        showToast('⚠️ Falhou', (data && data.message) || 'Tente novamente.', 'default');
+        return;
+      }
+      const r = data.resultado;
+      if (!Array.isArray(r.sequencia) || !r.sequencia.length) {
+        showToast('⚠️ Sem entradas', 'Estratégias com espelho ativado não geram uma sequência cronológica utilizável.', 'default');
+        return;
+      }
+
+      // Alerta se, por alguma razão (janela de velas mudou, TZ diferente etc.),
+      // o resultado reproduzido não bater com o que a carta mostra — o usuário
+      // pediu explicitamente que isso NUNCA passe batido.
+      const bateWinrate = Math.abs(r.winrate - t.winrate) < 0.05;
+      const bateEntries = r.entries === t.entries;
+      if (!bateWinrate || !bateEntries) {
+        showToast('⚠️ Resultado não bateu exatamente',
+          `Carta: ${t.winrate}% (${t.entries} ops) · Reproduzido: ${r.winrate}% (${r.entries} ops). Salvo mesmo assim, mas vale conferir.`,
+          'default');
+      }
+
+      const novo = {
+        id: 'hist_' + Date.now(),
+        nome: `${item.nome} (idêntico)`,
+        origem: 'estrategia',
+        estrategiaId: item.id,
+        pair: r.pair,
+        timeframe: r.timeframe,
+        winrate: r.winrate,
+        entries: r.entries,
+        periodoDe: r.periodo_de,
+        periodoAte: r.periodo_ate,
+        velasUsadas: r.velas_usadas,
+        sequencia: r.sequencia,
+        sequencia_rica: r.sequencia_rica || null,
+        criadoEm: new Date().toISOString(),
+      };
+      const lista = getHistoricos();
+      lista.push(novo);
+      if (!salvarHistoricos(lista)) return;
+      renderHistoricosCriados();
+
+      const res = document.getElementById('ch-resultado');
+      if (res) {
+        res.style.display = 'block';
+        res.innerHTML = `
+          <div class="glass-card" style="padding:18px; text-align:center; border:1px solid var(--accent);">
+            <div style="font-weight:800; margin-bottom:6px;">✅ Histórico idêntico gerado</div>
+            <div style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">"${novo.nome}"</div>
+            <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+              <div><div style="font-size:22px; font-weight:800;">${r.entries.toLocaleString('pt-BR')}</div><div style="font-size:11px; color:var(--text-secondary);">Entradas</div></div>
+              <div><div style="font-size:22px; font-weight:800; color:${bateWinrate ? 'var(--success)' : 'var(--warning)'};">${r.winrate}%</div><div style="font-size:11px; color:var(--text-secondary);">Winrate</div></div>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:12px;">Já disponível em <strong>Criar/Testar Gerenciamento</strong> e no Inventário → Históricos.</div>
+          </div>`;
+      }
+      showToast('✅ Histórico gerado', `"${novo.nome}" — ${novo.sequencia.length} entradas, ${bateWinrate ? 'mesmo resultado da carta' : 'confira a diferença acima'}.`, 'discovery');
+    })
+    .catch(() => {
+      showToast('❌ API offline', 'Não consegui falar com o servidor agora. Tente de novo em um instante.', 'default');
+    })
+    .finally(() => {
+      if (btn) btn.innerHTML = txtOriginal;
+      const btn2 = document.getElementById('ch-btn-gerar-exato');
+      if (btn2) btn2.disabled = false;
+    });
 }
 
 function setCriarHistPairFilter(f) {
