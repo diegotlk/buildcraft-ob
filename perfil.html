@@ -77,7 +77,10 @@
           Escolha o emblema que vai aparecer como sua imagem no site.
         </p>
 
-        <div id="avatar-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px"></div>
+        <div id="avatar-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px"></div>
+
+        <p style="color:var(--text-muted);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin:0 0 10px">Borda</p>
+        <div id="borda-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px"></div>
 
         <div id="pf-erro-nome" class="auth-error"></div>
         <div class="form-group">
@@ -287,10 +290,22 @@
 
     function renderAvatarGrid() {
       const atual = getAvatar();
+      const desbloqueados = typeof getTitulosDesbloqueados === 'function' ? getTitulosDesbloqueados() : {};
       const grid = document.getElementById('avatar-grid');
       if (!grid) return;
       grid.innerHTML = AVATAR_OPCOES.map(o => {
         const sel = o.id === atual;
+        const livre = !!desbloqueados[o.id];
+        if (!livre) {
+          return `<div style="
+            border-radius:12px;padding:10px 6px 8px;text-align:center;
+            border:2px solid rgba(255,255,255,.05);
+            background:transparent;cursor:not-allowed;">
+            <img src="${o.src}" width="52" height="52" style="border-radius:50%;display:block;margin:0 auto;
+              filter:grayscale(1) brightness(.4);">
+            <span style="font-size:.65rem;color:var(--text-muted);margin-top:4px;display:block">🔒</span>
+          </div>`;
+        }
         return `<div onclick="selecionarAvatar('${o.id}')" style="
           cursor:pointer;border-radius:12px;padding:10px 6px 8px;text-align:center;
           border:2px solid ${sel ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
@@ -303,9 +318,50 @@
     }
 
     function selecionarAvatar(id) {
+      const desbloqueados = typeof getTitulosDesbloqueados === 'function' ? getTitulosDesbloqueados() : {};
+      if (!desbloqueados[id]) return;
       localStorage.setItem(AVATAR_KEY, id);
       aplicarAvatarNoNavbar();
       renderAvatarGrid();
+    }
+
+    function renderBordaGrid() {
+      const atual = getBorda();
+      const grid = document.getElementById('borda-grid');
+      if (!grid) return;
+      const semBorda = `<div onclick="selecionarBorda(null)" style="
+        cursor:pointer;border-radius:12px;padding:8px;text-align:center;
+        border:2px solid ${!atual ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
+        background:${!atual ? 'rgba(0,234,255,.07)' : 'transparent'};
+        transition:border-color .15s,background .15s;">
+        <div style="width:52px;height:52px;margin:0 auto;border-radius:50%;
+          border:2px dashed rgba(255,255,255,.2);
+          display:flex;align-items:center;justify-content:center;
+          font-size:.6rem;color:var(--text-muted);line-height:1.3;text-align:center">
+          Sem<br>borda
+        </div>
+      </div>`;
+      const bordas = BORDA_OPCOES.map(o => {
+        const sel = o.id === atual;
+        return `<div onclick="selecionarBorda('${o.id}')" style="
+          cursor:pointer;border-radius:12px;padding:8px;text-align:center;
+          border:2px solid ${sel ? 'var(--accent)' : 'rgba(255,255,255,.08)'};
+          background:${sel ? 'rgba(0,234,255,.07)' : 'transparent'};
+          transition:border-color .15s,background .15s;">
+          <div style="position:relative;width:52px;height:52px;margin:0 auto">
+            <div style="position:absolute;inset:7px;border-radius:50%;background:#07070f"></div>
+            <img src="${o.src}" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block">
+          </div>
+        </div>`;
+      }).join('');
+      grid.innerHTML = semBorda + bordas;
+    }
+
+    function selecionarBorda(id) {
+      if (id) localStorage.setItem(BORDA_KEY, id);
+      else localStorage.removeItem(BORDA_KEY);
+      aplicarBordaNoNavbar();
+      renderBordaGrid();
     }
 
     function preencherDadosPerfil() {
@@ -317,6 +373,7 @@
       atualizarSecaoPlano();
       montarESalvarSecaoTitulos();
       renderAvatarGrid();
+      renderBordaGrid();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -324,6 +381,7 @@
       montarSelectFuso();
       montarESalvarSecaoTitulos();
       renderAvatarGrid();
+      renderBordaGrid();
       // renderNavbarAuth (chamado por auth.js) busca /api/auth/me antes de
       // termos a sessão completa — espera ela terminar pra preencher os campos.
       renderNavbarAuth().then(preencherDadosPerfil).catch(preencherDadosPerfil);

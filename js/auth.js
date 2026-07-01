@@ -222,6 +222,42 @@ function aplicarAvatarNoNavbar() {
 }
 
 /* ============================================================
+   Bordas de avatar
+   ============================================================ */
+const BORDA_KEY = 'binaryzando_borda';
+const BORDA_OPCOES = [
+  { id: 'f1', src: 'bordas_avatar/f1.png' },
+  { id: 'f2', src: 'bordas_avatar/f2.png' },
+  { id: 'f3', src: 'bordas_avatar/f3.png' },
+  { id: 'f4', src: 'bordas_avatar/f4.png' },
+  { id: 'm1', src: 'bordas_avatar/m1.png' },
+  { id: 'm2', src: 'bordas_avatar/m2.png' },
+  { id: 'm3', src: 'bordas_avatar/m3.png' },
+  { id: 'm4', src: 'bordas_avatar/m4.png' },
+];
+
+function getBorda() {
+  return localStorage.getItem(BORDA_KEY) || null;
+}
+
+function aplicarBordaNoNavbar() {
+  const avatar = document.querySelector('.navbar-actions .navbar-avatar');
+  if (!avatar) return;
+  const old = avatar.querySelector('.navbar-borda-img');
+  if (old) old.remove();
+  const id = getBorda();
+  const opcao = id ? BORDA_OPCOES.find(o => o.id === id) : null;
+  if (!opcao) return;
+  avatar.style.position = 'relative';
+  avatar.style.overflow = 'visible';
+  const img = document.createElement('img');
+  img.className = 'navbar-borda-img';
+  img.src = opcao.src;
+  img.style.cssText = 'position:absolute;top:-6px;left:-6px;width:calc(100% + 12px);height:calc(100% + 12px);pointer-events:none;z-index:2;display:block';
+  avatar.appendChild(img);
+}
+
+/* ============================================================
    Conta: mudar nome, senha, e-mail — tudo em perfil.html.
    ============================================================ */
 function erroContaHtml(elId) {
@@ -486,6 +522,7 @@ async function renderNavbarAuth() {
       avatar.href = 'perfil.html';
       avatar.onclick = null;
       aplicarAvatarNoNavbar();
+      aplicarBordaNoNavbar();
 
       try {
         const resp = await fetch(`${AUTH_API_BASE}/api/auth/me`, {
