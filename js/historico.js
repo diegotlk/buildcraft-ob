@@ -322,12 +322,16 @@ function renderCriarHistCartaExata(item) {
   }
 
   bloco.style.display = 'block';
+  const temEpochExato = t.periodoDeTs && t.periodoAteTs;
   resumo.innerHTML = `
     <div><strong>Par:</strong> ${t.pair}</div>
     <div><strong>Timeframe:</strong> ${t.timeframeOperado || 'M1'}</div>
     <div><strong>Horário:</strong> ${t.scheduleStart}–${t.scheduleEnd}</div>
     <div><strong>Período:</strong> ${t.periodoDe} a ${t.periodoAte}</div>
     <div style="margin-top:6px; color:var(--text-secondary);">Resultado salvo na carta: <strong>${t.winrate}%</strong> · ${(t.entries || 0).toLocaleString('pt-BR')} entradas</div>
+    ${temEpochExato
+      ? `<div style="margin-top:8px; color:var(--success); font-size:12px;">✓ Reprodução exata garantida (esta carta guarda o instante exato do teste original).</div>`
+      : `<div style="margin-top:8px; color:var(--warning); font-size:12px;">⚠️ Carta antiga: só tem a data salva (sem o horário exato). Se o par ganhou mais velas coletadas desde então, o resultado pode divergir um pouco.</div>`}
   `;
 }
 
@@ -355,6 +359,16 @@ function gerarHistoricoDaCarta() {
     periodo_modo: 'personalizado',
     data_de: t.periodoDe,
     data_ate: t.periodoAte,
+    // Cartas geradas após esse fix guardam o epoch exato da 1a/última vela
+    // usada (periodoDeTs/periodoAteTs) — o backend prioriza isso e ignora
+    // data_de/data_ate, fechando a MESMA janela usada da 1a vez. Sem isso,
+    // data_de/data_ate (só a data, sem hora) pegariam o dia inteiro — que
+    // pode ter mais velas coletadas desde então (coletor roda 24/7), mudando
+    // o winrate/entradas. Cartas antigas (sem periodoDeTs) caem de volta pra
+    // essa aproximação por data, com o aviso de divergência já implementado
+    // logo abaixo.
+    ts_de_exato: t.periodoDeTs ?? null,
+    ts_ate_exato: t.periodoAteTs ?? null,
     dias_semana: (Array.isArray(d.diasSemana) && d.diasSemana.length && d.diasSemana.length < 7) ? d.diasSemana : null,
     timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
   };

@@ -20,6 +20,12 @@ let strategyState = {
   periodoModo: 'tudo', // 'tudo' (todo o histórico disponível) ou 'personalizado'
   periodoDataDe: null,
   periodoDataAte: null,
+  // Epoch exato (ver reproduzirCarta) — só preenchido ao "Testar de Novo" uma
+  // carta salva, pra fechar a MESMA janela usada da 1a vez (periodoDataDe/Ate
+  // só guardam a data e "perdem" a hora exata, o que mudaria o resultado se o
+  // dia calendário salvo já ganhou mais velas coletadas desde então).
+  periodoTsDe: null,
+  periodoTsAte: null,
   // ── Campos do modo quadrante ──
   q: {
     tipo: 'quadrante',     // 'quadrante' (Família 1) ou 'referencia' (Famílias 2/3)
@@ -398,6 +404,12 @@ function setSchedule() {
 
   strategyState.scheduleStart = start;
   strategyState.scheduleEnd = end;
+
+  // Escolha manual de período sempre substitui um epoch exato herdado de
+  // reproduzirCarta() (senão um teste novo ficaria travado, sem querer, na
+  // janela exata de uma reprodução anterior).
+  strategyState.periodoTsDe = null;
+  strategyState.periodoTsAte = null;
 
   if (strategyState.periodoModo === 'personalizado') {
     const de = document.getElementById('schedule-data-de').value;
@@ -1008,6 +1020,11 @@ function testStrategy() {
       periodo_modo: strategyState.periodoModo,
       data_de: strategyState.periodoDataDe,
       data_ate: strategyState.periodoDataAte,
+      // Se veio de reproduzirCarta() com o epoch exato salvo na carta, o
+      // backend ignora data_de/data_ate e fecha a MESMA janela usada da 1a
+      // vez — garante o mesmo winrate/entradas mesmo com o coletor rodando.
+      ts_de_exato: strategyState.periodoTsDe,
+      ts_ate_exato: strategyState.periodoTsAte,
       dias_semana: getDiasSemanaSelecionados(),
       timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
     };
@@ -1548,6 +1565,14 @@ function confirmSaveStrategy() {
       losses: r.losses,
       periodoDe: r.periodo_de,
       periodoAte: r.periodo_ate,
+      // Epoch exato da 1a/última vela usada nesse teste (ver rodar_backtest()
+      // no backend) — periodoDe/periodoAte só guardam a DATA, então reabrir
+      // um período "tudo" antigo só com a data pega o dia inteiro (o coletor
+      // roda 24/7 e pode ter juntado mais velas àquele mesmo dia desde então).
+      // Com o epoch exato, "gerar histórico idêntico" fecha a MESMA janela e
+      // garante o mesmo winrate/entradas.
+      periodoDeTs: r.periodo_de_ts ?? null,
+      periodoAteTs: r.periodo_ate_ts ?? null,
       diasTestados: dias,
       entradasPorDia: dias ? Math.max(1, Math.round(r.entries / dias)) : null,
       velasUsadas: r.velas_usadas,
@@ -1892,6 +1917,11 @@ function reproduzirCarta(id) {
   strategyState.periodoModo = 'personalizado';
   strategyState.periodoDataDe = item.teste.periodoDe;
   strategyState.periodoDataAte = item.teste.periodoAte;
+  // Cartas mais novas guardam o epoch exato (periodoDeTs/periodoAteTs) — usa
+  // ele pra travar a MESMA janela usada da 1a vez. Cartas antigas (sem esse
+  // campo) caem de volta pro par de datas, que é uma aproximação.
+  strategyState.periodoTsDe = item.teste.periodoDeTs ?? null;
+  strategyState.periodoTsAte = item.teste.periodoAteTs ?? null;
   // dias da semana já foram restaurados por carregarDefinicaoExistente() (o
   // recorte exato que essa carta tinha — inclusive se veio do "Otimizar").
 
