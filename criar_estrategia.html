@@ -809,17 +809,86 @@
           </div>
         </div>
 
-        <!-- ── TESTAR ESTRATÉGIA/CARTA EXISTENTE ── -->
+        <!-- ── CRIAR HISTÓRICO DE UMA ESTRATÉGIA ──
+             Roda uma estratégia salva (modo Pintar) contra um par + horário +
+             período escolhidos LIVREMENTE e gera uma sequência real de W/L, que
+             fica salva pra reusar em Gerenciamentos — mesmo que a carta original
+             tenha sido comprada, excluída ou perdido o histórico. Lógica em
+             js/historico.js (abrirCriarHistorico / gerarHistoricoCriar).
+             OBS: só modo "pintar" porque é o único que respeita recorte por
+             par + hora + data no motor (os outros só rodam contra "as últimas N
+             velas", sem recorte de calendário). -->
         <div class="phase-section" id="phase-existente">
-          <div class="step-counter" data-i18n="lab.existente.passo">Testar Estratégia · Passo 1</div>
-          <h2 class="card-box-title" data-i18n="lab.existente.titulo">♻️ O que você quer testar?</h2>
-          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 8px;" data-i18n="lab.existente.desc">
-            A regra continua exatamente igual. Só muda o par e o horário do teste.
+          <div class="step-counter">Testar Estratégia · Criar Histórico</div>
+          <h2 class="card-box-title">📊 Criar Histórico de uma Estratégia</h2>
+          <p class="ger-intro">
+            Rode uma estratégia salva num <strong>par</strong> e <strong>período</strong> à sua escolha
+            pra gerar uma sequência real de entradas (ganhou/perdeu). O histórico fica salvo pra você
+            usar em <strong>Gerenciamentos</strong> — mesmo que tenha perdido, excluído ou comprado a
+            carta. Pode gerar quantos históricos quiser, em pares e horários diferentes.
           </p>
 
-          <div id="existente-lista" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:28px; margin-top: 24px;"></div>
+          <div class="ger-section-label">1. Escolha a estratégia</div>
+          <div id="ch-estrategia-lista" class="build-pick-grid"></div>
 
-          <div class="pattern-controls">
+          <div class="ger-section-label">2. Escolha o par</div>
+          <div class="direction-grid" style="grid-template-columns:1fr 1fr; max-width:320px; margin:0 auto 12px;">
+            <button class="direction-btn selected" id="ch-filtro-otc" onclick="setCriarHistPairFilter('otc')">OTC</button>
+            <button class="direction-btn" id="ch-filtro-op" onclick="setCriarHistPairFilter('op')">Aberto</button>
+          </div>
+          <div id="ch-pares" class="direction-grid" style="grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); max-width:640px; margin:0 auto;"></div>
+
+          <div class="ger-section-label">3. Horário e período</div>
+          <div style="max-width:560px; margin:0 auto;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+              <div>
+                <label class="form-label" style="display:block; margin-bottom:6px;">Das</label>
+                <input type="time" id="ch-hora-de" value="00:00"
+                       style="width:100%; padding:10px 12px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg); color:var(--text-primary);">
+              </div>
+              <div>
+                <label class="form-label" style="display:block; margin-bottom:6px;">Às</label>
+                <input type="time" id="ch-hora-ate" value="23:59"
+                       style="width:100%; padding:10px 12px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg); color:var(--text-primary);">
+              </div>
+            </div>
+
+            <div class="direction-grid" id="ch-periodo-grid" style="grid-template-columns:1fr 1fr; margin-bottom:12px;">
+              <button class="direction-btn selected" data-periodo="tudo" onclick="setCriarHistPeriodo('tudo', this)">🌍 Todo o período disponível</button>
+              <button class="direction-btn" data-periodo="personalizado" onclick="setCriarHistPeriodo('personalizado', this)">📅 Período específico</button>
+            </div>
+
+            <div id="ch-periodo-datas" style="display:none; margin-bottom:8px;">
+              <div style="display:flex; gap:8px; justify-content:center; margin-bottom:12px; flex-wrap:wrap;">
+                <button class="btn btn-sm btn-outline" onclick="setCriarHistPeriodoRapido(1, this)">Ontem</button>
+                <button class="btn btn-sm btn-outline" onclick="setCriarHistPeriodoRapido(7, this)">Última semana</button>
+                <button class="btn btn-sm btn-outline" onclick="setCriarHistPeriodoRapido(30, this)">Último mês</button>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div>
+                  <label style="display:block; margin-bottom:6px; font-size:13px; text-align:center;">De</label>
+                  <input type="date" id="ch-data-de" oninput="limparAtalhosPeriodo('ch')"
+                         style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg); color:var(--text-primary);">
+                </div>
+                <div>
+                  <label style="display:block; margin-bottom:6px; font-size:13px; text-align:center;">Até</label>
+                  <input type="date" id="ch-data-ate" oninput="limparAtalhosPeriodo('ch')"
+                         style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-color); background:var(--bg); color:var(--text-primary);">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pattern-controls" style="margin-top:24px;">
+            <button class="btn btn-lg btn-accent" id="ch-btn-gerar" onclick="gerarHistoricoCriar()" disabled>🔬 Gerar Histórico</button>
+          </div>
+
+          <div id="ch-resultado" style="display:none; max-width:560px; margin:20px auto 0;"></div>
+
+          <div class="ger-section-label" style="margin-top:32px;">Históricos criados</div>
+          <div id="ch-historico-lista" style="display:flex; flex-direction:column; gap:10px; max-width:680px; margin:0 auto;"></div>
+
+          <div class="pattern-controls" style="margin-top:24px;">
             <button class="btn btn-sm btn-outline" onclick="trocarGrupoLab('testar')"><span data-i18n="lab.voltar">⬅ Voltar</span></button>
           </div>
         </div>
@@ -1678,7 +1747,10 @@
           <div class="pattern-controls">
             <button class="btn btn-sm btn-outline" id="btn-review-voltar" onclick="goToPhase('schedule')"><span data-i18n="lab.voltar">⬅ Voltar</span></button>
             <button class="btn btn-lg btn-accent" id="btn-test-strategy" onclick="testStrategy()" data-i18n="rev.testarestrategia">⚡ Testar Estratégia</button>
-            <button class="btn btn-lg btn-legendary" id="btn-sortear-cenario" onclick="sortearCenario()" title="Sorteia um par e horário reais. Mesma pintura, cenário diferente, carta diferente.">🎲 Sortear Cenário</button>
+            <!-- DESATIVADO temporariamente (pedido do Diego): "Sortear Cenário" não
+                 estava funcionando bem. Não remover — só reativar tirando o display:none
+                 e revertendo os guards em js/strategy-builder.js (resetPostTestButtons/renderResult). -->
+            <button class="btn btn-lg btn-legendary" id="btn-sortear-cenario" onclick="sortearCenario()" title="Sorteia um par e horário reais. Mesma pintura, cenário diferente, carta diferente." style="display: none;">🎲 Sortear Cenário</button>
             <button class="btn btn-lg btn-primary" id="btn-salvar-estrategia" onclick="showSaveForm()" style="display: none;" data-i18n="rev.salvarestrategia">💾 Salvar Estratégia</button>
             <button class="btn btn-lg btn-outline" id="btn-salvar-historico" onclick="salvarHistoricoDoTeste()" style="display: none;" data-i18n="rev.salvarhistorico">📊 Salvar Histórico</button>
             <button class="btn btn-lg btn-outline" id="btn-nova-estrategia" onclick="resetStrategy()" style="display: none;" data-i18n="rev.novaestrategia">🔄 Criar Nova Estratégia</button>
@@ -1973,11 +2045,11 @@
   <script src="js/pares.js?v=10"></script>
   <script src="js/data.js?v=9"></script>
   <script src="js/inventario.js?v=20"></script>
-  <script src="js/historico.js?v=10"></script>
+  <script src="js/historico.js?v=11"></script>
   <script src="js/gerenciamento.js?v=13"></script>
   <script src="js/build.js?v=12"></script>
   <script src="js/titulos.js?v=1"></script>
-  <script src="js/strategy-builder.js?v=26"></script>
+  <script src="js/strategy-builder.js?v=27"></script>
   <script src="js/catalogador.js?v=12"></script>
   <script src="js/refinar.js?v=1"></script>
   <script src="js/simulacao.js?v=1"></script>
@@ -2013,7 +2085,7 @@
     // atualiza a lista na tela.
     document.addEventListener('inventarioSincronizado', () => {
       if (document.getElementById('phase-existente')?.classList.contains('active')) {
-        renderListaExistente();
+        abrirCriarHistorico();
       }
     });
   </script>

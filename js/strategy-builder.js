@@ -580,9 +580,11 @@ function goToPhase(phase) {
     setPairFilter(filtro);
   }
 
-  // Renderizar a lista de estratégias/cartas salvas ao entrar na aba "Testar Estratégia"
+  // Aba "Testar Estratégia" agora é o painel "Criar Histórico" (js/historico.js):
+  // roda uma estratégia salva num par/horário/período à escolha e gera uma
+  // sequência real de W/L reutilizável em Gerenciamentos.
   if (phase === 'existente') {
-    renderListaExistente();
+    abrirCriarHistorico();
   }
 
   // Renderizar gerenciamentos e históricos (padrões + criados pelo usuário) ao entrar na aba
@@ -1121,9 +1123,9 @@ function resetPostTestButtons() {
   };
   mostra('btn-test-strategy', true);
   mostra('btn-review-voltar', true);
-  mostra('btn-sortear-cenario', true);
-  const _bs = document.getElementById('btn-sortear-cenario');
-  if (_bs) _bs.innerHTML = '🎲 Sortear Cenário';
+  // "Sortear Cenário" DESATIVADO temporariamente (pedido do Diego) — mantido
+  // oculto. Pra reativar: voltar pra `true` aqui e no bloco de renderResult.
+  mostra('btn-sortear-cenario', false);
   mostra('btn-salvar-estrategia', false);
   mostra('btn-salvar-historico', false);
   mostra('btn-nova-estrategia', false);
@@ -1244,10 +1246,12 @@ function renderResult(r) {
   tocarRevelacao(r.rarity);
   strategyState.cenarioSorteado = null; // consumido na revelação
 
-  // Mantém o botão de sorteio visível pós-teste e vira "de novo" — é o que
-  // alimenta o loop "só mais uma" (cada sorteio é um cenário real diferente).
+  // "Sortear Cenário" DESATIVADO temporariamente (pedido do Diego) — mantido
+  // oculto pós-teste também. Pra reativar: restaurar o bloco abaixo.
+  // const btnSorteia = document.getElementById('btn-sortear-cenario');
+  // if (btnSorteia) { btnSorteia.style.display = 'inline-flex'; btnSorteia.innerHTML = '🎲 Sortear de Novo'; }
   const btnSorteia = document.getElementById('btn-sortear-cenario');
-  if (btnSorteia) { btnSorteia.style.display = 'inline-flex'; btnSorteia.innerHTML = '🎲 Sortear de Novo'; }
+  if (btnSorteia) btnSorteia.style.display = 'none';
 
   // Já testou: o botão "Testar" e o "Voltar" de passo não fazem mais sentido aqui.
   const btnTestar = document.getElementById('btn-test-strategy');
@@ -2815,6 +2819,10 @@ function sortearCenario() {
 // ════════════════════════════════════════════════
 
 function montarPainelSimulacaoHTML(r) {
+  // DESATIVADO temporariamente (pedido do Diego): a Simulação Financeira aqui
+  // ficou obsoleta — já existe uma aba dedicada pra isso (Testar Gerenciamento).
+  // Pra reativar: apagar este return.
+  return '';
   if (!Array.isArray(r.sequencia) || !r.sequencia.length) return '';
   return `
     <div id="sim-financeira" style="margin-top:16px; border:2px solid var(--border); border-radius:12px; padding:24px;">
