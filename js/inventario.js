@@ -686,6 +686,28 @@ function renderCartaFront(item) {
   `;
 }
 
+// Mostra o intervalo Das/Até e, se a carta veio de um refino com horas
+// avulsas excluídas (não-contínuas — ex.: mantém 6h-9h e 20h-22h), deixa
+// isso explícito também, em vez de só o intervalo "de fora pra dentro" que
+// esconderia o buraco no meio.
+function textoHorarioCarta(t) {
+  const base = `${t.scheduleStart}–${t.scheduleEnd}`;
+  const horas = t.horasPermitidas;
+  if (!Array.isArray(horas) || !horas.length || horas.length >= 24) return base;
+  const lista = [...horas].sort((a, b) => a - b).map(h => `${String(h).padStart(2, '0')}h`).join(', ');
+  return `${base} (só ${lista})`;
+}
+
+// Dias da semana mantidos — "Todos" quando não houve refino, ou a lista
+// explícita de quais ficaram (o que foi excluído fica implícito no que não
+// aparece na lista).
+function textoDiasSemanaCarta(t) {
+  const dias = t.diasSemanaIncluidos;
+  if (!Array.isArray(dias) || !dias.length || dias.length >= 7) return 'Todos';
+  const nomes = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+  return [...dias].sort((a, b) => a - b).map(d => nomes[d]).join(', ');
+}
+
 function renderCartaBack(item, opts = {}) {
   const categoria = categoriaDaEstrategia(item);
   const t = item.teste;
@@ -722,9 +744,10 @@ function renderCartaBack(item, opts = {}) {
   } else {
     metaHTML = `
         <div class="carta-back-meta-row"><span>Par</span><span>${t.pair}</span></div>
-        <div class="carta-back-meta-row"><span>Horário</span><span>${t.scheduleStart}–${t.scheduleEnd}</span></div>
+        <div class="carta-back-meta-row"><span>Horário</span><span>${textoHorarioCarta(t)}</span></div>
         <div class="carta-back-meta-row"><span>Período testado</span><span>${periodoTxt}</span></div>
         <div class="carta-back-meta-row"><span>Dias testados</span><span>${t.diasTestados ?? '—'}</span></div>
+        <div class="carta-back-meta-row"><span>Dias da semana</span><span>${textoDiasSemanaCarta(t)}</span></div>
         <div class="carta-back-meta-row"><span>Winrate</span><span>${t.winrate}%</span></div>
         <div class="carta-back-meta-row"><span>Entradas/dia</span><span>${t.entradasPorDia != null ? '~' + t.entradasPorDia : '—'}</span></div>
   `;

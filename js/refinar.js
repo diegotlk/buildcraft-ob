@@ -281,13 +281,13 @@ function toggleRefinarHora(h) {
 }
 
 // ── CRIAR NOVA CARTA A PARTIR DO REFINO ──
-// Carrega a definição da estratégia-base na aba Criar, já com os dias da
-// semana refinados aqui aplicados (isso o backend respeita de verdade —
-// ver dias_semana em rodar_backtest/rodar_quadrante). O horário (Das/Até)
-// vem pré-preenchido com o intervalo das horas mantidas, mas é só ponto de
-// partida: o backend ainda não filtra por hora individual (schedule_start/
-// schedule_end não são lidos hoje), só o recorte contínuo Das–Até quando
-// isso for implementado. Revise o horário antes de testar.
+// Carrega a definição da estratégia-base (o padrão/quadrante/etc em si) e já
+// RODA o teste automaticamente com o par/timeframe/período usados aqui no
+// Refinar + os dias/horas que sobraram marcados — cai direto na revelação
+// (velinhas piscando + carta), sem passar pelas fases 1-6 de novo, porque já
+// está tudo definido. Backend agora filtra por hora de verdade (hora_inicio/
+// hora_fim = intervalo contínuo Das-Até; horas_permitidas = horas avulsas
+// quando o que sobrou não é um intervalo único, ex.: mantém 6h-9h e 20h-22h).
 function criarCartaRefinada() {
   const carta = getInventario().find(e => e.id === refinarState.estrategiaId);
   if (!carta) {
@@ -297,25 +297,57 @@ function criarCartaRefinada() {
   if (typeof carregarDefinicaoExistente !== 'function') return;
   carregarDefinicaoExistente(carta.id);
 
+  // Par/timeframe/período: os mesmos usados aqui no Refinar (o "cenário"
+  // que acabou de ser analisado), não necessariamente os da carta original.
+  const par = document.getElementById('refinar-par')?.value;
+  const tf = document.getElementById('refinar-tf')?.value || 'M1';
+  const periodo = document.getElementById('refinar-periodo')?.value || 'semana';
+  const dataStr = document.getElementById('refinar-data')?.value || '';
+  const { data_de, data_ate } = calcularIntervaloPeriodoCatalogador(periodo, dataStr);
+  if (par) strategyState.pair = par;
+  strategyState.timeframe = tf;
+  strategyState.periodoModo = 'personalizado';
+  strategyState.periodoDataDe = data_de;
+  strategyState.periodoDataAte = data_ate;
+  strategyState.periodoTsDe = null;
+  strategyState.periodoTsAte = null;
+  // goToPhase('review') roda setSchedule(), que RELÊ os inputs de data do
+  // DOM (não confia só no strategyState) — precisa espelhar aqui também,
+  // senão acha o período "vazio" e barra a navegação.
+  const inputDe = document.getElementById('schedule-data-de');
+  const inputAte = document.getElementById('schedule-data-ate');
+  if (inputDe) inputDe.value = data_de;
+  if (inputAte) inputAte.value = data_ate;
+  const periodoBtnPersonalizado = document.querySelector('#schedule-periodo-grid [data-periodo="personalizado"]');
+  if (periodoBtnPersonalizado) {
+    document.querySelectorAll('#schedule-periodo-grid .direction-btn').forEach(b => b.classList.remove('selected'));
+    periodoBtnPersonalizado.classList.add('selected');
+  }
+
   // Dias da semana: os que o usuário manteve marcados na visão "Por Horário".
   const diasKeep = [...refinarState.diasSemanaFiltro];
   if (typeof aplicarDiasSemanaUI === 'function') aplicarDiasSemanaUI(diasKeep);
 
-  // Horário: envelope (min–max) das horas não excluídas.
+  // Horas: envelope contínuo (Das/Até, pro campo visual) + a lista EXATA das
+  // horas mantidas (horas_permitidas, pro backend filtrar de verdade mesmo
+  // quando o que sobrou tem buracos no meio, não só um intervalo único).
   const horasKeep = Array.from({ length: 24 }, (_, h) => h).filter(h => !refinarState.horasExcluidas.has(h));
-  let avisoHorario = '';
   if (horasKeep.length && horasKeep.length < 24) {
     const min = Math.min(...horasKeep);
     const max = Math.max(...horasKeep);
-    const startInput = document.getElementById('schedule-start');
-    const endInput = document.getElementById('schedule-end');
     const de = `${String(min).padStart(2, '0')}:00`;
     const ate = `${String(max).padStart(2, '0')}:59`;
+    const startInput = document.getElementById('schedule-start');
+    const endInput = document.getElementById('schedule-end');
     if (startInput) startInput.value = de;
     if (endInput) endInput.value = ate;
     strategyState.scheduleStart = de;
     strategyState.scheduleEnd = ate;
-    avisoHorario = ` Horário pré-preenchido ${de}–${ate} (revise antes de testar).`;
+    strategyState.horasPermitidas = horasKeep;
+  } else {
+    strategyState.scheduleStart = '00:00';
+    strategyState.scheduleEnd = '23:59';
+    strategyState.horasPermitidas = null;
   }
 
   // Troca pro grupo "Criar" sem passar por trocarAbaLab/trocarGrupoLab —
@@ -331,7 +363,10 @@ function criarCartaRefinada() {
   document.getElementById('lab-subtabs-testar').style.display = 'none';
   document.getElementById('lab-tab-criar-estrategia')?.classList.add('active');
 
-  showToast('➕ Nova carta a partir do refino', `"${carta.nome}" carregada com os dias refinados.${avisoHorario}`, 'default');
+  // Já cai direto testando — nada de passar pelas fases 1-6 de novo.
+  goToPhase('review');
+  showToast('➕ Refinando "' + carta.nome + '"', 'Rodando com os dias/horários que você manteve...', 'default');
+  setTimeout(() => testStrategy(), 50);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

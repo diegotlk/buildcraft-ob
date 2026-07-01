@@ -26,6 +26,10 @@ let strategyState = {
   // dia calendário salvo já ganhou mais velas coletadas desde então).
   periodoTsDe: null,
   periodoTsAte: null,
+  // Horas avulsas (0-23, opcional) mantidas — vem da aba Refinar quando as
+  // horas mantidas não formam um intervalo contínuo (schedule_start/End
+  // sozinhos não dão conta disso). null = sem filtro extra de horas avulsas.
+  horasPermitidas: null,
   // ── Campos do modo quadrante ──
   q: {
     tipo: 'quadrante',     // 'quadrante' (Família 1) ou 'referencia' (Famílias 2/3)
@@ -982,6 +986,7 @@ function testStrategy() {
     data_ate: strategyState.periodoDataAte,
     dias_semana: getDiasSemanaSelecionados(),
     timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
+    horas_permitidas: strategyState.horasPermitidas,
   };
 
   if (strategyState.mode === 'figura') {
@@ -1068,6 +1073,7 @@ function testStrategy() {
       data_ate: strategyState.periodoDataAte,
       dias_semana: getDiasSemanaSelecionados(),
       timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
+      horas_permitidas: strategyState.horasPermitidas,
     };
   } else {
     payload = {
@@ -1090,6 +1096,7 @@ function testStrategy() {
       ts_ate_exato: strategyState.periodoTsAte,
       dias_semana: getDiasSemanaSelecionados(),
       timezone: typeof getFusoHorario === 'function' ? getFusoHorario() : null,
+      horas_permitidas: strategyState.horasPermitidas,
     };
   }
 
@@ -1540,6 +1547,8 @@ function confirmSaveStrategy() {
       diasTestados: dias,
       entradasPorDia: dias ? Math.max(1, Math.round(r.entries / dias)) : null,
       velasUsadas: r.velas_usadas,
+      diasSemanaIncluidos: getDiasSemanaSelecionados(),
+      horasPermitidas: strategyState.horasPermitidas,
     },
     carta: criarMetaCarta(),
   };
@@ -2674,6 +2683,8 @@ function montarHeroReveal(r) {
       periodoAte: r.periodo_ate,
       diasTestados: dias,
       entries: r.entries,
+      diasSemanaIncluidos: getDiasSemanaSelecionados(),
+      horasPermitidas: strategyState.horasPermitidas,
     },
   };
 
