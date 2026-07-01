@@ -233,14 +233,14 @@ const BORDA_KEY = 'binaryzando_borda';
 //   abertura e os espinhos/enfeites que apontam pra dentro passam POR CIMA dele.
 //   (Usar o "maior círculo inscrito" deixava o avatar minúsculo em bordas espinhosas.)
 const BORDA_OPCOES = [
-  { id: 'f1', src: 'bordas_avatar/f1.png', hole: { cx: 0.501, cy: 0.485, r: 0.350 } },
-  { id: 'f2', src: 'bordas_avatar/f2.png', hole: { cx: 0.497, cy: 0.486, r: 0.311 } },
-  { id: 'f3', src: 'bordas_avatar/f3.png', hole: { cx: 0.502, cy: 0.491, r: 0.324 } },
-  { id: 'f4', src: 'bordas_avatar/f4.png', hole: { cx: 0.501, cy: 0.484, r: 0.309 } },
-  { id: 'm1', src: 'bordas_avatar/m1.png', hole: { cx: 0.500, cy: 0.472, r: 0.328 } },
-  { id: 'm2', src: 'bordas_avatar/m2.png', hole: { cx: 0.500, cy: 0.487, r: 0.330 } },
-  { id: 'm3', src: 'bordas_avatar/m3.png', hole: { cx: 0.500, cy: 0.477, r: 0.326 } },
-  { id: 'm4', src: 'bordas_avatar/m4.png', hole: { cx: 0.501, cy: 0.491, r: 0.314 } },
+  { id: 'f1', src: 'bordas_avatar/f1.png', hole: { cx: 0.499, cy: 0.444, r: 0.334 } },
+  { id: 'f2', src: 'bordas_avatar/f2.png', hole: { cx: 0.487, cy: 0.477, r: 0.307 } },
+  { id: 'f3', src: 'bordas_avatar/f3.png', hole: { cx: 0.493, cy: 0.478, r: 0.324 } },
+  { id: 'f4', src: 'bordas_avatar/f4.png', hole: { cx: 0.499, cy: 0.470, r: 0.311 } },
+  { id: 'm1', src: 'bordas_avatar/m1.png', hole: { cx: 0.499, cy: 0.375, r: 0.291 } },
+  { id: 'm2', src: 'bordas_avatar/m2.png', hole: { cx: 0.499, cy: 0.492, r: 0.332 } },
+  { id: 'm3', src: 'bordas_avatar/m3.png', hole: { cx: 0.500, cy: 0.417, r: 0.311 } },
+  { id: 'm4', src: 'bordas_avatar/m4.png', hole: { cx: 0.497, cy: 0.494, r: 0.314 } },
 ];
 
 function getBorda() {

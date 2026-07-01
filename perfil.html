@@ -29,8 +29,8 @@
 <body>
 
   <!-- Perfil exige login — manda pra login.html antes de pintar a página. -->
-  <script src="js/sound.js?v=4"></script>
-  <script src="js/auth.js?v=13"></script>
+  <script src="js/sound.js?v=5"></script>
+  <script src="js/auth.js?v=14"></script>
   <script>exigirLogin();</script>
 
   <!-- ==================== NAVBAR ==================== -->
@@ -303,6 +303,10 @@
         </div>`;
     }
 
+    // TEMPORÁRIO (fase de teste): todos os avatares liberados pra experimentar.
+    // Depois volta a travar por conquista — trocar pra: !!desbloqueados[o.id].
+    const AVATARES_TODOS_LIBERADOS = true;
+
     function renderAvatarGrid() {
       const atual = getAvatar(); // null = sem avatar (padrão)
       const desbloqueados = typeof getTitulosDesbloqueados === 'function' ? getTitulosDesbloqueados() : {};
@@ -317,7 +321,7 @@
 
       const outros = AVATAR_OPCOES.map(o => {
         const sel = o.id === atual;
-        const livre = !!desbloqueados[o.id];
+        const livre = AVATARES_TODOS_LIBERADOS || !!desbloqueados[o.id];
         if (!livre) {
           return _avatarCell('', o.src, false, true, '🔒', 'not-allowed');
         }
@@ -332,7 +336,7 @@
         localStorage.removeItem(AVATAR_KEY); // volta pro padrão (sem avatar)
       } else {
         const desbloqueados = typeof getTitulosDesbloqueados === 'function' ? getTitulosDesbloqueados() : {};
-        if (!desbloqueados[id]) return; // só usa o que já desbloqueou
+        if (!AVATARES_TODOS_LIBERADOS && !desbloqueados[id]) return; // só usa o que já desbloqueou
         localStorage.setItem(AVATAR_KEY, id);
       }
       aplicarAvatarNoNavbar();
