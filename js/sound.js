@@ -110,62 +110,48 @@ document.addEventListener('click', (e) => {
 }, { capture: true });
 
 // ── MÚSICA AMBIENTE (só na home) ──
-// Pad cyberpunk simples: 3 osciladores detunados + filtro com LFO lento.
-// Autoplay é bloqueado pelo navegador sem gesto do usuário — por isso só
-// começa no primeiro clique/toque na página (e nunca se o som estiver mudo).
-let _musicaNodes = null;
+// Faixa cyberpunk real (Pixabay Content License — livre para uso comercial,
+// sem exigência de atribuição), tocando em loop com fade suave. O arquivo só
+// é baixado quando a música começa (1º gesto do usuário), nunca no load da
+// página, e nunca se o som estiver mudo.
+const MUSICA_HOME_SRC = 'audio/cyberpunk-home.mp3';
+const MUSICA_HOME_VOL = 0.32; // volume de fundo (0..1) — discreto, sem estourar
+let _musicaEl = null;
+let _musicaFadeRAF = null;
+
+function _fadeMusica(alvo, ms, aoTerminar) {
+  if (!_musicaEl) return;
+  if (_musicaFadeRAF) cancelAnimationFrame(_musicaFadeRAF);
+  const ini = _musicaEl.volume;
+  const t0 = performance.now();
+  const passo = (t) => {
+    if (!_musicaEl) return;
+    const k = Math.min((t - t0) / ms, 1);
+    _musicaEl.volume = Math.max(0, Math.min(1, ini + (alvo - ini) * k));
+    if (k < 1) _musicaFadeRAF = requestAnimationFrame(passo);
+    else if (aoTerminar) aoTerminar();
+  };
+  _musicaFadeRAF = requestAnimationFrame(passo);
+}
 
 function iniciarMusicaAmbiente() {
-  if (!somAtivo() || _musicaNodes) return;
-  const ctx = garantirAudioCtx();
-  if (!ctx) return;
-
-  const master = ctx.createGain();
-  master.gain.value = 0.0001;
-  master.connect(ctx.destination);
-  master.gain.exponentialRampToValueAtTime(0.05, ctx.currentTime + 2.5);
-
-  const filtro = ctx.createBiquadFilter();
-  filtro.type = 'lowpass';
-  filtro.frequency.value = 800;
-  filtro.connect(master);
-
-  // Acorde sustentado (Am9-ish), bem grave e etéreo.
-  const freqs = [110, 164.81, 220, 277.18];
-  const oscs = freqs.map((freq, i) => {
-    const o = ctx.createOscillator();
-    o.type = i % 2 === 0 ? 'sawtooth' : 'sine';
-    o.frequency.value = freq;
-    o.detune.value = (i - 1.5) * 6;
-    o.connect(filtro);
-    o.start();
-    return o;
-  });
-
-  // LFO bem lento varrendo o filtro — dá a sensação de "respirar".
-  const lfo = ctx.createOscillator();
-  lfo.frequency.value = 0.06;
-  const lfoGain = ctx.createGain();
-  lfoGain.gain.value = 380;
-  lfo.connect(lfoGain);
-  lfoGain.connect(filtro.frequency);
-  lfo.start();
-
-  _musicaNodes = { master, filtro, oscs, lfo, lfoGain };
+  if (!somAtivo()) return;
+  if (!_musicaEl) {
+    _musicaEl = new Audio(MUSICA_HOME_SRC);
+    _musicaEl.loop = true;
+    _musicaEl.preload = 'auto';
+    _musicaEl.volume = 0;
+  }
+  const p = _musicaEl.play();
+  // Navegador bloqueia autoplay sem gesto — silenciamos a rejeição (a função
+  // é rearmada no 1º clique/toque via ativarMusicaAmbienteNaHome).
+  if (p && p.catch) p.catch(() => {});
+  _fadeMusica(MUSICA_HOME_VOL, 1800);
 }
 
 function pararMusicaAmbiente() {
-  if (!_musicaNodes) return;
-  const ctx = garantirAudioCtx();
-  const { master, oscs, lfo } = _musicaNodes;
-  if (ctx && master) {
-    master.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1);
-    setTimeout(() => {
-      oscs.forEach(o => { try { o.stop(); } catch (e) {} });
-      try { lfo.stop(); } catch (e) {}
-    }, 1100);
-  }
-  _musicaNodes = null;
+  if (!_musicaEl) return;
+  _fadeMusica(0, 600, () => { try { _musicaEl.pause(); } catch (e) {} });
 }
 
 // Marca a home e arma o início no 1º gesto do usuário.
