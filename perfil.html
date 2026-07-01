@@ -29,8 +29,8 @@
 <body>
 
   <!-- Perfil exige login — manda pra login.html antes de pintar a página. -->
-  <script src="js/sound.js?v=3"></script>
-  <script src="js/auth.js?v=12"></script>
+  <script src="js/sound.js?v=4"></script>
+  <script src="js/auth.js?v=13"></script>
   <script>exigirLogin();</script>
 
   <!-- ==================== NAVBAR ==================== -->
@@ -373,8 +373,8 @@
       // "entrar" por baixo do anel — sem sobra nem descentralização.
       const bordas = BORDA_OPCOES.map(o => {
         const sel = o.id === atual;
-        const h = o.hole || { cx: 0.5, cy: 0.5, r: 0.29 };
-        const rr = h.r * 1.10;            // 10% maior que o buraco -> encaixa por baixo
+        const h = o.hole || { cx: 0.5, cy: 0.5, r: 0.33 };
+        const rr = h.r;                   // raio de preenchimento (percentil 70)
         const size = (2 * rr * 100).toFixed(1);
         const left = ((h.cx - rr) * 100).toFixed(1);
         const top = ((h.cy - rr) * 100).toFixed(1);

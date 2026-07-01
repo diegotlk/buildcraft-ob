@@ -114,8 +114,8 @@ document.addEventListener('click', (e) => {
 // sem exigência de atribuição), tocando em loop com fade suave. Já começa a
 // BAIXAR no load da home (se o som estiver ligado), pra tocar sem atraso no 1º
 // gesto do usuário — o navegador exige um clique/toque antes de tocar áudio.
-const MUSICA_HOME_SRC = 'audio/cyberpunk-trailer.mp3';
-const MUSICA_HOME_VOL = 0.32; // volume de fundo (0..1) — discreto, sem estourar
+const MUSICA_HOME_SRC = 'audio/cyberpunk-home.mp3';
+const MUSICA_HOME_VOL = 0.28; // volume de fundo (0..1) — discreto, sem estourar
 let _musicaEl = null;
 let _musicaFadeRAF = null;
 
