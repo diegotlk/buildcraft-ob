@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" href="img/favicon-512.png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 
-  <link rel="stylesheet" href="css/global.css?v=8">
+  <link rel="stylesheet" href="css/global.css?v=9">
   <link rel="stylesheet" href="css/cards.css?v=9">
   <link rel="stylesheet" href="css/components.css?v=6">
   <link rel="stylesheet" href="css/pages.css?v=6">
@@ -828,10 +828,9 @@
           <div class="step-counter">Testar Estratégia · Criar Histórico</div>
           <h2 class="card-box-title">📊 Criar Histórico de uma Estratégia</h2>
           <p class="ger-intro">
-            Escolha uma estratégia salva e gere uma sequência real de entradas (ganhou/perdeu) pra
-            usar em <strong>Gerenciamentos</strong>. Duas opções: reproduzir <strong>exatamente</strong>
-            o cenário da carta (mesmo resultado) — útil se você perdeu, excluiu ou comprou a carta — ou
-            testar em um <strong>par/período novo</strong>, livre.
+            Escolha uma estratégia salva pra gerar uma sequência real de entradas (ganhou/perdeu),
+            usada em <strong>Gerenciamentos</strong>: reproduza o cenário <strong>exato</strong> da
+            carta (mesmo resultado) ou teste um <strong>par/período novo</strong>.
           </p>
 
           <div class="ger-section-label">1. Escolha a estratégia</div>
@@ -844,9 +843,7 @@
             <div class="glass-card" style="padding:20px; border:1px solid var(--accent);">
               <div style="font-weight:800; margin-bottom:4px;">🔁 Histórico desta carta (mesmo resultado)</div>
               <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:14px;">
-                Roda exatamente o mesmo par, horário e período que geraram essa carta — o resultado
-                é idêntico ao que ela já mostra. Use quando quiser recuperar o histórico de uma carta
-                comprada, excluída ou que perdeu o histórico original.
+                Mesmo par, horário e período da carta — resultado idêntico.
               </div>
               <div id="ch-carta-exata-resumo" style="font-size:13px; margin-bottom:16px; padding:12px; background:var(--bg); border-radius:8px;"></div>
               <button class="btn btn-accent" style="width:100%" id="ch-btn-gerar-exato" onclick="gerarHistoricoDaCarta()">🔬 Gerar Histórico Idêntico</button>
@@ -854,10 +851,6 @@
           </div>
 
           <div class="ger-section-label" style="margin-top:36px;">— ou crie um histórico novo, em outro cenário —</div>
-          <p style="text-align:center; color:var(--text-muted); font-size:12.5px; margin-top:-8px; margin-bottom:16px;">
-            Escolha livremente o par e o período pra testar a mesma estratégia numa situação diferente.
-            O resultado pode ser diferente do da carta original — é esperado, é outro cenário.
-          </p>
 
           <div class="ger-section-label">2. Escolha o par</div>
           <div class="direction-grid" style="grid-template-columns:1fr 1fr; max-width:320px; margin:0 auto 12px;">
