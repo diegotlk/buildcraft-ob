@@ -303,8 +303,11 @@ function proximoNumeroDescoberta() {
 const CARTA_SHINY_CHANCE = 0.01;
 
 function criarMetaCarta() {
-  const lista = getInventario();
-  const isPrimeira = lista.filter(e => !e.deletadoEm).length === 0;
+  // Gênesis só nasce quando o inventário está TOTALMENTE zerado: nada na
+  // lixeira, nada arquivado, nenhum histórico, nenhuma carta — não só "sem
+  // cartas ativas". Do contrário, esvaziar/arquivar tudo e criar de novo
+  // geraria um 2º "Gênesis" por engano.
+  const isPrimeira = getInventario().length === 0 && getHistoricos().length === 0;
   return {
     numero: proximoNumeroDescoberta(),
     transformadaEm: new Date().toISOString(),

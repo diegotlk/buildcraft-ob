@@ -1144,7 +1144,6 @@ function resetPostTestButtons() {
   // oculto. Pra reativar: voltar pra `true` aqui e no bloco de renderResult.
   mostra('btn-sortear-cenario', false);
   mostra('btn-salvar-estrategia', false);
-  mostra('btn-salvar-historico', false);
   mostra('btn-nova-estrategia', false);
   mostra('btn-ver-inventario', false);
   const tr = document.getElementById('test-result');
@@ -1300,47 +1299,7 @@ function renderResult(r) {
     }
   }
 
-  // Histórico (sequência real W/L) só existe quando o backtest devolveu uma —
-  // não acontece com o espelho ativado, por exemplo (mistura duas ordens cronológicas).
-  const btnHistorico = document.getElementById('btn-salvar-historico');
-  if (btnHistorico) btnHistorico.style.display = (Array.isArray(r.sequencia) && r.sequencia.length) ? 'inline-flex' : 'none';
-
   container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-// ── SALVAR HISTÓRICO (direto do teste, sem precisar salvar a estratégia) ──
-// Cobre o caso de "testar estratégia" (nova ou já existente) quando o usuário
-// só quer o histórico de entradas pra testar um Gerenciamento — sem criar
-// outra carta duplicada no inventário.
-function salvarHistoricoDoTeste() {
-  const r = strategyState.lastResult;
-  if (!r || !Array.isArray(r.sequencia) || !r.sequencia.length) {
-    showToast('⚠️ Sem sequência', 'Esse teste não gerou uma sequência cronológica utilizável.', 'default');
-    return;
-  }
-
-  const nome = `${strategyState.testandoExistente ? strategyState.testandoExistente.origemNome : r.pair} · ${r.timeframe} (${new Date().toLocaleDateString('pt-BR')})`;
-
-  const historicos = getHistoricos();
-  historicos.push({
-    id: 'hist_' + Date.now(),
-    nome,
-    origem: 'estrategia',
-    estrategiaId: strategyState.testandoExistente ? strategyState.testandoExistente.origemId : null,
-    pair: r.pair,
-    timeframe: r.timeframe,
-    winrate: r.winrate,
-    entries: r.entries,
-    periodoDe: r.periodo_de,
-    periodoAte: r.periodo_ate,
-    velasUsadas: r.velas_usadas,
-    sequencia: r.sequencia,
-    sequencia_rica: r.sequencia_rica || null,
-    criadoEm: new Date().toISOString(),
-  });
-  if (!salvarHistoricos(historicos)) return;
-
-  showToast('✅ Histórico salvo', `"${nome}" tem ${r.sequencia.length} entradas reais — já disponível em Criar Gerenciamento e no Inventário.`, 'discovery');
 }
 
 // ── CRIAR NOVA ESTRATÉGIA (recomeçar do zero) ──
@@ -1387,8 +1346,6 @@ function resetStrategy() {
   if (btnNova) btnNova.style.display = 'none';
   const btnSalvar = document.getElementById('btn-salvar-estrategia');
   if (btnSalvar) btnSalvar.style.display = 'none';
-  const btnHistorico = document.getElementById('btn-salvar-historico');
-  if (btnHistorico) btnHistorico.style.display = 'none';
 
   // Esconde o formulário de salvar (caso esteja aberto)
   const saveForm = document.getElementById('save-form');
@@ -1616,8 +1573,6 @@ function confirmSaveStrategy() {
   // caminho claro de saída em vez de deixar a tela igual a antes de salvar.
   const btnSalvar = document.getElementById('btn-salvar-estrategia');
   if (btnSalvar) btnSalvar.style.display = 'none';
-  const btnHistorico = document.getElementById('btn-salvar-historico');
-  if (btnHistorico) btnHistorico.style.display = 'none';
   const btnVerInv = document.getElementById('btn-ver-inventario');
   if (btnVerInv) btnVerInv.style.display = 'inline-flex';
 
@@ -1840,7 +1795,7 @@ function avisarTimeframeIndisponivel() {
 // teste ("Testar Gerenciamento" / "Testar Build"), pra cada tipo rodar no
 // fluxo certo em vez de tentar adivinhar pelo item clicado.
 function renderListaExistente() {
-  const lista = getInventario().filter(e => !e.deletadoEm && BUILD_STRATEGY_MODES.includes(e.mode));
+  const lista = getInventario().filter(e => !e.deletadoEm && !e.arquivadoEm && BUILD_STRATEGY_MODES.includes(e.mode));
   const cont = document.getElementById('existente-lista');
 
   if (lista.length === 0) {
@@ -2513,27 +2468,12 @@ function garantirRevealStyles() {
   .reveal-hero{position:relative;margin-bottom:22px;text-align:center;}
   .reveal-hero-eyebrow{font-family:var(--font-hud);letter-spacing:4px;text-transform:uppercase;font-size:.72rem;
     color:var(--text-muted);margin-bottom:12px;}
-  .reveal-card{position:relative;overflow:hidden;max-width:420px;margin:0 auto;padding:26px 22px;border-radius:16px;
-    border:2px solid var(--rc);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(0,0,0,.2));
-    box-shadow:0 0 46px var(--rg),inset 0 0 34px rgba(0,0,0,.45);
-    animation:reveal-pop .62s var(--ease-spring) both;}
-  .reveal-card::before{content:'';position:absolute;top:0;left:-60%;width:55%;height:100%;
-    background:linear-gradient(100deg,transparent,rgba(255,255,255,.18),transparent);
-    transform:skewX(-18deg);animation:reveal-shine 1.05s ease-out .45s both;}
-  .reveal-rar-badge{display:inline-block;padding:5px 18px;border-radius:999px;background:var(--rc);color:#04121a;
-    font-family:var(--font-display);font-weight:800;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;
-    box-shadow:0 0 18px var(--rg);}
-  .reveal-grade{font-family:var(--font-display);font-weight:900;font-size:4.4rem;line-height:.95;color:var(--rc);
-    text-shadow:0 0 26px var(--rg);margin:8px 0 2px;animation:reveal-grade-in .5s var(--ease-spring) .25s both;}
   .reveal-headline{font-family:var(--font-display);font-weight:800;font-size:1.05rem;letter-spacing:.04em;
     color:var(--text-primary);margin:6px 0 14px;text-transform:uppercase;}
-  .reveal-pair{font-family:var(--font-hud);letter-spacing:1px;color:var(--text-secondary);font-size:.95rem;margin-bottom:16px;}
   .reveal-cenario{font-size:.8rem;color:var(--neon-gold);margin:-8px 0 14px;letter-spacing:.5px;}
-  .reveal-ministats{display:flex;gap:12px;justify-content:center;}
-  .reveal-ministat{flex:1;max-width:140px;padding:10px 6px;border-radius:10px;background:rgba(0,0,0,.28);
-    border:1px solid var(--border);}
-  .reveal-ministat .v{font-family:var(--font-display);font-weight:800;font-size:1.5rem;line-height:1;}
-  .reveal-ministat .l{font-size:.66rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-top:4px;}
+  /* Pop na carta de revelação — mesma arte do Inventário (renderCartaFront),
+     só com a animação de "descoberta" (giro 3D) por cima. */
+  .reveal-hero .carta-flip-wrap{animation:reveal-pop .62s var(--ease-spring) both;}
   .reveal-nearmiss{max-width:420px;margin:14px auto 0;padding:12px 16px;border-radius:10px;font-size:.86rem;line-height:1.5;
     text-align:left;color:#ffe6a8;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);}
   .reveal-nearmiss b{color:var(--neon-gold);}
@@ -2552,11 +2492,9 @@ function garantirRevealStyles() {
   @keyframes reveal-fade{from{opacity:0}to{opacity:1}}
   @keyframes reveal-pop{from{opacity:0;transform:perspective(900px) rotateY(82deg) scale(.86)}
     to{opacity:1;transform:perspective(900px) rotateY(0) scale(1)}}
-  @keyframes reveal-grade-in{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
-  @keyframes reveal-shine{from{left:-60%}to{left:130%}}
   @keyframes reveal-fall{to{transform:translateY(112vh) rotate(540deg);opacity:.9}}
   @media(prefers-reduced-motion:reduce){
-    .reveal-card,.reveal-card::before,.reveal-grade{animation:none}
+    .reveal-hero .carta-flip-wrap{animation:none}
   }`;
   document.head.appendChild(s);
 }
@@ -2668,7 +2606,6 @@ function montarHeroReveal(r) {
   const lab = _RAR_LABEL[rar] || 'Comum';
   const acima = r.winrate >= 53.5;
   const headline = acima ? `Você descobriu uma carta ${lab}` : 'Carta descoberta';
-  const corWr = acima ? 'var(--success)' : 'var(--danger)';
   const quase = calcularQuaseAcerto(r);
   const quaseHTML = quase ? `<div class="reveal-nearmiss">${quase}</div>` : '';
 
@@ -2683,24 +2620,39 @@ function montarHeroReveal(r) {
       </div>
     </div>` : '';
 
-  const isPrimeiraDescoberta = typeof getInventario === 'function'
-    && getInventario().filter(e => !e.deletadoEm).length === 0;
+  // Gênesis só quando o inventário INTEIRO está zerado (nada em lixeira,
+  // arquivadas, históricos ou cartas) — mesma regra de criarMetaCarta()
+  // em js/inventario.js, aplicada aqui só pra mostrar a mensagem certa
+  // ANTES de salvar (o número #001 de verdade só é fixado ao salvar).
+  const isPrimeiraDescoberta = typeof getInventario === 'function' && typeof getHistoricos === 'function'
+    && getInventario().length === 0 && getHistoricos().length === 0;
   const primeiraHTML = isPrimeiraDescoberta
     ? '<div class="reveal-genesis-msg">✦ Sua primeira criatura. O início de tudo.</div>' : '';
+
+  // Carta de prévia com a MESMA arte do Inventário (renderCartaFront) — antes
+  // a revelação usava um card custom (.reveal-card) com um visual diferente
+  // da carta final; agora é a idêntica, só sem número/selo de Gênesis (que só
+  // existem de fato depois de salvar).
+  const dias = diasEntrePeriodo(r.periodo_de, r.periodo_ate);
+  const previewItem = {
+    nome: `${r.pair} · ${r.timeframe}`,
+    mode: strategyState.mode,
+    definicao: snapshotDefinicao(),
+    teste: {
+      rarity: rar,
+      winrate: r.winrate,
+      grade: r.grade || '—',
+      entradasPorDia: dias ? Math.max(1, Math.round(r.entries / dias)) : null,
+    },
+  };
 
   return `
   <div class="reveal-hero" style="--rc:${cor};--rg:${glow};">
     <div class="reveal-hero-eyebrow">⚡ Descoberta no histórico real</div>
-    <div class="reveal-card">
-      <div class="reveal-rar-badge">${lab}</div>
-      <div class="reveal-grade">${r.grade || '—'}</div>
-      <div class="reveal-headline">${headline}</div>
-      <div class="reveal-pair">${r.pair} · ${r.timeframe}</div>
-      ${strategyState.cenarioSorteado ? `<div class="reveal-cenario">🎲 Cenário sorteado: ${strategyState.cenarioSorteado}</div>` : ''}
-      <div class="reveal-ministats">
-        <div class="reveal-ministat"><div class="v" style="color:${corWr};">${r.winrate}%</div><div class="l">Taxa de acerto</div></div>
-        <div class="reveal-ministat"><div class="v">${(r.entries || 0).toLocaleString('pt-BR')}</div><div class="l">Operações</div></div>
-      </div>
+    <div class="reveal-headline" style="margin-bottom:14px;">${headline}</div>
+    ${strategyState.cenarioSorteado ? `<div class="reveal-cenario">🎲 Cenário sorteado: ${strategyState.cenarioSorteado}</div>` : ''}
+    <div class="carta-flip-wrap" style="pointer-events:none; margin-bottom:8px;">
+      <div class="carta-flip-inner">${renderCartaFront(previewItem)}</div>
     </div>
     ${primeiraHTML}
     ${marcoColecao(r)}

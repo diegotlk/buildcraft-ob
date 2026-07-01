@@ -525,7 +525,7 @@ function abrirTesteGerenciamento(id) {
   document.getElementById('gerenciamento-teste-resultado').style.display = 'none';
   document.getElementById('gerenciamento-teste-resultado').innerHTML = '';
 
-  const historicos = getHistoricos();
+  const historicos = getHistoricos().filter(h => !h.arquivadoEm);
   const select = document.getElementById('gerenciamento-teste-historico');
   select.innerHTML = `<option value="${GERENCIAMENTO_HISTORICO_PADRAO.id}">⭐ ${GERENCIAMENTO_HISTORICO_PADRAO.nome}</option>`
     + historicos.map(h => `<option value="${h.id}">${h.nome} (${h.sequencia.length} entradas)</option>`).join('');
@@ -755,7 +755,7 @@ function renderGerenciamentosTestar() {
   const cont = document.getElementById('gerenciamento-testar-lista');
   if (!cont) return;
 
-  const cartas = getInventario().filter(e => !e.deletadoEm && e.mode === 'gerenciamento');
+  const cartas = getInventario().filter(e => !e.deletadoEm && !e.arquivadoEm && e.mode === 'gerenciamento');
   if (cartas.length) {
     cont.style.display = 'grid';
     cont.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';

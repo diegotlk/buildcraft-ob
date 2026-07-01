@@ -43,6 +43,33 @@ function excluirHistorico(id) {
   // Cada render null-checa o próprio container, então chamar as duas é seguro.
   renderHistoricos();
   if (typeof renderHistoricosCriados === 'function') renderHistoricosCriados();
+  if (typeof renderHistoricosInventario === 'function') renderHistoricosInventario();
+}
+
+// ── ARQUIVAR — igual ao "Arquivar" das cartas (js/inventario.js): permanente,
+// nunca expira, só "tira da vista" das listas ativas sem apagar de verdade.
+function arquivarHistorico(id) {
+  const lista = getHistoricos();
+  const h = lista.find(x => x.id === id);
+  if (!h) return;
+  h.arquivadoEm = new Date().toISOString();
+  salvarHistoricos(lista);
+  renderHistoricos();
+  if (typeof renderHistoricosCriados === 'function') renderHistoricosCriados();
+  if (typeof renderHistoricosInventario === 'function') renderHistoricosInventario();
+}
+
+function desarquivarHistorico(id) {
+  const lista = getHistoricos();
+  const h = lista.find(x => x.id === id);
+  if (!h) return;
+  delete h.arquivadoEm;
+  salvarHistoricos(lista);
+  if (typeof renderHistoricosInventario === 'function') renderHistoricosInventario();
+}
+
+function getHistoricosArquivados() {
+  return getHistoricos().filter(h => h.arquivadoEm);
 }
 
 // ── GERAR A PARTIR DO HISTÓRICO PADRÃO (entrada no verde, EURUSD) ──
@@ -99,7 +126,7 @@ function gerarHistoricoPadrao(presetId) {
 function listarEstrategiasParaHistorico() {
   // Só estratégias "pintar" (padrão de velas) carregam sequência real por
   // enquanto — os outros modos ainda não devolvem a sequência W/L da API.
-  return getInventario().filter(e => !e.deletadoEm && e.mode === 'pintar');
+  return getInventario().filter(e => !e.deletadoEm && !e.arquivadoEm && e.mode === 'pintar');
 }
 
 function abrirGeradorHistoricoDeEstrategia() {
@@ -223,21 +250,27 @@ function renderHistoricos() {
   const cont = document.getElementById('historico-lista');
   if (!cont) return;
 
-  const lista = getHistoricos();
+  const lista = getHistoricos().filter(h => !h.arquivadoEm);
   cont.innerHTML = lista.length
-    ? lista.slice().reverse().map(renderCardHistorico).join('')
+    ? lista.slice().reverse().map(h => renderCardHistorico(h)).join('')
     : '<p class="ger-empty">Nenhum histórico ainda. Gere um padrão ou a partir de uma estratégia salva.</p>';
 }
 
-function renderCardHistorico(h) {
+// arquivado=true renderiza o card na aba Arquivar do Inventário (botão
+// "Desarquivar" em vez de "Arquivar"/"Excluir").
+function renderCardHistorico(h, arquivado = false) {
   const tagOrigem = h.origem === 'padrao' ? '⭐ Padrão' : '📋 Da sua estratégia';
+  const acoes = arquivado
+    ? `<button class="btn btn-sm btn-accent" onclick="desarquivarHistorico('${h.id}')">♻️ Desarquivar</button>`
+    : `<button class="btn btn-sm btn-outline" onclick="arquivarHistorico('${h.id}')">📦 Arquivar</button>
+       <button class="btn btn-sm btn-outline" onclick="excluirHistorico('${h.id}')">🗑️ Excluir</button>`;
   return `
     <div class="glass-card ger-mini-card">
       <div>
         <div style="font-weight:700">📊 ${h.nome}</div>
         <div class="ger-mini-info">${tagOrigem} · ${h.pair} · ${h.timeframe} · ${h.sequencia.length} entradas · ${h.winrate}% winrate</div>
       </div>
-      <button class="btn btn-sm btn-outline" onclick="excluirHistorico('${h.id}')">🗑️ Excluir</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">${acoes}</div>
     </div>
   `;
 }
@@ -268,7 +301,7 @@ function abrirCriarHistorico() {
 }
 
 function getEstrategiasParaCriarHistorico() {
-  return getInventario().filter(e => !e.deletadoEm && e.mode === 'pintar');
+  return getInventario().filter(e => !e.deletadoEm && !e.arquivadoEm && e.mode === 'pintar');
 }
 
 function renderCriarHistEstrategias() {
@@ -502,9 +535,9 @@ function atualizarBtnGerarHistorico() {
 function renderHistoricosCriados() {
   const cont = document.getElementById('ch-historico-lista');
   if (!cont) return;
-  const lista = getHistoricos();
+  const lista = getHistoricos().filter(h => !h.arquivadoEm);
   cont.innerHTML = lista.length
-    ? lista.slice().reverse().map(renderCardHistorico).join('')
+    ? lista.slice().reverse().map(h => renderCardHistorico(h)).join('')
     : '<p class="ger-empty">Nenhum histórico ainda. Escolha uma estratégia acima e gere o primeiro.</p>';
 }
 

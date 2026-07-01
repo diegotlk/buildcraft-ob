@@ -97,6 +97,13 @@
 
         <!-- Arquivar (permanente — nunca expira, só "tira da vista") -->
         <div id="inv-arquivar-section" style="display:none;">
+          <div class="rk-filtros" style="margin-bottom:16px;">
+            <button class="btn btn-sm btn-outline inv-filtro-raridade-arq active" data-raridade="" onclick="trocarFiltroRaridadeArquivadas(this, '')" data-i18n="inv.raridade.todas">Todas</button>
+            <button class="btn btn-sm btn-outline inv-filtro-raridade-arq" data-raridade="legendary" onclick="trocarFiltroRaridadeArquivadas(this, 'legendary')" data-i18n="inv.raridade.lendaria">Lendária</button>
+            <button class="btn btn-sm btn-outline inv-filtro-raridade-arq" data-raridade="epic" onclick="trocarFiltroRaridadeArquivadas(this, 'epic')" data-i18n="inv.raridade.epica">Épica</button>
+            <button class="btn btn-sm btn-outline inv-filtro-raridade-arq" data-raridade="rare" onclick="trocarFiltroRaridadeArquivadas(this, 'rare')" data-i18n="inv.raridade.rara">Rara</button>
+            <button class="btn btn-sm btn-outline inv-filtro-raridade-arq" data-raridade="common" onclick="trocarFiltroRaridadeArquivadas(this, 'common')" data-i18n="inv.raridade.comum">Comum</button>
+          </div>
           <p class="carta-hint" style="margin-bottom:16px;" data-i18n="inv.dica.arquivar">Cartas arquivadas ficam guardadas pra sempre, fora da lista principal. Desarquive quando quiser ver de novo.</p>
           <div id="inv-arquivar" style="display:flex; flex-direction:column; gap:12px;"></div>
         </div>
@@ -105,6 +112,11 @@
         <div id="inv-historicos-section" style="display:none;">
           <p class="carta-hint" style="margin-bottom:16px;" data-i18n="inv.dica.historicos">Gerados ao testar uma estratégia no Laboratório. Use-os em "Criar Gerenciamento" → "Testar Gerenciamento".</p>
           <div id="inv-historicos" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+          <details class="ger-historico-toggle" id="inv-historicos-arquivados-wrap" style="display:none; margin-top:20px;">
+            <summary>📦 Históricos arquivados (<span id="inv-historicos-arquivados-count">0</span>)</summary>
+            <div class="ger-historico-body" id="inv-historicos-arquivados" style="display:flex; flex-direction:column; gap:10px;"></div>
+          </details>
         </div>
 
         <!-- Lixeira -->
@@ -122,13 +134,14 @@
 
   <script src="js/app.js?v=11"></script>
   <script src="js/titulos.js?v=1"></script>
-  <script src="js/inventario.js?v=20"></script>
-  <script src="js/historico.js?v=14"></script>
+  <script src="js/inventario.js?v=21"></script>
+  <script src="js/historico.js?v=15"></script>
   <script src="js/i18n.js?v=4"></script>
   <script>
     let abaInventarioAtual = 'cartas';
     let subAbaCartasAtual = 'estrategias';
     let raridadeFiltroAtual = '';
+    let raridadeFiltroArquivadasAtual = '';
 
     function trocarSubAbaCartas(sub) {
       subAbaCartasAtual = sub;
@@ -140,6 +153,13 @@
     function trocarFiltroRaridade(btn, raridade) {
       raridadeFiltroAtual = raridade;
       document.querySelectorAll('.inv-filtro-raridade').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderInventario();
+    }
+
+    function trocarFiltroRaridadeArquivadas(btn, raridade) {
+      raridadeFiltroArquivadasAtual = raridade;
+      document.querySelectorAll('.inv-filtro-raridade-arq').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderInventario();
     }
@@ -158,11 +178,21 @@
     }
 
     function renderHistoricosInventario() {
-      const lista = getHistoricos();
+      const todos = getHistoricos();
+      const lista = todos.filter(h => !h.arquivadoEm);
+      const arquivados = todos.filter(h => h.arquivadoEm);
       document.getElementById('inv-tab-historicos').innerHTML = `${t('inv.tab.historicos')} <span style="color:var(--accent-hover);font-weight:800">(${lista.length})</span>`;
       document.getElementById('inv-historicos').innerHTML = lista.length
-        ? lista.slice().reverse().map(renderCardHistorico).join('')
+        ? lista.slice().reverse().map(h => renderCardHistorico(h)).join('')
         : vazio(t('inv.vazio.historicos'));
+
+      const wrap = document.getElementById('inv-historicos-arquivados-wrap');
+      if (wrap) {
+        wrap.style.display = arquivados.length ? 'block' : 'none';
+        document.getElementById('inv-historicos-arquivados-count').textContent = arquivados.length;
+        document.getElementById('inv-historicos-arquivados').innerHTML =
+          arquivados.slice().reverse().map(h => renderCardHistorico(h, true)).join('');
+      }
     }
 
     function excluirHistorico(id) {
@@ -299,8 +329,11 @@
             ? t('inv.vazio.gerenciamentos')
             : t('inv.vazio.estrategias'));
 
-      document.getElementById('inv-arquivar').innerHTML = arquivados.length
-        ? arquivados.map(renderItemArquivado).join('')
+      const arquivadosFiltrados = raridadeFiltroArquivadasAtual
+        ? arquivados.filter(e => e.teste && e.teste.rarity === raridadeFiltroArquivadasAtual)
+        : arquivados;
+      document.getElementById('inv-arquivar').innerHTML = arquivadosFiltrados.length
+        ? arquivadosFiltrados.map(renderItemArquivado).join('')
         : vazio(t('inv.vazio.arquivar'));
 
       document.getElementById('inv-lixeira').innerHTML = lixeira.length

@@ -20,11 +20,11 @@ const buildState = {
 // já testadas) — assim qualquer exclusão (lixeira ou definitiva) some
 // daqui automaticamente, sem precisar de uma limpeza separada.
 function getEstrategiasSalvas() {
-  return getInventario().filter(e => !e.deletadoEm && BUILD_STRATEGY_MODES.includes(e.mode));
+  return getInventario().filter(e => !e.deletadoEm && !e.arquivadoEm && BUILD_STRATEGY_MODES.includes(e.mode));
 }
 
 function getGerenciamentosCartas() {
-  return getInventario().filter(e => !e.deletadoEm && e.mode === 'gerenciamento');
+  return getInventario().filter(e => !e.deletadoEm && !e.arquivadoEm && e.mode === 'gerenciamento');
 }
 
 function setBuildEstrategia(id) {
@@ -148,7 +148,7 @@ function renderListaTestarBuild() {
   const cont = document.getElementById('testar-build-lista');
   if (!cont) return;
 
-  const lista = getInventario().filter(e => !e.deletadoEm && e.mode === 'build');
+  const lista = getInventario().filter(e => !e.deletadoEm && !e.arquivadoEm && e.mode === 'build');
   if (lista.length === 0) {
     cont.innerHTML = '<p style="text-align:center;color:var(--text-secondary);grid-column:1/-1;">Você ainda não tem nenhuma build salva. Crie uma primeiro em "Criar Build".</p>';
     return;
