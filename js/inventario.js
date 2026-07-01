@@ -686,7 +686,7 @@ function renderCartaFront(item) {
   `;
 }
 
-function renderCartaBack(item) {
+function renderCartaBack(item, opts = {}) {
   const categoria = categoriaDaEstrategia(item);
   const t = item.teste;
   const criadaEmFmt = new Date(item.criadaEm).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
@@ -753,7 +753,7 @@ function renderCartaBack(item) {
       <div class="carta-back-meta">
         ${metaHTML}
       </div>
-      ${(!isBuild && !isGerenciamento) ? renderBotaoRanking(item) : ''}
+      ${(!isBuild && !isGerenciamento && !opts.preview) ? renderBotaoRanking(item) : ''}
       <div class="carta-footer" style="margin:8px -16px -14px;padding:9px 16px">
         <div class="card-footer-stat"><strong>1</strong> usuário</div>
         <div class="grade ${getGradeClass(t.grade)}">${t.grade}</div>

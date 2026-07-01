@@ -301,6 +301,10 @@ function updateMirrorPreview() {
 // pula direto pra fase de par (reabilitar trocando o onclick do botão de volta
 // pra goToPhase('mirror') no criar_estrategia.html).
 function pularEspelho() {
+  if (!strategyState.anchoring) {
+    showToast('⚠️ Escolha uma opção', 'Selecione "Exato" ou "No Mínimo" antes de continuar.', 'default');
+    return;
+  }
   strategyState.mirror = false;
   strategyState.mirrorChosen = true;
   goToPhase('pair');
@@ -496,6 +500,14 @@ function getDiasSemanaSelecionados() {
     .map(c => parseInt(c.dataset.dia, 10));
   if (sel.length === 0 || sel.length === 7) return null;
   return sel;
+}
+
+// Texto amigável dos dias selecionados, pra Revisão Final.
+function textoDiasSemana() {
+  const dias = getDiasSemanaSelecionados();
+  if (!dias) return 'Todos os dias';
+  const nomes = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+  return dias.map(d => nomes[d]).join(', ');
 }
 
 // Reacende todos os dias (volta ao padrão "opera todos"). Usado no reset e na
@@ -738,9 +750,15 @@ function updateReviewContent() {
       </div>
     </div>
 
-    <div style="font-size: 14px;">
-      <p><strong>Horário:</strong></p>
-      <p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px;">
+      <div>
+        <p><strong>Horário:</strong></p>
+        <p>${strategyState.scheduleStart} - ${strategyState.scheduleEnd}</p>
+      </div>
+      <div>
+        <p><strong>Dias da semana:</strong></p>
+        <p>${textoDiasSemana()}</p>
+      </div>
     </div>
   `;
 
@@ -1168,22 +1186,6 @@ function resetPostTestButtons() {
 
 // ── RENDERIZAR RESULTADO DO BACKTEST ──
 function renderResult(r) {
-  const rarityLabel = {
-    common: 'Comum', rare: 'Rara', epic: 'Épica', legendary: 'Lendária',
-  };
-  const rarityColor = {
-    common: 'var(--text-secondary)', rare: 'var(--rarity-rare)',
-    epic: 'var(--rarity-epic)', legendary: 'var(--rarity-legendary)',
-  };
-  const cor = rarityColor[r.rarity] || 'var(--text-secondary)';
-
-  // winrate vs breakeven (~53.5% para payout 87%)
-  const acima = r.winrate >= 53.5;
-  const corWinrate = acima ? 'var(--success)' : 'var(--danger)';
-
-  const insightsHTML = (r.insights || [])
-    .map(i => `<li style="margin-bottom:6px;">${i}</li>`).join('');
-
   // Comparação "antes × agora": só aparece quando o usuário está TESTANDO uma
   // estratégia que já existe no inventário (aba Testar). Mostra se o desempenho
   // melhorou ou piorou em relação ao teste original da carta.
@@ -1216,53 +1218,13 @@ function renderResult(r) {
     }
   }
 
+  // O antigo painel "Resultado do Backtest" (winrate/operações/ganhos/perdas/
+  // confiança/período) virou redundante depois que a prévia da carta passou
+  // a ser uma carta de verdade com frente E verso (clicável pra virar) — o
+  // verso (renderCartaBack) já mostra winrate, entradas/dia, par, horário,
+  // período e dias testados, exatamente como fica salvo no Inventário.
   const html = `
     ${comparacaoHTML}
-    <div style="border:2px solid ${cor}; border-radius:12px; padding:24px; background:rgba(99,102,241,0.04);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-        <div>
-          <div style="font-size:12px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em;">Resultado do Backtest</div>
-          <div style="font-size:20px; font-weight:700;">${r.pair} · ${r.timeframe}</div>
-        </div>
-        <div style="text-align:center;">
-          <div style="display:inline-block; padding:4px 16px; border-radius:999px; background:${cor}; color:#fff; font-size:12px; font-weight:700;">${rarityLabel[r.rarity] || 'Comum'}</div>
-          <div style="font-size:40px; font-weight:900; color:${cor}; line-height:1;">${r.grade}</div>
-        </div>
-      </div>
-
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:16px; margin-bottom:20px;">
-        <div style="text-align:center; padding:12px; background:var(--bg); border-radius:8px;">
-          <div style="font-size:26px; font-weight:800; color:${corWinrate};">${r.winrate}%</div>
-          <div style="font-size:11px; color:var(--text-secondary);">Taxa de Acerto</div>
-        </div>
-        <div style="text-align:center; padding:12px; background:var(--bg); border-radius:8px;">
-          <div style="font-size:26px; font-weight:800;">${r.entries.toLocaleString('pt-BR')}</div>
-          <div style="font-size:11px; color:var(--text-secondary);">Operações</div>
-        </div>
-        <div style="text-align:center; padding:12px; background:var(--bg); border-radius:8px;">
-          <div style="font-size:26px; font-weight:800; color:var(--success);">${r.wins.toLocaleString('pt-BR')}</div>
-          <div style="font-size:11px; color:var(--text-secondary);">Ganhos</div>
-        </div>
-        <div style="text-align:center; padding:12px; background:var(--bg); border-radius:8px;">
-          <div style="font-size:26px; font-weight:800; color:var(--danger);">${r.losses.toLocaleString('pt-BR')}</div>
-          <div style="font-size:11px; color:var(--text-secondary);">Perdas</div>
-        </div>
-      </div>
-
-      <div style="margin-bottom:20px; padding:14px 16px; background:var(--bg); border-radius:8px;">
-        ${renderConfidenceBar(r.entries)}
-      </div>
-
-      <div style="font-size:13px; color:var(--text-secondary); margin-bottom:16px; padding:12px; background:var(--bg); border-radius:8px;">
-        📅 Período testado: <strong>${r.periodo_de}</strong> até <strong>${r.periodo_ate}</strong>
-        &nbsp;·&nbsp; ${r.velas_usadas.toLocaleString('pt-BR')} velas reais analisadas
-      </div>
-
-      <div style="padding:16px; background:rgba(99,102,241,0.06); border-radius:8px; border-left:3px solid ${cor};">
-        <div style="font-weight:600; margin-bottom:8px;">📊 Análise</div>
-        <ul style="list-style:none; padding:0; margin:0; font-size:13px;">${insightsHTML}</ul>
-      </div>
-    </div>
     ${montarPainelSimulacaoHTML(r)}
   `;
 
@@ -2506,6 +2468,10 @@ function garantirRevealStyles() {
     box-shadow:0 0 16px var(--rg);}
   .reveal-marco b{color:var(--rc);}
 
+  .reveal-flip-hint{font-size:.76rem;color:var(--text-muted);margin:-2px 0 10px;letter-spacing:.02em;}
+  .reveal-unsaved-warning{max-width:420px;margin:14px auto 0;padding:10px 16px;border-radius:10px;font-size:.82rem;
+    line-height:1.5;text-align:center;color:#ffb4b4;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);}
+
   .reveal-confete-layer{position:fixed;inset:0;pointer-events:none;z-index:9600;overflow:hidden;}
   .reveal-confete{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;animation:reveal-fall linear forwards;}
 
@@ -2649,20 +2615,34 @@ function montarHeroReveal(r) {
   const primeiraHTML = isPrimeiraDescoberta
     ? '<div class="reveal-genesis-msg">✦ Sua primeira criatura. O início de tudo.</div>' : '';
 
-  // Carta de prévia com a MESMA arte do Inventário (renderCartaFront) — antes
-  // a revelação usava um card custom (.reveal-card) com um visual diferente
-  // da carta final; agora é a idêntica, só sem número/selo de Gênesis (que só
-  // existem de fato depois de salvar).
+  // Carta de prévia com a MESMA arte do Inventário (renderCartaFront/Back) —
+  // antes a revelação usava um card custom (.reveal-card) com um visual
+  // diferente da carta final; agora é idêntica (frente E verso, com clique
+  // pra virar), só sem número/selo de Gênesis (que só existem de fato depois
+  // de salvar). Nome fica genérico "Nome" até o Diego nomear de verdade —
+  // usar pair+timeframe como nome-fantasma pipocava com título de 2 linhas
+  // e estourava a altura fixa do card em modo quadrante (linha "· quadrante
+  // M5"), disparando o overflow-y:auto de .carta-face-front sem o usuário
+  // conseguir rolar (a prévia é pointer-events:none pra não competir com o
+  // clique de virar a carta).
   const dias = diasEntrePeriodo(r.periodo_de, r.periodo_ate);
   const previewItem = {
-    nome: `${r.pair} · ${r.timeframe}`,
+    nome: 'Nome',
     mode: strategyState.mode,
+    criadaEm: new Date().toISOString(),
     definicao: snapshotDefinicao(),
     teste: {
       rarity: rar,
       winrate: r.winrate,
       grade: r.grade || '—',
       entradasPorDia: dias ? Math.max(1, Math.round(r.entries / dias)) : null,
+      pair: r.pair,
+      scheduleStart: strategyState.scheduleStart,
+      scheduleEnd: strategyState.scheduleEnd,
+      periodoDe: r.periodo_de,
+      periodoAte: r.periodo_ate,
+      diasTestados: dias,
+      entries: r.entries,
     },
   };
 
@@ -2671,9 +2651,14 @@ function montarHeroReveal(r) {
     <div class="reveal-hero-eyebrow">⚡ Descoberta no histórico real</div>
     <div class="reveal-headline" style="margin-bottom:14px;">${headline}</div>
     ${strategyState.cenarioSorteado ? `<div class="reveal-cenario">🎲 Cenário sorteado: ${strategyState.cenarioSorteado}</div>` : ''}
-    <div class="carta-flip-wrap" style="pointer-events:none; margin-bottom:8px;">
-      <div class="carta-flip-inner">${renderCartaFront(previewItem)}</div>
+    <div class="carta-flip-wrap" onclick="this.classList.toggle('is-flipped')" style="cursor:pointer; margin-bottom:4px;">
+      <div class="carta-flip-inner">
+        ${renderCartaFront(previewItem)}
+        ${renderCartaBack(previewItem, { preview: true })}
+      </div>
     </div>
+    <div class="reveal-flip-hint">👆 Toque na carta pra ver o verso</div>
+    <div class="reveal-unsaved-warning">⚠️ Se você sair desta tela sem nomear e salvar, esta carta será perdida.</div>
     ${primeiraHTML}
     ${marcoColecao(r)}
     ${quaseHTML}
