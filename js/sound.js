@@ -57,7 +57,7 @@ function tocarClique() {
   if (!somAtivo()) return;
   const ctx = garantirAudioCtx();
   if (!ctx) return;
-  _tocarNota(ctx, ctx.currentTime, 720, 'triangle', 0.06, 0.045, 0);
+  _tocarNota(ctx, ctx.currentTime, 720, 'triangle', 0.12, 0.045, 0);
 }
 
 // 1 tic curto, com o tom subindo conforme o suspense se aproxima do fim

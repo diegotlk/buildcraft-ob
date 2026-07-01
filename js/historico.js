@@ -322,16 +322,12 @@ function renderCriarHistCartaExata(item) {
   }
 
   bloco.style.display = 'block';
-  const temEpochExato = t.periodoDeTs && t.periodoAteTs;
   resumo.innerHTML = `
     <div><strong>Par:</strong> ${t.pair}</div>
     <div><strong>Timeframe:</strong> ${t.timeframeOperado || 'M1'}</div>
     <div><strong>Horário:</strong> ${t.scheduleStart}–${t.scheduleEnd}</div>
     <div><strong>Período:</strong> ${t.periodoDe} a ${t.periodoAte}</div>
     <div style="margin-top:6px; color:var(--text-secondary);">Resultado salvo na carta: <strong>${t.winrate}%</strong> · ${(t.entries || 0).toLocaleString('pt-BR')} entradas</div>
-    ${temEpochExato
-      ? `<div style="margin-top:8px; color:var(--success); font-size:12px;">✓ Reprodução exata garantida (esta carta guarda o instante exato do teste original).</div>`
-      : `<div style="margin-top:8px; color:var(--warning); font-size:12px;">⚠️ Carta antiga: só tem a data salva (sem o horário exato). Se o par ganhou mais velas coletadas desde então, o resultado pode divergir um pouco.</div>`}
   `;
 }
 
