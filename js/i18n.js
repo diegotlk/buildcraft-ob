@@ -150,7 +150,7 @@ const I18N_DICT = {
 
     'lab.titulo': '🎨 Criar Estratégia',
     'lab.subtitulo': 'Monte seu padrão de velas, escolha a direção e teste contra histórico real.',
-    'lab.grupo.criar': '🎨 Criar', 'lab.grupo.testar': '♻️ Testar', 'lab.grupo.catalogador': '🔥 Catalogar',
+    'lab.grupo.criar': '🎨 Criar', 'lab.grupo.testar': '📋 Histórico', 'lab.grupo.catalogador': '🔥 Catalogar',
     'lab.grupo.refinar': '🎯 Refinar', 'lab.grupo.personalizar': '🖌️ Personalizar',
     'lab.criarestrategia': '📐 Criar Estratégia', 'lab.testarestrategia': '📐 Testar Estratégia',
     'lab.antesdetudo': 'Antes de tudo',
@@ -436,7 +436,7 @@ const I18N_DICT = {
 
     'lab.titulo': '🎨 Create Strategy',
     'lab.subtitulo': 'Build your candle pattern, pick a direction, and test it against real history.',
-    'lab.grupo.criar': '🎨 Create', 'lab.grupo.testar': '♻️ Test', 'lab.grupo.catalogador': '🔥 Catalog',
+    'lab.grupo.criar': '🎨 Create', 'lab.grupo.testar': '📋 History', 'lab.grupo.catalogador': '🔥 Catalog',
     'lab.grupo.refinar': '🎯 Refine', 'lab.grupo.personalizar': '🖌️ Customize',
     'lab.criarestrategia': '📐 Create Strategy', 'lab.testarestrategia': '📐 Test Strategy',
     'lab.antesdetudo': 'Before anything',
