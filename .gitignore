@@ -3,3 +3,10 @@ __pycache__/
 *.pyc
 start_site.bat
 backtest_api.py
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
