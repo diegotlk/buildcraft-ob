@@ -1374,6 +1374,11 @@ function resetStrategy() {
   // Reseta seleções visuais (direção, ancoragem, espelho, par)
   document.querySelectorAll('.direction-btn.selected, .anchoring-card.selected')
     .forEach(el => el.classList.remove('selected'));
+  // "Todo o período" volta a ser o padrão pré-selecionado (igual dias da semana)
+  const periodoTudo = document.querySelector('#schedule-periodo-grid [data-periodo="tudo"]');
+  if (periodoTudo) periodoTudo.classList.add('selected');
+  const periodoDatas = document.getElementById('schedule-periodo-datas');
+  if (periodoDatas) periodoDatas.style.display = 'none';
   const mirrorDir = document.getElementById('mirror-direction-container');
   if (mirrorDir) mirrorDir.style.display = 'none';
   const busca = document.getElementById('pair-search');
