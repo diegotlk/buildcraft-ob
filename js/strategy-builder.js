@@ -7,7 +7,7 @@ let strategyState = {
   timeframe: 'M1', // pergunta global, sempre a primeira fase
   patternLength: null,
   pattern: [],
-  direction: null,
+  direction: 'put',
   anchoring: null,
   mirror: false,
   mirrorChosen: false,
@@ -573,7 +573,7 @@ function goToPhase(phase) {
   }
 
   if (phase === 'anchoring' && !strategyState.direction) {
-    showToast('⚠️ Escolha a direção', 'CALL, PUT ou OS DOIS?', 'default');
+    showToast('⚠️ Escolha a direção', 'CALL ou PUT?', 'default');
     return;
   }
 
@@ -1324,7 +1324,7 @@ function resetStrategy() {
     timeframe: 'M1',
     patternLength: null,
     pattern: [],
-    direction: null,
+    direction: 'put',
     anchoring: null,
     mirror: false,
     mirrorChosen: false,
@@ -1374,6 +1374,9 @@ function resetStrategy() {
   // Reseta seleções visuais (direção, ancoragem, espelho, par)
   document.querySelectorAll('.direction-btn.selected, .anchoring-card.selected')
     .forEach(el => el.classList.remove('selected'));
+  // PUT volta a ser o padrão pré-selecionado
+  const direcaoPut = document.querySelector('#phase-direction [onclick="setDirection(\'put\')"]');
+  if (direcaoPut) direcaoPut.classList.add('selected');
   // "Todo o período" volta a ser o padrão pré-selecionado (igual dias da semana)
   const periodoTudo = document.querySelector('#schedule-periodo-grid [data-periodo="tudo"]');
   if (periodoTudo) periodoTudo.classList.add('selected');
